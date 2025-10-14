@@ -1,5 +1,21 @@
+@font-face {
+    font-family: "bold";
+    src: url("./assets/GmarketSansTTFBold.ttf") format("truetype");
+    font-weight: bold;
+}
+@font-face {
+    font-family: "light";
+    src: url("./assets/GmarketSansTTFLight.ttf") format("truetype");
+    font-weight: lighter;
+}
+@font-face {
+    font-family: "medium";
+    src: url("./assets/GmarketSansTTFMedium.ttf") format("truetype");
+    font-weight: normal;
+}
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "medium", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
