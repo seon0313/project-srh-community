@@ -36,6 +36,7 @@ a {
 }
 a:hover {
   color: #535bf2;
+  cursor: pointer;
 }
 
 body {
@@ -78,4 +79,24 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.Login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding-left: calc(50% - 150px);
+    padding-right: calc(50% - 150px);
+}
+
+input::placeholder {
+  font-family: "light"
+}
+input {
+  padding: 0 10px;
+  font-size: 1em;
+  font-family: "medium";
+  box-sizing: border-box;
 }

@@ -1,0 +1,28 @@
+#root {
+    margin: auto;
+    padding: auto;
+}
+
+.login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.input {
+    display: block;
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
+    border: 0;
+    border-radius: 8px;
+    margin: 5px 0;
+}
+
+.loginButton {
+    display: block;
+    width: 100%;
+}
