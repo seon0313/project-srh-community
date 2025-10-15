@@ -4,7 +4,7 @@ function Footer() {
 
   return (
     <>
-      <div className="Footer">
+      <div className="footer">
         <p>개발 / 배포 <a href="https://pages.seon06.co.kr">추윤선</a></p>
         <p><a>개인정보 처리방침</a> | <a>이용약관</a></p>
         <p>© 2023 <a href="https://github.com/seon0313">seon0313</a>. All rights reserved.</p>
