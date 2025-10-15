@@ -1,16 +1,16 @@
 @font-face {
     font-family: "bold";
-    src: url("./assets/GmarketSansTTFBold.ttf") format("truetype");
+    src: url("./assets/GmarketSansTTFBold.woff") format("woff");
     font-weight: bold;
 }
 @font-face {
     font-family: "light";
-    src: url("./assets/GmarketSansTTFLight.ttf") format("truetype");
+    src: url("./assets/GmarketSansTTFLight.woff") format("woff");
     font-weight: lighter;
 }
 @font-face {
     font-family: "medium";
-    src: url("./assets/GmarketSansTTFMedium.ttf") format("truetype");
+    src: url("./assets/GmarketSansTTFMedium.woff") format("woff");
     font-weight: normal;
 }
 
