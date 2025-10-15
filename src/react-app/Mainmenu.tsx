@@ -1,3 +1,4 @@
+import Footer from "./footer";
 import "./Mainmenu.css";
 import { useNavigate } from "react-router-dom";
 
@@ -21,7 +22,7 @@ function Mainmenu() {
             </div>
         </div>
 
-        <p>개발 / 배포 <a href="https://pages.seon06.co.kr">추윤선</a></p>
+        <Footer />
       </div>
     </>
   );

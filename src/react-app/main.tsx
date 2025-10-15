@@ -6,6 +6,7 @@ import Mainmenu from "./Mainmenu.tsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./Login.tsx";
 import Signin from "./Signin.tsx";
+import Welcome from "./Welcome.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -15,6 +16,8 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/app" element={<App />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signin />} />
+        <Route path="/welcome" element={<Welcome />} />
+        <Route path="*" element={<div>Not Found</div>} />
       </Routes>
     </BrowserRouter>
     
