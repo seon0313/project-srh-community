@@ -1,4 +1,3 @@
-import Footer from "./footer";
 import "./Mainmenu.css";
 import { useNavigate } from "react-router-dom";
 
@@ -21,8 +20,6 @@ function Mainmenu() {
                 <p>로봇고 프렌즈</p>
             </div>
         </div>
-
-        <Footer />
       </div>
     </>
   );

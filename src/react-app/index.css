@@ -29,6 +29,16 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+#root {
+  min-height: 100vh;
+}
+
+.footer {
+  margin-top: auto;
+  line-height: 0.5;
+  margin-left: 10px;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -45,8 +55,8 @@ body {
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 2em;
+  line-height: 1;
 }
 
 button {
