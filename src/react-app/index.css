@@ -1,16 +1,16 @@
 @font-face {
     font-family: "bold";
-    src: url("./assets/GmarketSansTTFBold.woff") format("woff");
+    src: url("./assets/GmarketSansTTFBold.woff2") format("woff2");
     font-weight: bold;
 }
 @font-face {
     font-family: "light";
-    src: url("./assets/GmarketSansTTFLight.woff") format("woff");
+    src: url("./assets/GmarketSansTTFLight.woff2") format("woff2");
     font-weight: lighter;
 }
 @font-face {
     font-family: "medium";
-    src: url("./assets/GmarketSansTTFMedium.woff") format("woff");
+    src: url("./assets/GmarketSansTTFMedium.woff2") format("woff2");
     font-weight: normal;
 }
 
@@ -37,6 +37,7 @@
   margin-top: auto;
   line-height: 0.5;
   margin-left: 10px;
+  text-align: center;
 }
 
 a {
