@@ -50,6 +50,10 @@ function Signin() {
                 onChange={(e) => setPasswordre(e.target.value)}
             />
             <button className={style.loginButton} onClick={() => navigate("/app")}>회원가입</button>
+
+            <p>모든 데이터는 암호화 하여 서버에 저장됩니다.</p>
+            <p>개인정보는 파기 요청시 즉시 삭제되며 프로필에서 삭제할 수 있습니다.</p>
+            <p>Cloudflare의 서버를 이용하여 안전하게 보호됩니다.</p>
         
             <p><a href="/signup">인스타 DM</a>으로 편리하게 회원가입</p>
         </div>

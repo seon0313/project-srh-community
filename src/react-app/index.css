@@ -38,6 +38,8 @@
   line-height: 0.5;
   margin-left: 10px;
   text-align: center;
+  position: relative;
+  top: 0;
 }
 
 a {
@@ -93,11 +95,6 @@ button:focus-visible {
 }
 
 .Login {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     padding-left: calc(50% - 150px);
     padding-right: calc(50% - 150px);
 }
