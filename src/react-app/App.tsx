@@ -8,8 +8,8 @@ import honoLogo from "./assets/hono.svg";
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
-  const [name, setName] = useState("unknown");
+  const [name, setName] = useState("");
+  const [cmd, setCmd] = useState("/api/");
 
   return (
     <>
@@ -32,33 +32,24 @@ function App() {
         </a>
       </div>
       <h1>Vite + React + Hono + Cloudflare</h1>
-      <div className="card">
-        <button
-          onClick={() => setCount((count) => count + 1)}
-          aria-label="increment"
-        >
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <div className="card">
-        <button
-          onClick={() => {
-            fetch("/api/ai?prompt=Hello")
-              .then((res) => res.json() as Promise<{ name: string }>)
-              .then((data) => setName(data.name));
-          }}
-          aria-label="get name"
-        >
-          Name from API is: {name}
-        </button>
-        <p>
-          Edit <code>worker/index.ts</code> to change the name
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the logos to learn more</p>
+      <input 
+        value={cmd}
+        onChange={(e) => setCmd(e.target.value)}
+        placeholder="url"
+        type="text"
+      />
+      <button onClick={async () => {
+        const res = await fetch(cmd);
+        const data = await res.json();
+        setName(JSON.stringify(data, null, 2));
+      }}>Fetch</button>
+      <pre style={{ textAlign: "left" }}>{name}</pre>
+      <p>
+        Edit <code>src/App.tsx</code> and save to test HMR
+      </p>
+      <p>
+        Click on the Vite, React, Hono, and Cloudflare logos to learn more
+      </p>
     </>
   );
 }
