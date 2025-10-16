@@ -40,22 +40,11 @@ body {
     border-radius: 8px;
     height: 100%;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     min-width: 0; /* grid 축소 허용 */
     grid-row: 1;
     box-sizing: border-box;
-}
-
-/* 왼쪽(정보), 가운데(Main Content), 오른쪽(로봇고 프렌즈) 각각 사이드/중앙 배치 */
-.mainItem:first-child {
-    justify-content: flex-start;
-}
-.mainItem:nth-child(2) {
-    justify-content: center;
-}
-.mainItem:last-child {
-    justify-content: flex-end;
 }
 
 .mainmenu_topbar table {

@@ -15,10 +15,16 @@ app.get("/api/", (c) => c.json({ name: "Cloudflare" }));
 app.get("/api/ai", async (c) => {
   const prompt = c.req.query("prompt") || "";
   const ai = c.env.AI;
-  const result = await ai.run("@cf/openai/gpt-oss-120b", {
-    input: prompt,
+  // Llama 모델은 prompt 필드 사용
+  const stream = await ai.run("@cf/meta/llama-3.1-8b-instruct-fast", {
+    prompt,
+    stream: true
   });
-  return c.json(result);
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream"
+    }
+  });
 });
 
 export default app;

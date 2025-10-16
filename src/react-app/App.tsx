@@ -10,6 +10,31 @@ import "./App.css";
 function App() {
   const [name, setName] = useState("");
   const [cmd, setCmd] = useState("/api/");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiOutput, setAiOutput] = useState("");
+
+  // AI 스트림 요청 함수
+  const fetchAiStream = async () => {
+    setAiOutput(""); // 초기화
+    const res = await fetch(`/api/ai?prompt=${encodeURIComponent(aiPrompt)}`);
+    if (!res.body) return;
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let done = false;
+    while (!done) {
+      const { value, done: readerDone } = await reader.read();
+      if (value) {
+        const chunk = decoder.decode(value);
+        try {
+          const json = JSON.parse(chunk);
+          setAiOutput(prev => prev + (json.response ?? ""));
+        } catch {
+          setAiOutput(prev => prev + chunk);
+        }
+      }
+      done = readerDone;
+    }
+  };
 
   return (
     <>
@@ -44,6 +69,19 @@ function App() {
         setName(JSON.stringify(data, null, 2));
       }}>Fetch</button>
       <pre style={{ textAlign: "left" }}>{name}</pre>
+
+      <hr />
+      <h2>Cloudflare AI (스트림)</h2>
+      <input
+        value={aiPrompt}
+        onChange={e => setAiPrompt(e.target.value)}
+        placeholder="AI에게 질문하세요"
+        type="text"
+        style={{ width: "60%" }}
+      />
+      <button onClick={fetchAiStream}>AI 질문</button>
+      <pre style={{ textAlign: "left", minHeight: "80px" }}>{aiOutput}</pre>
+
       <p>
         Edit <code>src/App.tsx</code> and save to test HMR
       </p>
