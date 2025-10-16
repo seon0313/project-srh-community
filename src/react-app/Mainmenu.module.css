@@ -1,17 +1,19 @@
-#root {
+/* CSS 모듈에서는 :global을 사용해 전역 스타일 적용 */
+:global(#root) {
     margin: 0;
     padding: 0;
     width: 100%;
     max-width: none;
 }
 
-body {
+:global(body) {
     margin: 0;
     padding: 0;
     width: 100vw;
     max-width: none;
 }
 
+/* 이하 기존 스타일 유지 */
 .Mainmenu {
     display: flex;
     flex-direction: column;
@@ -28,11 +30,10 @@ body {
     grid-template-rows: 1fr auto;
     gap: 10px;
     align-items: stretch;
-    width: 100%;        /* 부모의 전체 너비 사용 */
-    max-width: none;    /* 최대 너비 제한 해제 */
+    width: 100%;
+    max-width: none;
 }
 
-/* 각 사이드 영역에 min-width와 미디어 쿼리로 점진적 숨김 처리 */
 .mainItem {
     background-color: oklch(45.586% 0.01532 244.6 / 0.5);
     padding: 20px;

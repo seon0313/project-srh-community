@@ -1,4 +1,4 @@
-import "./Mainmenu.css";
+import styles from "./Mainmenu.module.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -13,11 +13,10 @@ function Mainmenu() {
   }, []);
 
   return (
-    <>
-      <div className="Mainmenu">
-        <h1>서울로봇고 카르텔</h1>
-        <table className="mainmenu_topbar">
-          <tr>
+    <div className={styles.Mainmenu}>
+      <h1>서울로봇고 카르텔</h1>
+      <table className={styles.mainmenu_topbar}>
+        <tr>
             <td onClick={() => navigate("/app")}>
                 <a>채팅</a>
             </td>
@@ -27,43 +26,43 @@ function Mainmenu() {
             <td onClick={() => navigate("/app")}>
                 <a>소개</a>
             </td>
-            <td onClick={() => navigate("/app")}>
+            <td onClick={() => navigate("/ai")}>
                 <a>AI</a>
             </td>
             <td onClick={() => navigate("/login")}>
                 <a>프로필</a>
             </td>
-          </tr>
-        </table>
-        
-        <div className="main">
-            <div className="mainItem">
-                <p>정보</p>
-            </div>
-            <div className="mainItem">
-                <table className="posttable">
-                    {posts.map(post => (
-                        <tr key={post.id} className="postitem">
-                            <td>
-                                <strong>{post.title}</strong>
-                            </td>
-                            <td>
-                                <strong>{post.author}</strong>
-                            </td>
-                            <td>
-                                <strong>{post.date}</strong>
-                            </td>
-                        </tr>
-                    ))}
-                </table>
-
-            </div>
-            <div className="mainItem">
-                <p>로봇고 프렌즈</p>
-            </div>
+        </tr>
+      </table>
+      
+      <div className={styles.main}>
+        <div className={styles.mainItem}>
+          <p>정보</p>
+        </div>
+        <div className={styles.mainItem}>
+          <table className={styles.posttable}>
+            <tbody>
+              {posts.map(post => (
+                <tr key={post.id} className={styles.postitem}>
+                  <td>
+                    <strong>{post.title}</strong>
+                  </td>
+                  <td>
+                    <strong>{post.author}</strong>
+                  </td>
+                  <td>
+                    <strong>{post.date}</strong>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className={styles.mainItem}>
+          <p>로봇고 프렌즈</p>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

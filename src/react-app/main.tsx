@@ -8,6 +8,7 @@ import Login from "./Login.tsx";
 import Signin from "./Signin.tsx";
 import Welcome from "./Welcome.tsx";
 import User from "./User.tsx";
+import AI from "./AI.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -19,6 +20,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/signup" element={<Signin />} />
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/user/:id" element={<User />} />
+        <Route path="/ai" element={<AI />} />
         <Route path="*" element={<div>Not Found</div>} />
       </Routes>
     </BrowserRouter>

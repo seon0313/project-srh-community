@@ -12,17 +12,29 @@ app.get("/api/posts", (c) => c.json(posts));
 
 app.get("/api/", (c) => c.json({ name: "Cloudflare" }));
 
-app.get("/api/ai", async (c) => {
-  const prompt = c.req.query("prompt") || "";
+// AI API - POST로 메시지 리스트 전체 전송
+app.post("/api/ai", async (c) => {
+  const { messages } = await c.req.json<{ 
+    messages: { role: "user" | "system"; message: string }[] 
+  }>();
+  
   const ai = c.env.AI;
-  // Llama 모델은 prompt 필드 사용
+  
+  // Cloudflare AI 형식으로 변환
+  const formattedMessages = messages.map(msg => ({
+    role: msg.role === "system" ? "assistant" : "user",
+    content: msg.message
+  }));
+  
   const stream = await ai.run("@cf/meta/llama-3.1-8b-instruct-fast", {
-    prompt,
+    messages: formattedMessages,
     stream: true
   });
+  
   return new Response(stream, {
     headers: {
-      "Content-Type": "text/event-stream"
+      "Content-Type": "text/event-stream",
+      "Access-Control-Allow-Origin": "*"
     }
   });
 });
