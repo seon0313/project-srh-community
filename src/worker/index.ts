@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-const app = new Hono<{ Bindings: Env & { AI: any } }>();
+const app = new Hono<{ Bindings: Env & { AI: any, DB: D1Database } }>();
 
 // 게시글 목록 예시 데이터
 const posts = [

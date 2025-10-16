@@ -14,5 +14,12 @@
   },
   "ai": {
     "binding": "AI"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "project_srh-cm",
+      "database_id": "6ce759da-2e85-4965-9b50-658df09f12d0"
+    }
+  ]
 }
