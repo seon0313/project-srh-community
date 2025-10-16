@@ -25,11 +25,15 @@ function App() {
       const { value, done: readerDone } = await reader.read();
       if (value) {
         const chunk = decoder.decode(value);
-        try {
-          const json = JSON.parse(chunk);
-          setAiOutput(prev => prev + (json.response ?? ""));
-        } catch {
-          setAiOutput(prev => prev + chunk);
+        // 여러 줄이 들어올 수 있으므로 줄 단위로 처리
+        const lines = chunk.split("\n").filter(line => line.startsWith("data:"));
+        for (const line of lines) {
+          try {
+            const json = JSON.parse(line.replace("data: ", ""));
+            setAiOutput(prev => prev + (json.response ?? ""));
+          } catch {
+            // 무시
+          }
         }
       }
       done = readerDone;
