@@ -58,9 +58,25 @@ body {
     justify-content: flex-end;
 }
 
-.footerItem {
-    grid-column: 1 / span 3; /* footer가 전체 너비 차지 */
-    grid-row: 2;
+.mainmenu_topbar table {
+    vertical-align: middle;
+    text-align: center;
+    width: 100%;
+    table-layout: fixed; /* 모든 셀 너비 고정 */
+    margin: 5px;
+}
+
+.mainmenu_topbar td {
+    width: 20%;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    height: 25px;
+    cursor: pointer;
+}
+
+.mainmenu_topbar {
+    text-align: center;
+    width: 100%;
 }
 
 @media (max-width: 900px) {

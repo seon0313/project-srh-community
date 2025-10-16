@@ -8,7 +8,26 @@ function Mainmenu() {
     <>
       <div className="Mainmenu">
         <h1>서울로봇고 카르텔</h1>
-        <button onClick={() => navigate("/login")}>로그인</button>
+        <table className="mainmenu_topbar">
+          <tr>
+            <td onClick={() => navigate("/app")}>
+                <a>채팅</a>
+            </td>
+            <td onClick={() => navigate("/app")}>
+                <a>게시판</a>
+            </td>
+            <td onClick={() => navigate("/app")}>
+                <a>소개</a>
+            </td>
+            <td onClick={() => navigate("/app")}>
+                <a>AI</a>
+            </td>
+            <td onClick={() => navigate("/login")}>
+                <a>프로필</a>
+            </td>
+          </tr>
+        </table>
+        
         <div className="main">
             <div className="mainItem">
                 <p>정보</p>
