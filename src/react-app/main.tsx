@@ -10,6 +10,7 @@ import Welcome from "./Welcome.tsx";
 import User from "./User.tsx";
 import AI from "./AI.tsx";
 import Posts from "./Posts.tsx";
+import Post from "./Post.tsx";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
@@ -23,7 +24,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/user/:id" element={<User />} />
                 <Route path="/ai" element={<AI />} />
                 <Route path="/posts" element={<Posts />} />
-                <Route path="/post/:id" element={<User />} />
+                <Route path="/post/:id" element={<Post />} />
                 <Route path="*" element={<div>Not Found</div>} />
             </Routes>
         </BrowserRouter>

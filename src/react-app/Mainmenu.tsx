@@ -1,6 +1,7 @@
 import styles from "./Mainmenu.module.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Topbar from "./Topbar";
 
 function Mainmenu() {
   const navigate = useNavigate();
@@ -19,29 +20,7 @@ function Mainmenu() {
 
   return (
     <div className={styles.Mainmenu}>
-      <h1>서비스명</h1>
-      <table className={styles.mainmenu_topbar}>
-        <tbody>
-          <tr>
-            <td onClick={() => navigate("/app")}>
-                <a>채팅</a>
-            </td>
-            <td onClick={() => navigate("/posts")}>
-                <a>게시판</a>
-            </td>
-            <td onClick={() => navigate("/app")}>
-                <a>소개</a>
-            </td>
-            <td onClick={() => navigate("/ai")}>
-                <a>AI</a>
-            </td>
-            <td onClick={() => navigate("/login")}>
-                <a>프로필</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      
+      <Topbar />
       <div className={styles.main}>
         <div className={styles.mainItem}>
           <p>정보</p>
