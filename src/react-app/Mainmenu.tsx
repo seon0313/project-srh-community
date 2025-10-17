@@ -26,7 +26,7 @@ function Mainmenu() {
             <td onClick={() => navigate("/app")}>
                 <a>채팅</a>
             </td>
-            <td onClick={() => navigate("/app")}>
+            <td onClick={() => navigate("/posts")}>
                 <a>게시판</a>
             </td>
             <td onClick={() => navigate("/app")}>

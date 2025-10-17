@@ -1,0 +1,191 @@
+.mainmenu_topbar table {
+    vertical-align: middle;
+    text-align: center;
+    width: 100%;
+    table-layout: fixed;
+    margin: 5px;
+}
+
+.mainmenu_topbar td {
+    width: 20%;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    height: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.mainmenu_topbar td:hover {
+    background-color: #2a2a2a;
+}
+
+.mainmenu_topbar {
+    text-align: center;
+    width: 100%;
+}
+
+.postContainer {
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.posttable {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.postitem {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out forwards;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: table-row;
+}
+
+.postitem:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* 각 아이템마다 0.03초씩 지연 (동적 계산) */
+.postitem {
+    animation-delay: calc(var(--item-index) * 0.03s);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.postitem td {
+    padding: 8px;
+    border-bottom: 1px solid #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.postTitle {
+    width: auto;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.postAuthor {
+    width: 100px;
+    text-align: center;
+}
+
+.postDate {
+    width: 100px;
+    text-align: center;
+}
+
+.moreButtonContainer {
+    width: 100%;
+    display: table-row;
+}
+
+.moreButton {
+    display: table-cell;
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+    background-color: rgba(26, 26, 26, 0.8);
+    border: 1px solid #444;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.moreButton:hover {
+    background-color: rgba(42, 42, 42, 0.9);
+    border-color: #0d7377;
+    box-shadow: 0 0 10px rgba(13, 115, 119, 0.3);
+}
+
+.moreButton:active {
+    background-color: rgba(50, 50, 50, 0.9);
+    transform: scale(0.98);
+}
+
+.moreButton p {
+    margin: 0;
+    font-weight: 500;
+    font-size: 13px;
+    color: #e0e0e0;
+    letter-spacing: 0.3px;
+}
+
+.moreButton:hover p {
+    color: #0d7377;
+}
+
+.loadingSpace {
+    height: 400px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: none !important;
+}
+
+.loadingSpinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(13, 115, 119, 0.2);
+    border-top-color: #0d7377;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.emptySpace {
+    height: 400px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: none !important;
+}
+
+.emptySpace p {
+    margin: 0;
+    font-size: 16px;
+    color: #888;
+    font-weight: 500;
+}
+
+@media (max-width: 600px) {
+    .postContainer {
+        padding: 0 10px;
+    }
+
+    .postAuthor,
+    .postDate {
+        width: 80px;
+        font-size: 0.9em;
+    }
+    
+    .moreButton {
+        padding: 8px;
+    }
+    
+    .moreButton p {
+        font-size: 12px;
+    }
+}
