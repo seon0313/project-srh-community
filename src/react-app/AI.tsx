@@ -5,6 +5,8 @@ import styles from "./AI.module.css";
 type Message = {
     role: "user" | "system";
     message: string;
+    isTyping?: boolean; // AI 타이핑 중인지 표시
+    animated?: boolean; // 애니메이션 완료 여부
 };
 
 function AI() {
@@ -13,12 +15,12 @@ function AI() {
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const shouldAutoScrollRef = useRef(true);
     const inputContainerRef = useRef<HTMLDivElement>(null);
+    const prevMessageLengthRef = useRef(0);
 
     // 스크롤 위치 감지
     const handleScroll = () => {
         if (messagesContainerRef.current) {
             const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-            // 스크롤이 최하단 근처(50px 이내)에 있으면 자동 스크롤 활성화
             shouldAutoScrollRef.current = scrollHeight - scrollTop - clientHeight < 50;
         }
     };
@@ -28,9 +30,10 @@ function AI() {
         if (shouldAutoScrollRef.current && messagesContainerRef.current) {
             messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
+        prevMessageLengthRef.current = messages.length;
     }, [messages]);
 
-    // 입력창 실제 높이를 CSS 변수로 반영 -> 리스트 바닥 패딩 계산에 사용
+    // 입력창 실제 높이를 CSS 변수로 반영
     useEffect(() => {
         const updateComposerH = () => {
             const h = inputContainerRef.current?.offsetHeight ?? 0;
@@ -41,7 +44,7 @@ function AI() {
         return () => window.removeEventListener("resize", updateComposerH);
     }, []);
 
-    // VisualViewport로 키보드 높이 추적 -> --kb CSS 변수로 반영
+    // VisualViewport로 키보드 높이 추적
     useEffect(() => {
         const vv = (window as any).visualViewport as VisualViewport | undefined;
 
@@ -49,7 +52,6 @@ function AI() {
             const innerH = window.innerHeight;
             let kb = 0;
             if (vv) {
-                // 키보드가 열리면 visualViewport.height가 줄어듦
                 kb = Math.max(0, innerH - (vv.height + vv.offsetTop));
             }
             document.documentElement.style.setProperty("--kb", `${kb}px`);
@@ -74,11 +76,10 @@ function AI() {
     const fetchAiStream = async () => {
         if (!aiPrompt.trim()) return;
         
-        // 사용자 메시지 추가
         const newMessages: Message[] = [...messages, { role: "user", message: aiPrompt }];
         setMessages(newMessages);
         setAiPrompt("");
-        shouldAutoScrollRef.current = true; // 새 메시지 전송 시 자동 스크롤 활성화
+        shouldAutoScrollRef.current = true;
 
         const res = await fetch("/api/ai", {
             method: "POST",
@@ -92,8 +93,8 @@ function AI() {
         let done = false;
         let buffer = "";
         
-        // system 메시지 추가 (빈 메시지로 시작)
-        setMessages(prev => [...prev, { role: "system", message: "" }]);
+        // system 메시지 추가 (타이핑 중 표시)
+        setMessages(prev => [...prev, { role: "system", message: "", isTyping: true, animated: false }]);
 
         while (!done) {
             const { value, done: readerDone } = await reader.read();
@@ -114,14 +115,15 @@ function AI() {
                             
                             if (!responseText) continue;
                             
-                            // 마지막 system 메시지에 텍스트 추가
                             setMessages(prev => {
                                 const updated = [...prev];
                                 const lastIdx = updated.length - 1;
                                 if (lastIdx >= 0 && updated[lastIdx].role === "system") {
                                     updated[lastIdx] = {
                                         ...updated[lastIdx],
-                                        message: updated[lastIdx].message + responseText
+                                        message: updated[lastIdx].message + responseText,
+                                        isTyping: true,
+                                        animated: false // 타이핑 중에는 애니메이션 하지 않음
                                     };
                                 }
                                 return updated;
@@ -134,6 +136,16 @@ function AI() {
             }
             done = readerDone;
         }
+
+        // 타이핑 완료 후 isTyping 제거하고 animated 설정
+        setMessages(prev => {
+            const updated = [...prev];
+            const lastIdx = updated.length - 1;
+            if (lastIdx >= 0 && updated[lastIdx].role === "system") {
+                updated[lastIdx] = { ...updated[lastIdx], isTyping: false, animated: true };
+            }
+            return updated;
+        });
     };
 
     return (
@@ -146,7 +158,10 @@ function AI() {
                 onScroll={handleScroll}
             >
                 {messages.map((msg, idx) => (
-                    <div key={idx} className={msg.role === "user" ? styles.userMessage : styles.systemMessage}>
+                    <div 
+                        key={idx} 
+                        className={`${msg.role === "user" ? styles.userMessage : styles.systemMessage} ${msg.isTyping ? styles.typing : ''} ${msg.animated ? styles.animated : ''}`}
+                    >
                         <ReactMarkdown>{msg.message}</ReactMarkdown>
                     </div>
                 ))}

@@ -3,12 +3,34 @@ import style from "./Login.module.css";
 import { useNavigate } from "react-router-dom";
 
 function Signin() {
-    const [name, setName] = useState("");
+    const [id, setId] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordre, setPasswordre] = useState("");
-    const [callnumber, setCallnumber] = useState("");
+    const [showDetails, setShowDetails] = useState(false);
     const navigate = useNavigate();
+
+    function handleSignup() {
+        if (!id || !email || !password || !passwordre) {
+            alert("모든 항목을 입력해주세요.");
+            return;
+        }
+        
+        // 이메일 양식 확인
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert("올바른 이메일 형식을 입력해주세요.");
+            return;
+        }
+        
+        if (password !== passwordre) {
+            alert("비밀번호가 일치하지 않습니다.");
+            return;
+        }
+
+        alert("회원가입이 완료되었습니다.\n졸업생 및 재학생 인증은 프로필에서 가능합니다.");
+        navigate("/");
+    }
 
     return (
         <>
@@ -17,9 +39,9 @@ function Signin() {
             <input
                 className={style.input}
                 type="text"
-                placeholder="이름"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                placeholder="아이디"
+                value={id}
+                onChange={(e) => setId(e.target.value)}
             />
             <input
                 className={style.input}
@@ -27,13 +49,6 @@ function Signin() {
                 placeholder="이메일"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-                className={style.input}
-                type="tel"
-                placeholder="전화번호"
-                value={callnumber}
-                onChange={(e) => setCallnumber(e.target.value)}
             />
             <input
                 className={style.input}
@@ -49,13 +64,32 @@ function Signin() {
                 value={passwordre}
                 onChange={(e) => setPasswordre(e.target.value)}
             />
-            <button className={style.loginButton} onClick={() => navigate("/app")}>회원가입</button>
+            <button className={style.loginButton} onClick={handleSignup}>회원가입</button>
 
-            <p>모든 데이터는 암호화 하여 서버에 저장됩니다.</p>
-            <p>개인정보는 파기 요청시 즉시 삭제되며 프로필에서 삭제할 수 있습니다.</p>
-            <p>Cloudflare의 서버를 이용하여 안전하게 보호됩니다.</p>
-        
             <p><a href="/signup">인스타 DM</a>으로 편리하게 회원가입</p>
+
+            <button 
+                onClick={() => setShowDetails(!showDetails)}
+                style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: '#0d7377', 
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    padding: '10px 0',
+                    fontSize: '14px'
+                }}
+            >
+                {showDetails ? '▼ 서울로봇고 카르텔은 안전한가요?' : '▶ 서울로봇고 카르텔은 안전한가요?'}
+            </button>
+
+            {showDetails && (
+                <div style={{ marginTop: '10px' }}>
+                    <span>모든 데이터는 암호화 하여 서버에 저장됩니다.</span>
+                    <span>개인정보는 파기 요청시 즉시 삭제되며 프로필에서 삭제할 수 있습니다.</span>
+                    <span>Cloudflare의 서버를 이용하여 안전하게 보호됩니다.</span>
+                </div>
+            )}
         </div>
       </>
     );
