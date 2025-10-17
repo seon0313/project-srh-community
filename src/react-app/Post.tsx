@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import Topbar from "./Topbar";
 
 function Posts() {
-    const navigate = useNavigate();
     const p = useParams();
     return (
         <>
