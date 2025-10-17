@@ -17,8 +17,24 @@ const posts = [
   { id: 12, title: "열두 번째 게시글", author: "오준혁", date: "2025-10-05" },
 ];
 
+const guide = [
+    { id: 1, title: "김치볶음밥 만들어보자", description: "김치볶음밥에 대한 모든 것", author: "요리왕", date: "2025-10-16", steps: 5, needtime: 15, thumbnail: "/vite.svg" },  
+    { id: 2, title: "Python 기초 완벽 정복", description: "파이썬 기초 문법부터 실전까지", author: "코딩마스터", date: "2025-10-15", steps: 10, needtime: 120, thumbnail: "/vite.svg" },
+    { id: 3, title: "홈 카페 라떼아트 배우기", description: "집에서 카페 수준의 라떼 만들기", author: "바리스타김", date: "2025-10-14", steps: 7, needtime: 30, thumbnail: "/vite.svg" },
+    { id: 4, title: "기타 코드 10분 마스터", description: "기본 코드로 노래 연주하기", author: "음악쟁이", date: "2025-10-13", steps: 8, needtime: 10, thumbnail: "/vite.svg" },
+    { id: 5, title: "Arduino LED 제어 프로젝트", description: "아두이노로 LED 깜빡이기", author: "메이커박", date: "2025-10-12", steps: 6, needtime: 45, thumbnail: "/vite.svg" },
+    { id: 6, title: "셀프 네일아트 기초", description: "집에서 쉽게 따라하는 네일아트", author: "뷰티러버", date: "2025-10-11", steps: 4, needtime: 20, thumbnail: "/vite.svg" },
+    { id: 7, title: "Photoshop 사진 보정", description: "인물 사진 자연스럽게 보정하기", author: "포토그래퍼", date: "2025-10-10", steps: 9, needtime: 60, thumbnail: "/vite.svg" },
+    { id: 8, title: "반려식물 키우기 입문", description: "초보자를 위한 식물 돌보기", author: "그린핑거", date: "2025-10-09", steps: 5, needtime: 10, thumbnail: "/vite.svg" },
+    { id: 9, title: "React 컴포넌트 설계", description: "재사용 가능한 컴포넌트 만들기", author: "프론트개발자", date: "2025-10-08", steps: 12, needtime: 90, thumbnail: "/vite.svg" },
+    { id: 10, title: "홈트 전신 운동 루틴", description: "집에서 30분 전신 운동", author: "헬스트레이너", date: "2025-10-07", steps: 8, needtime: 30, thumbnail: "/vite.svg" },
+    { id: 11, title: "유튜브 썸네일 디자인", description: "클릭률 높이는 썸네일 만들기", author: "유튜버", date: "2025-10-06", steps: 6, needtime: 25, thumbnail: "/vite.svg" },
+    { id: 12, title: "3D 프린터 첫 출력", description: "3D 프린터 설정부터 출력까지", author: "3D프린팅", date: "2025-10-05", steps: 7, needtime: 50, thumbnail: "/vite.svg" },
+];
+
 // 게시글 목록 API
 app.get("/api/posts", (c) => c.json(posts));
+app.get("/api/guides", (c) => c.json(guide));
 
 app.get("/api/", (c) => c.json({ name: "Cloudflare" }));
 
