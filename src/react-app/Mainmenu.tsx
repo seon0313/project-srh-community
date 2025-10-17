@@ -19,7 +19,7 @@ function Mainmenu() {
 
   return (
     <div className={styles.Mainmenu}>
-      <h1>서울로봇고 카르텔</h1>
+      <h1>서비스명</h1>
       <table className={styles.mainmenu_topbar}>
         <tbody>
           <tr>
