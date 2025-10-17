@@ -12,6 +12,7 @@ function AI() {
     const [messages, setMessages] = useState<Message[]>([]);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const shouldAutoScrollRef = useRef(true);
+    const inputContainerRef = useRef<HTMLDivElement>(null);
 
     // 스크롤 위치 감지
     const handleScroll = () => {
@@ -28,6 +29,47 @@ function AI() {
             messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
     }, [messages]);
+
+    // 입력창 실제 높이를 CSS 변수로 반영 -> 리스트 바닥 패딩 계산에 사용
+    useEffect(() => {
+        const updateComposerH = () => {
+            const h = inputContainerRef.current?.offsetHeight ?? 0;
+            document.documentElement.style.setProperty("--composer-h", `${h}px`);
+        };
+        updateComposerH();
+        window.addEventListener("resize", updateComposerH);
+        return () => window.removeEventListener("resize", updateComposerH);
+    }, []);
+
+    // VisualViewport로 키보드 높이 추적 -> --kb CSS 변수로 반영
+    useEffect(() => {
+        const vv = (window as any).visualViewport as VisualViewport | undefined;
+
+        const updateKB = () => {
+            const innerH = window.innerHeight;
+            let kb = 0;
+            if (vv) {
+                // 키보드가 열리면 visualViewport.height가 줄어듦
+                kb = Math.max(0, innerH - (vv.height + vv.offsetTop));
+            }
+            document.documentElement.style.setProperty("--kb", `${kb}px`);
+        };
+
+        updateKB();
+        if (vv) {
+            vv.addEventListener("resize", updateKB);
+            vv.addEventListener("scroll", updateKB);
+        }
+        window.addEventListener("resize", updateKB);
+
+        return () => {
+            if (vv) {
+                vv.removeEventListener("resize", updateKB);
+                vv.removeEventListener("scroll", updateKB);
+            }
+            window.removeEventListener("resize", updateKB);
+        };
+    }, []);
 
     const fetchAiStream = async () => {
         if (!aiPrompt.trim()) return;
@@ -110,7 +152,7 @@ function AI() {
                 ))}
             </div>
 
-            <div className={styles.inputContainer}>
+            <div className={styles.inputContainer} ref={inputContainerRef}>
                 <input
                     className={styles.input}
                     value={aiPrompt}
