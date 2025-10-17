@@ -69,6 +69,11 @@ function Mainmenu() {
                                     </div>
                                 </div>
                             ))}
+                            <div className={styles.moreButtonContainer}>
+                                <div className={styles.moreButton} onClick={() => navigate("/guides")}>
+                                    <p>더보기</p>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

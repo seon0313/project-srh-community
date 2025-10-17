@@ -6,11 +6,11 @@ function User() {
 
     return (
         <>
-          <div className="User">
+        <div className="User">
             <h1>사용자 정보</h1>
             <p>ID: {p.id}</p>
 
-          <p>계정이 없으신가요? <a onClick={() => navigate("/signup")}>회원가입</a></p>
+            <p>계정이 없으신가요? <a onClick={() => navigate("/signup")}>회원가입</a></p>
         </div>
         </>
     );

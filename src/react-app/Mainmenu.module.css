@@ -146,6 +146,14 @@
     display: table-row;
 }
 
+.moreButtonContainer div {
+    display: block;
+}
+
+.moreButton div {
+    display: block;
+}
+
 .moreButton {
     display: table-cell;
     width: 100%;
@@ -328,7 +336,7 @@
         display: none;
     }
     .main {
-        grid-template-columns: minmax(320px, 3fr) 0.7fr;
+        grid-template-columns: minmax(320px, 3fr) 1fr;
     }
 }
 
