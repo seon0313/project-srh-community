@@ -1,5 +1,5 @@
 import style from "./Posts.module.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Topbar from "./Topbar";
 
 function Posts() {
