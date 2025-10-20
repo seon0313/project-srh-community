@@ -1,0 +1,85 @@
+/* Guide detail page styles */
+.container {
+	padding: 12px;
+}
+.header {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 12px;
+}
+.backBtn {
+	align-self: flex-start;
+	padding: 6px 10px;
+	border: 1px solid #444;
+	border-radius: 6px;
+	background: #1a1a1a;
+	color: #e0e0e0;
+	cursor: pointer;
+}
+.backBtn:hover { background: #2a2a2a; }
+
+.headerBody {
+	display: flex;
+	gap: 12px;
+}
+.thumb {
+	width: 88px;
+	height: 88px;
+	object-fit: cover;
+	border-radius: 8px;
+}
+.headerContent { flex: 1; min-width: 0; }
+.title { margin: 0 0 4px 0; font-size: 20px; }
+.meta { display: flex; gap: 8px; color: #aaa; font-size: 12px; align-items: center; }
+.dot { opacity: 0.6; }
+.description { margin: 6px 0 0 0; color: #ccc; font-size: 14px; }
+
+.skeletonThumb { width: 88px; height: 88px; border-radius: 8px; background: #333; }
+.skeletonText { flex: 1; height: 24px; border-radius: 4px; background: #333; }
+
+.loadingZone { display: flex; justify-content: center; align-items: center; min-height: 160px; }
+.spinner {
+	width: 44px; height: 44px;
+	border: 4px solid rgba(13,115,119,0.2);
+	border-top-color: #0d7377;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+@keyframes spin { from { transform: rotate(0deg);} to {transform: rotate(360deg);} }
+
+.errorZone { color: #ff6961; text-align: center; padding: 12px; }
+
+.stepsList {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+.stepCard {
+	background: rgba(26,26,26,0.6);
+	border: 1px solid #333;
+	border-radius: 10px;
+	padding: 10px;
+	animation: fadeInUp 0.4s ease-out both;
+	animation-delay: var(--delay, 0ms);
+}
+@keyframes fadeInUp {
+	from { opacity: 0; transform: translateY(8px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+.stepHeader { display: flex; align-items: center; gap: 8px; }
+.stepIndex { width: 22px; height: 22px; border-radius: 50%; background: #0d7377; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+.stepTitle { margin: 0; font-size: 16px; }
+.stepTime { margin-left: auto; color: #aaa; font-size: 12px; }
+.stepBody { display: flex; gap: 10px; margin-top: 8px; }
+.stepThumb { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.stepContent { margin: 0; color: #ddd; font-size: 14px; }
+.stepMeta { display: flex; gap: 8px; color: #999; font-size: 12px; margin-top: 8px; }
+
+@media (max-width: 600px) {
+	.thumb { width: 72px; height: 72px; }
+	.stepThumb { width: 64px; height: 64px; }
+}

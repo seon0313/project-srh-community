@@ -32,9 +32,51 @@ const guide = [
     { id: 12, title: "3D 프린터 첫 출력", description: "3D 프린터 설정부터 출력까지", author: "3D프린팅", date: "2025-10-05", steps: 7, needtime: 50, thumbnail: "/vite.svg" },
 ];
 
+// 각 가이드에 맞는 단계별 아이템 더미 데이터 생성
+type GuideItem = {
+  id: number;
+  parentId: number;
+  title: string;
+  author: string;
+  content: string;
+  date: string;
+  needtime: number;
+  thumbnail: string;
+};
+
+const guide_items: GuideItem[] = guide.flatMap((g) => {
+  const perStepTime = Math.max(1, Math.round(g.needtime / Math.max(1, g.steps)));
+  const steps = Math.max(1, g.steps);
+  const items: GuideItem[] = [];
+  for (let i = 1; i <= steps; i++) {
+    items.push({
+      id: g.id * 1000 + i, // 간단한 고유 ID 규칙
+      parentId: g.id,
+      title: `${i} - ${g.title} 단계`,
+      author: g.author,
+      content: `${g.title}의 ${i}번째 단계에 대한 설명입니다. 예시 더미 텍스트로 채워집니다.`,
+      date: g.date,
+      needtime: perStepTime,
+      thumbnail: g.thumbnail,
+    });
+  }
+  return items;
+});
+
 // 게시글 목록 API
 app.get("/api/posts", (c) => c.json(posts));
 app.get("/api/guides", (c) => c.json(guide));
+
+// 가이드 아이템 조회 API (parentId로 필터 가능)
+app.get("/api/guide-items", (c) => {
+  const url = new URL(c.req.url);
+  const parentId = url.searchParams.get("id");
+  if (parentId) {
+    const pid = Number(parentId);
+    return c.json(guide_items.filter((it) => it.parentId === pid));
+  }
+  return c.json(guide_items);
+});
 
 app.get("/api/", (c) => c.json({ name: "Cloudflare" }));
 
