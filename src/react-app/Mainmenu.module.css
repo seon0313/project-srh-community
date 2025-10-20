@@ -1,4 +1,4 @@
-/* CSS 모듈에서는 :global을 사용해 전역 스타일 적용 */
+/* Modern Minimal Design - Global Reset */
 :global(#root) {
     margin: 0;
     padding: 0;
@@ -11,83 +11,113 @@
     padding: 0;
     width: 100vw;
     max-width: none;
+    background: #0f0f0f;
 }
 
-/* 이하 기존 스타일 유지 */
+/* Main Container - Clean & Spacious */
 .Mainmenu {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     width: 100%;
-    max-width: none;
+    max-width: 100vw;
+    background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 .main {
     flex: 1 1 auto;
     min-height: 0;
     display: grid;
-    grid-template-columns: 0.9fr minmax(320px, 3fr) 0.9fr;
+    grid-template-columns: minmax(200px, 1fr) minmax(320px, 2fr) minmax(200px, 1fr);
     grid-template-areas: "info content friends";
-    grid-template-rows: auto; /* 콘텐츠 높이에 맞게 */
-    gap: 10px;
+    grid-template-rows: auto;
+    gap: 12px;
     width: 100%;
-    max-width: none;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 10px;
+    box-sizing: border-box;
 }
 
 .mainItem {
     width: 100%;
-    background-color: oklch(45.586% 0.01532 244.6 / 0.5);
-    padding: 5px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    padding: 12px;
     text-align: center;
-    border-radius: 8px;
-    /* height: auto; */ /* 별도 지정 불필요 */
-    height: auto; /* 콘텐츠 높이에 맞춤 */
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    height: auto;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: start;
     min-width: 0;
-    /* grid-row: 1; */ /* 고정 행 배치 제거 */
-    align-self: start; /* 기본값 사용 */
+    align-self: start;
     box-sizing: border-box;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mainItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 /* grid areas for clarity */
-.infoPanel { grid-area: info; }
-.contentPanel { grid-area: content; }
-.friendsPanel { grid-area: friends; }
+.infoPanel { 
+    grid-area: info;
+    min-width: 0;
+}
+.contentPanel { 
+    grid-area: content;
+    min-width: 0;
+}
+.friendsPanel { 
+    grid-area: friends;
+    min-width: 0;
+}
 
 .mainmenu_topbar {
-    margin: 0;                 /* 좌우 여백 제거 */
-    padding: 0;                /* 좌우 패딩 제거 */
+    margin: 0;
+    padding: 6px 10px;
     width: 100%;
     text-align: center;
     box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .mainmenu_topbar table {
     width: 100%;
-    margin: 0;                 /* 테이블 마진 제거 */
+    max-width: 800px;
+    margin: 0 auto;
     table-layout: fixed;
-    border-collapse: collapse; /* 테두리 간격 제거 */
-    border-spacing: 0;         /* 기본 border-spacing 제거 */
+    border-collapse: separate;
+    border-spacing: 6px;
     vertical-align: middle;
     text-align: center;
 }
 
 .mainmenu_topbar td {
-    /* 필요한 경우 셀 내부 여백만 사용 */
-    padding: 0;                /* 셀 바깥 간격 제거 (왼쪽 딱 붙게) */
+    padding: 6px 10px;
     width: 20%;
-    background-color: #1a1a1a;
-    border-radius: 8px;
-    height: 25px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    height: auto;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.02em;
 }
 
 .mainmenu_topbar td:hover {
-    background-color: #2a2a2a;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
 }
 
 .posttable {
@@ -97,17 +127,16 @@
 
 .postitem {
     opacity: 0;
-    animation: fadeInUp 0.5s ease-out forwards;
+    animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: table-row;
 }
 
 .postitem:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.04);
 }
 
-/* 각 아이템마다 0.03초씩 지연 (동적 계산) */
 .postitem {
     animation-delay: calc(var(--item-index) * 0.03s);
 }
@@ -115,7 +144,7 @@
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(12px);
     }
     to {
         opacity: 1;
@@ -124,11 +153,13 @@
 }
 
 .postitem td {
-    padding: 8px;
-    border-bottom: 1px solid #444;
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .postTitle {
@@ -164,23 +195,22 @@
     display: table-cell;
     width: 100%;
     text-align: center;
-    padding: 10px;
-    background-color: rgba(26, 26, 26, 0.8);
-    border: 1px solid #444;
-    border-radius: 8px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box;
 }
 
 .moreButton:hover {
-    background-color: rgba(42, 42, 42, 0.9);
-    border-color: #0d7377;
-    box-shadow: 0 0 10px rgba(13, 115, 119, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(100, 200, 255, 0.4);
+    transform: translateY(-2px);
 }
 
 .moreButton:active {
-    background-color: rgba(50, 50, 50, 0.9);
     transform: scale(0.98);
 }
 
@@ -188,12 +218,12 @@
     margin: 0;
     font-weight: 500;
     font-size: 13px;
-    color: #e0e0e0;
-    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.05em;
 }
 
 .moreButton:hover p {
-    color: #0d7377;
+    color: rgba(100, 200, 255, 0.95);
 }
 
 .loadingSpace {
@@ -205,12 +235,12 @@
 
 .loadingSpinner {
     display: inline-block;
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(13, 115, 119, 0.2);
-    border-top-color: #0d7377;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: rgba(100, 200, 255, 0.8);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes spin {
@@ -248,38 +278,43 @@
 .guideList {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
     width: 100%;
-    padding: 5px;
+    padding: 4px;
     box-sizing: border-box;
+    overflow-y: auto;
+    max-height: 600px;
 }
 
 .guideItem {
     display: flex;
-    gap: 12px;
-    padding: 10px;
-    background-color: rgba(26, 26, 26, 0.6);
-    border-radius: 8px;
+    gap: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0;
-    animation: fadeInUp 0.5s ease-out forwards;
-    animation-delay: calc(var(--item-index) * 0.1s);
-    container-type: inline-size; /* 컨테이너 쿼리를 위한 설정 */
+    animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-delay: calc(var(--item-index) * 0.08s);
+    container-type: inline-size;
 }
 
 .guideItem:hover {
-    background-color: rgba(42, 42, 42, 0.8);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .guideThumbnail {
     width: 80px;
     height: 80px;
     object-fit: cover;
-    border-radius: 6px;
+    border-radius: 8px;
     flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .guideContent {
@@ -302,40 +337,44 @@
 
 .guideTitle {
     margin: 0;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.95);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     text-align: left;
+    letter-spacing: -0.01em;
 }
 
 .guideDescription {
     margin: 0;
-    font-size: 12px;
-    color: #aaa;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
     overflow: hidden;
     text-overflow: ellipsis;
     max-lines: 2;
     white-space: nowrap;
     text-align: left;
+    line-height: 1.5;
 }
 
 .guideMeta {
     display: flex;
-    gap: 8px;
-    font-size: 11px;
-    color: #888;
+    gap: 10px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
     margin-top: auto;
+    align-items: center;
 }
 
 .guideAuthor {
-    color: #0d7377;
+    color: rgba(100, 200, 255, 0.8);
+    font-weight: 500;
 }
 
 .guideTime {
-    color: #888;
+    color: rgba(255, 255, 255, 0.45);
 }
 
 @media (max-width: 900px) {
@@ -344,7 +383,7 @@
         display: none;
     }
     .main {
-        grid-template-columns: 1fr minmax(320px, 3fr);
+        grid-template-columns: minmax(180px, 1fr) minmax(280px, 2fr);
         grid-template-areas: "info content";
     }
     /* 프렌즈는 드로어로 접근 */
@@ -354,46 +393,58 @@
 }
 
 @media (max-width: 600px) {
-    /* 모바일에서는 정보 패널이 메인 콘텐츠 위에 배치되도록 스택 */
+    /* Mobile - Stack Layout */
     .main {
         grid-template-columns: 1fr;
         grid-template-areas:
             "info"
             "content";
+        padding: 10px 8px;
+        gap: 10px;
     }
-    /* 정보 리스트는 가로 스크롤 캐러셀 형태 */
+    .mainItem {
+        padding: 10px;
+        border-radius: 14px;
+    }
+    /* Horizontal Scroll for Info Panel */
     .infoPanel .guideList {
         display: flex;
         flex-direction: row;
-        gap: 10px;
+        gap: 12px;
         overflow-x: auto;
         overflow-y: hidden;
-        padding: 6px 8px;
+        padding: 8px 4px;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
     }
     .infoPanel .guideItem {
         flex: 0 0 auto;
-        min-width: 240px;
-        max-width: 80vw;
+        min-width: 260px;
+        max-width: 85vw;
         scroll-snap-align: start;
+        padding: 10px;
     }
-    /* 썸네일 축소로 세로 공간 절약 */
     .infoPanel .guideThumbnail {
-        width: 64px;
-        height: 64px;
+        width: 68px;
+        height: 68px;
     }
-    /* 스크롤바 미세 표시/숨김 (브라우저별) */
+    /* Minimal Scrollbar */
     .infoPanel .guideList::-webkit-scrollbar {
-        height: 6px;
+        height: 4px;
     }
     .infoPanel .guideList::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.2);
-        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 2px;
     }
-    .infoPanel .guideList { scrollbar-color: rgba(255,255,255,0.2) transparent; scrollbar-width: thin; }
+    .infoPanel .guideList::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.03);
+    }
+    .infoPanel .guideList {
+        scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+        scrollbar-width: thin;
+    }
     .friendsPanel {
-        display: none; /* 모바일에서는 드로어로 대체 */
+        display: none;
     }
     .friendsToggleButton {
         display: inline-flex !important;
@@ -402,18 +453,41 @@
     .postAuthor,
     .postDate {
         width: 80px;
-        font-size: 0.9em;
+        font-size: 13px;
     }
     
     .moreButton {
-        padding: 8px;
-        height: 100%;
+        padding: 12px;
         text-align: center;
     }
     
     .moreButton p {
-        font-size: 12px;
+        font-size: 13px;
         text-align: center;
+    }
+    
+    /* More Button in Info Panel */
+    .infoPanel .moreButtonContainer {
+        flex: 0 0 auto;
+        display: block;
+    }
+    .infoPanel .moreButton {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 160px;
+        height: 96px;
+        padding: 0 16px;
+        margin: 0 4px;
+        box-sizing: border-box;
+    }
+    .infoPanel .moreButton p {
+        margin: 0;
+        text-align: center !important;
+        height: auto;
+        width: 100%;
     }
 }
 
@@ -428,30 +502,36 @@
     align-self: start;
 }
 
-/* 모바일 프렌즈 토글 버튼 (기본은 숨김) */
+/* Modern Friends Toggle Button */
 .friendsToggleButton {
     display: none;
-    margin: 8px 10px 0 10px;
+    margin: 8px 12px 0 12px;
     align-self: flex-start;
-    padding: 6px 12px;
-    background-color: #1a1a1a;
-    color: #e0e0e0;
-    border: 1px solid #444;
-    border-radius: 6px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .friendsToggleButton:hover {
-    background-color: #2a2a2a;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
 }
 
-/* 드로어 & 오버레이 */
+/* Modern Drawer & Overlay */
 .drawerOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 999;
 }
 .friendsDrawer {
@@ -459,12 +539,13 @@
     top: 0;
     right: 0;
     height: 100vh;
-    width: min(80vw, 320px);
-    background: #1e1e1e;
-    border-left: 1px solid #333;
-    box-shadow: -8px 0 16px rgba(0,0,0,0.4);
+    width: min(80vw, 340px);
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.5);
     transform: translateX(100%);
-    transition: transform 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
     display: flex;
     flex-direction: column;
@@ -473,20 +554,24 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 14px;
-    border-bottom: 1px solid #333;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .friendsDrawerBody {
-    padding: 12px 14px;
+    padding: 16px;
     overflow-y: auto;
 }
 .closeButton {
     background: transparent;
     border: none;
-    color: #e0e0e0;
-    font-size: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 24px;
     line-height: 1;
     cursor: pointer;
+    transition: color 0.2s ease;
+}
+.closeButton:hover {
+    color: rgba(255, 255, 255, 0.95);
 }
 .open.drawerOverlay,
 .drawerOverlay.open {
