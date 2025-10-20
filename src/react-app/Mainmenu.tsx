@@ -74,7 +74,6 @@ function Mainmenu() {
 
             <div className={styles.main}>
                 <div className={`${styles.mainItem} ${styles.infoPanel}`}>
-                    <h3 style={{ margin: "10px 0" }}>정보</h3>
                     {guidesLoading ? (
                         <div className={styles.guideLoadingSpace}>
                             <div className={styles.loadingSpinner}></div>

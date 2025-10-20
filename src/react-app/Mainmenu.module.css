@@ -317,6 +317,7 @@
     color: #aaa;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-lines: 2;
     white-space: nowrap;
     text-align: left;
 }
@@ -412,7 +413,6 @@
     
     .moreButton p {
         font-size: 12px;
-        height: 100%;
         text-align: center;
     }
 }
