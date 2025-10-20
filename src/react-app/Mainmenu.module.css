@@ -27,6 +27,7 @@
     min-height: 0;
     display: grid;
     grid-template-columns: 0.9fr minmax(320px, 3fr) 0.9fr;
+    grid-template-areas: "info content friends";
     grid-template-rows: auto; /* 콘텐츠 높이에 맞게 */
     gap: 10px;
     width: 100%;
@@ -50,6 +51,11 @@
     align-self: start; /* 기본값 사용 */
     box-sizing: border-box;
 }
+
+/* grid areas for clarity */
+.infoPanel { grid-area: info; }
+.contentPanel { grid-area: content; }
+.friendsPanel { grid-area: friends; }
 
 .mainmenu_topbar {
     margin: 0;                 /* 좌우 여백 제거 */
@@ -332,20 +338,64 @@
 }
 
 @media (max-width: 900px) {
-    .mainItem:first-child {
+    /* 먼저 프렌즈 패널 숨김 */
+    .friendsPanel {
         display: none;
     }
     .main {
-        grid-template-columns: minmax(320px, 3fr) 1fr;
+        grid-template-columns: 1fr minmax(320px, 3fr);
+        grid-template-areas: "info content";
+    }
+    /* 프렌즈는 드로어로 접근 */
+    .friendsToggleButton {
+        display: inline-flex !important;
     }
 }
 
 @media (max-width: 600px) {
-    .mainItem:last-child {
-        display: none;
-    }
+    /* 모바일에서는 정보 패널이 메인 콘텐츠 위에 배치되도록 스택 */
     .main {
-        grid-template-columns: minmax(320px, 1fr);
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "info"
+            "content";
+    }
+    /* 정보 리스트는 가로 스크롤 캐러셀 형태 */
+    .infoPanel .guideList {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 6px 8px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+    .infoPanel .guideItem {
+        flex: 0 0 auto;
+        min-width: 240px;
+        max-width: 80vw;
+        scroll-snap-align: start;
+    }
+    /* 썸네일 축소로 세로 공간 절약 */
+    .infoPanel .guideThumbnail {
+        width: 64px;
+        height: 64px;
+    }
+    /* 스크롤바 미세 표시/숨김 (브라우저별) */
+    .infoPanel .guideList::-webkit-scrollbar {
+        height: 6px;
+    }
+    .infoPanel .guideList::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 3px;
+    }
+    .infoPanel .guideList { scrollbar-color: rgba(255,255,255,0.2) transparent; scrollbar-width: thin; }
+    .friendsPanel {
+        display: none; /* 모바일에서는 드로어로 대체 */
+    }
+    .friendsToggleButton {
+        display: inline-flex !important;
     }
     
     .postAuthor,
@@ -356,10 +406,14 @@
     
     .moreButton {
         padding: 8px;
+        height: 100%;
+        text-align: center;
     }
     
     .moreButton p {
         font-size: 12px;
+        height: 100%;
+        text-align: center;
     }
 }
 
@@ -372,4 +426,74 @@
 /* 가운데(게시글)는 콘텐츠 높이에 맞게 */
 .main > .mainItem:nth-child(2) {
     align-self: start;
+}
+
+/* 모바일 프렌즈 토글 버튼 (기본은 숨김) */
+.friendsToggleButton {
+    display: none;
+    margin: 8px 10px 0 10px;
+    align-self: flex-start;
+    padding: 6px 12px;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #444;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.friendsToggleButton:hover {
+    background-color: #2a2a2a;
+}
+
+/* 드로어 & 오버레이 */
+.drawerOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 999;
+}
+.friendsDrawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(80vw, 320px);
+    background: #1e1e1e;
+    border-left: 1px solid #333;
+    box-shadow: -8px 0 16px rgba(0,0,0,0.4);
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+.friendsDrawerHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 1px solid #333;
+}
+.friendsDrawerBody {
+    padding: 12px 14px;
+    overflow-y: auto;
+}
+.closeButton {
+    background: transparent;
+    border: none;
+    color: #e0e0e0;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+.open.drawerOverlay,
+.drawerOverlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+.open.friendsDrawer,
+.friendsDrawer.open {
+    transform: translateX(0);
 }

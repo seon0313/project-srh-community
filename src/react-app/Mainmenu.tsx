@@ -16,6 +16,7 @@ function Mainmenu() {
     }[]>([]);
     const [loading, setLoading] = useState(true);
     const [guidesLoading, setGuidesLoading] = useState(true);
+    const [isFriendsOpen, setFriendsOpen] = useState(false);
 
     useEffect(() => {
         fetch("/api/posts")
@@ -38,8 +39,41 @@ function Mainmenu() {
     return (
         <div className={styles.Mainmenu}>
             <Topbar />
+
+            {/* 모바일 전용 프렌즈 토글 버튼 */}
+            <button
+                type="button"
+                className={styles.friendsToggleButton}
+                aria-controls="friends-drawer"
+                aria-expanded={isFriendsOpen}
+                onClick={() => setFriendsOpen((v) => !v)}
+            >
+                프렌즈 열기
+            </button>
+
+            {/* 프렌즈 슬라이드 드로어 및 오버레이 */}
+            <div
+                className={`${styles.drawerOverlay} ${isFriendsOpen ? styles.open : ""}`}
+                onClick={() => setFriendsOpen(false)}
+                aria-hidden={!isFriendsOpen}
+            />
+            <aside
+                id="friends-drawer"
+                className={`${styles.friendsDrawer} ${isFriendsOpen ? styles.open : ""}`}
+                role="dialog"
+                aria-label="또봇고 프렌즈"
+            >
+                <div className={styles.friendsDrawerHeader}>
+                    <strong>또봇고 프렌즈</strong>
+                    <button type="button" className={styles.closeButton} onClick={() => setFriendsOpen(false)} aria-label="닫기">×</button>
+                </div>
+                <div className={styles.friendsDrawerBody}>
+                    <p>로봇고 프렌즈</p>
+                </div>
+            </aside>
+
             <div className={styles.main}>
-                <div className={styles.mainItem}>
+                <div className={`${styles.mainItem} ${styles.infoPanel}`}>
                     <h3 style={{ margin: "10px 0" }}>정보</h3>
                     {guidesLoading ? (
                         <div className={styles.guideLoadingSpace}>
@@ -77,7 +111,7 @@ function Mainmenu() {
                         </div>
                     )}
                 </div>
-                <div className={styles.mainItem}>
+                <div className={`${styles.mainItem} ${styles.contentPanel}`}>
                     <table className={styles.posttable}>
                         <tbody>
                             {loading ? (
@@ -89,19 +123,19 @@ function Mainmenu() {
                             ) : (
                                 <>
                                     {posts.map((post, index) => (
-                                        <tr 
-                                            key={post.id} 
+                                        <tr
+                                            key={post.id}
                                             className={styles.postitem}
                                             style={{ '--item-index': index } as React.CSSProperties}
                                         >
-                                            <td 
+                                            <td
                                                 className={styles.postTitle}
                                                 onClick={() => navigate("/post/" + post.id)}
                                             >
                                                 <strong>{post.title}</strong>
                                             </td>
-                                            <td 
-                                                className={styles.postAuthor} 
+                                            <td
+                                                className={styles.postAuthor}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     navigate("/user/" + post.author);
@@ -109,7 +143,7 @@ function Mainmenu() {
                                             >
                                                 <strong>{post.author}</strong>
                                             </td>
-                                            <td 
+                                            <td
                                                 className={styles.postDate}
                                                 onClick={() => navigate("/post/" + post.id)}
                                             >
@@ -127,7 +161,7 @@ function Mainmenu() {
                         </tbody>
                     </table>
                 </div>
-                <div className={styles.mainItem}>
+                <div className={`${styles.mainItem} ${styles.friendsPanel}`}>
                     <p>로봇고 프렌즈</p>
                 </div>
             </div>
