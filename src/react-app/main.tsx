@@ -12,6 +12,7 @@ import AI from "./AI.tsx";
 import Posts from "./Posts.tsx";
 import Post from "./Post.tsx";
 import Guide from "./Guide.tsx";
+import Guides from "./Guides.tsx";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
@@ -28,6 +29,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/post/:id" element={<Post />} />
                 <Route path="/guide/view/:id" element={<User />} />
                 <Route path="/guide/:id" element={<Guide />} />
+                <Route path="/guides" element={<Guides />} />
                 <Route path="*" element={<div>Not Found</div>} />
             </Routes>
         </BrowserRouter>

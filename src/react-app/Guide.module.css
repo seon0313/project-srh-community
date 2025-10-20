@@ -65,6 +65,7 @@
 	padding: 10px;
 	animation: fadeInUp 0.4s ease-out both;
 	animation-delay: var(--delay, 0ms);
+    cursor: pointer;
 }
 @keyframes fadeInUp {
 	from { opacity: 0; transform: translateY(8px); }
