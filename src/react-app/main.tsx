@@ -26,6 +26,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/ai" element={<AI />} />
                 <Route path="/posts" element={<Posts />} />
                 <Route path="/post/:id" element={<Post />} />
+                <Route path="/guide/view/:id" element={<User />} />
                 <Route path="/guide/:id" element={<Guide />} />
                 <Route path="*" element={<div>Not Found</div>} />
             </Routes>

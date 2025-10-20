@@ -81,6 +81,7 @@ function Guide() {
                             <img className={styles.thumb} src={guide.thumbnail} alt={guide.title} />
                             <div className={styles.headerContent}>
                                 <h1 className={styles.title}>{guide.title}</h1>
+                                <p className={styles.description}>{guide.description}</p>
                                 <div className={styles.meta}>
                                     <span className={styles.author}>{guide.author}</span>
                                     <span className={styles.dot}>•</span>
@@ -90,7 +91,6 @@ function Guide() {
                                     <span className={styles.dot}>•</span>
                                     <span className={styles.steps}>{guide.steps}단계</span>
                                 </div>
-                                <p className={styles.description}>{guide.description}</p>
                             </div>
                         </div>
                     ) : loading ? (
@@ -114,7 +114,7 @@ function Guide() {
                 ) : (
                     <ol className={styles.stepsList}>
                         {items.map((it, idx) => (
-                            <li key={it.id} className={styles.stepCard} style={{ ['--delay' as any]: `${idx * 40}ms` }}>
+                            <li key={it.id} className={styles.stepCard} style={{ ['--delay' as any]: `${idx * 40}ms` }} onClick={() => navigate("/guide/view/"+it.id)}>
                                 <div className={styles.stepHeader}>
                                     <span className={styles.stepIndex}>{idx + 1}</span>
                                     <h3 className={styles.stepTitle}>{it.title}</h3>
