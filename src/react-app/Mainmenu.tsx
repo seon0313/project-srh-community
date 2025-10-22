@@ -14,8 +14,20 @@ function Mainmenu() {
         needtime: number; 
         thumbnail: string 
     }[]>([]);
+    const [users, setUsers] = useState<{
+        id: number;
+        username: string;
+        displayName: string;
+        company?: string;
+        position?: string;
+        bio?: string;
+        avatar: string;
+        isOnline: boolean;
+        badges: string[];
+    }[]>([]);
     const [loading, setLoading] = useState(true);
     const [guidesLoading, setGuidesLoading] = useState(true);
+    const [usersLoading, setUsersLoading] = useState(true);
     const [isFriendsOpen, setFriendsOpen] = useState(false);
 
     useEffect(() => {
@@ -34,6 +46,14 @@ function Mainmenu() {
                 setGuidesLoading(false);
             })
             .catch(() => setGuidesLoading(false));
+
+        fetch("/api/users")
+            .then(res => res.json())
+            .then(data => {
+                setUsers(data);
+                setUsersLoading(false);
+            })
+            .catch(() => setUsersLoading(false));
     }, []);
 
     return (
@@ -68,7 +88,40 @@ function Mainmenu() {
                     <button type="button" className={styles.closeButton} onClick={() => setFriendsOpen(false)} aria-label="닫기">×</button>
                 </div>
                 <div className={styles.friendsDrawerBody}>
-                    <p>로봇고 프렌즈</p>
+                    {usersLoading ? (
+                        <div className={styles.loadingSpinner}></div>
+                    ) : (
+                        <div className={styles.businessCardList}>
+                            {users.slice(0, 8).map((user, index) => (
+                                <div 
+                                    key={user.id} 
+                                    className={styles.businessCard}
+                                    style={{ '--item-index': index } as React.CSSProperties}
+                                    onClick={() => navigate("/user/" + user.username)}
+                                >
+                                    <div className={styles.cardHeader}>
+                                        <img 
+                                            src={user.avatar} 
+                                            alt={user.displayName} 
+                                            className={styles.cardAvatar}
+                                        />
+                                        <div className={styles.cardInfo}>
+                                            <h4 className={styles.cardName}>{user.displayName}</h4>
+                                            <p className={styles.cardPosition}>{user.position}</p>
+                                            <p className={styles.cardCompany}>{user.company}</p>
+                                        </div>
+                                        <div className={`${styles.onlineStatus} ${user.isOnline ? styles.online : styles.offline}`}></div>
+                                    </div>
+                                    <div className={styles.cardBadges}>
+                                        {user.badges.slice(0, 2).map((badge, i) => (
+                                            <span key={i} className={styles.badge}>{badge}</span>
+                                        ))}
+                                    </div>
+                                    <p className={styles.cardBio}>{user.bio?.slice(0, 60)}...</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </aside>
 
@@ -161,7 +214,42 @@ function Mainmenu() {
                     </table>
                 </div>
                 <div className={`${styles.mainItem} ${styles.friendsPanel}`}>
-                    <p>로봇고 프렌즈</p>
+                    {usersLoading ? (
+                        <div className={styles.guideLoadingSpace}>
+                            <div className={styles.loadingSpinner}></div>
+                        </div>
+                    ) : (
+                        <div className={styles.businessCardList}>
+                            {users.slice(0, 6).map((user, index) => (
+                                <div 
+                                    key={user.id} 
+                                    className={styles.businessCard}
+                                    style={{ '--item-index': index } as React.CSSProperties}
+                                    onClick={() => navigate("/user/" + user.username)}
+                                >
+                                    <div className={styles.cardHeader}>
+                                        <img 
+                                            src={user.avatar} 
+                                            alt={user.displayName} 
+                                            className={styles.cardAvatar}
+                                        />
+                                        <div className={styles.cardInfo}>
+                                            <h4 className={styles.cardName}>{user.displayName}</h4>
+                                            <p className={styles.cardPosition}>{user.position}</p>
+                                            <p className={styles.cardCompany}>{user.company}</p>
+                                        </div>
+                                        <div className={`${styles.onlineStatus} ${user.isOnline ? styles.online : styles.offline}`}></div>
+                                    </div>
+                                    <div className={styles.cardBadges}>
+                                        {user.badges.slice(0, 2).map((badge, i) => (
+                                            <span key={i} className={styles.badge}>{badge}</span>
+                                        ))}
+                                    </div>
+                                    <p className={styles.cardBio}>{user.bio?.slice(0, 60)}...</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

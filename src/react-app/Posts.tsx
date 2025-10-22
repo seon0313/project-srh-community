@@ -6,23 +6,77 @@ import Topbar from "./Topbar";
 function Posts() {
     const navigate = useNavigate();
     const [posts, setPosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
+    const [filteredPosts, setFilteredPosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filterType, setFilterType] = useState("all");
 
     useEffect(() => {
         fetch("/api/posts")
             .then(res => res.json())
             .then(data => {
                 setPosts(data);
+                setFilteredPosts(data);
                 setLoading(false);
             })
             .catch(() => setLoading(false));
     }, []);
+
+    const handleSearch = () => {
+        let filtered = posts;
+        
+        if (searchTerm) {
+            filtered = filtered.filter((post) => {
+                switch (filterType) {
+                    case "title":
+                        return post.title.toLowerCase().includes(searchTerm.toLowerCase());
+                    case "author":
+                        return post.author.toLowerCase().includes(searchTerm.toLowerCase());
+                    case "all":
+                    default:
+                        return post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                               post.author.toLowerCase().includes(searchTerm.toLowerCase());
+                }
+            });
+        }
+        
+        setFilteredPosts(filtered);
+    };
+
+    useEffect(() => {
+        handleSearch();
+    }, [posts, searchTerm, filterType]);
 
     return (
         <>
             <div className="Post">
                 <Topbar />
                 <div className={style.postContainer}>
+                    <div className={style.searchBar}>
+                        <select 
+                            className={style.filterSelect}
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                        >
+                            <option value="all">전체</option>
+                            <option value="title">제목</option>
+                            <option value="author">작성자</option>
+                        </select>
+                        <input
+                            type="text"
+                            className={style.searchInput}
+                            placeholder="검색어를 입력하세요..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                        />
+                        <button 
+                            className={style.searchButton}
+                            onClick={handleSearch}
+                        >
+                            검색
+                        </button>
+                    </div>
                     <table className={style.posttable}>
                         <tbody>
                             {loading ? (
@@ -33,7 +87,7 @@ function Posts() {
                                 </tr>
                             ) : (
                                 <>
-                                    {posts.map((post, index) => (
+                                    {filteredPosts.map((post, index) => (
                                         <tr
                                             key={post.id}
                                             className={style.postitem}

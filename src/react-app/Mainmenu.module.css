@@ -489,6 +489,39 @@
         height: auto;
         width: 100%;
     }
+
+    /* Mobile Business Cards */
+    .friendsDrawerBody .businessCardList {
+        gap: 10px;
+        padding: 0;
+    }
+    
+    .friendsDrawerBody .businessCard {
+        padding: 12px;
+        min-height: 100px;
+        aspect-ratio: 1.6 / 1;
+    }
+    
+    .friendsDrawerBody .cardAvatar {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .friendsDrawerBody .cardName {
+        font-size: 14px;
+    }
+    
+    .friendsDrawerBody .cardPosition {
+        font-size: 11px;
+    }
+    
+    .friendsDrawerBody .cardCompany {
+        font-size: 10px;
+    }
+    
+    .friendsDrawerBody .cardBio {
+        font-size: 10px;
+    }
 }
 
 /* 사이드(정보, 로봇고 프렌즈)는 기존처럼 늘어나게 */
@@ -581,4 +614,139 @@
 .open.friendsDrawer,
 .friendsDrawer.open {
     transform: translateX(0);
+}
+
+/* Business Card Styles */
+.businessCardList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    padding: 4px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    max-height: 600px;
+}
+
+.businessCard {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-delay: calc(var(--item-index) * 0.1s);
+    
+    /* 실제 명함 비율 (85.6mm × 53.98mm) ≈ 1.586:1 */
+    aspect-ratio: 1.586 / 1;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.businessCard:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.cardHeader {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    position: relative;
+}
+
+.cardAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.cardInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.cardName {
+    margin: 0 0 2px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cardPosition {
+    margin: 0 0 1px 0;
+    font-size: 12px;
+    color: rgba(100, 200, 255, 0.8);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cardCompany {
+    margin: 0;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.onlineStatus {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.onlineStatus.online {
+    background: #00ff88;
+    box-shadow: 0 0 6px rgba(0, 255, 136, 0.6);
+}
+
+.onlineStatus.offline {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.cardBadges {
+    display: flex;
+    gap: 4px;
+    margin: 6px 0 4px 0;
+    flex-wrap: wrap;
+}
+
+.badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    background: rgba(100, 200, 255, 0.15);
+    color: rgba(100, 200, 255, 0.9);
+    border-radius: 4px;
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    white-space: nowrap;
+}
+
+.cardBio {
+    margin: 0;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
