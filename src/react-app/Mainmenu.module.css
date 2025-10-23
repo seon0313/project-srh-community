@@ -11,7 +11,12 @@
     padding: 0;
     width: 100vw;
     max-width: none;
-    background: #0f0f0f;
+    background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+}
+
+:global(html) {
+    background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+    min-height: 100%;
 }
 
 /* Main Container - Clean & Spacious */
@@ -538,7 +543,7 @@
 /* 사이드(정보, 로봇고 프렌즈)는 기존처럼 늘어나게 */
 .main > .mainItem:first-child,
 .main > .mainItem:last-child {
-    align-self: stretch;
+    align-self: start;
 }
 
 /* 가운데(게시글)는 콘텐츠 높이에 맞게 */

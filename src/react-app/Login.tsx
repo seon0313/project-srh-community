@@ -11,22 +11,23 @@ function Login() {
         <>
             <div className="Login">
                 <h1>로그인</h1>
-                <input
-                    className={style.input}
-                    type="email"
-                    placeholder="이메일"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-                <input
-                    className={style.input}
-                    type="password"
-                    placeholder="비밀번호"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <button className={style.loginButton} onClick={() => navigate("/app")}>로그인</button>
-
+                <div className={style.loginForm}>
+                    <input
+                        className={style.input}
+                        type="email"
+                        placeholder="이메일"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <input
+                        className={style.input}
+                        type="password"
+                        placeholder="비밀번호"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button className={style.loginButton} onClick={() => navigate("/app")}>로그인</button>
+                </div>
                 <p>계정이 없으신가요? <a onClick={() => navigate("/signup")}>회원가입</a></p>
             </div>
         </>

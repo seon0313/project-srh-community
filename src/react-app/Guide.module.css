@@ -1,4 +1,10 @@
 /* Guide detail page styles */
+:global(.Guide) {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+    color: rgba(255, 255, 255, 0.9);
+}
+
 .container {
 	padding: 12px;
 }

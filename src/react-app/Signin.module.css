@@ -1,6 +1,5 @@
-
-/* Modern Login Page Design */
-:global(.Login) {
+/* Modern Signin Page Design */
+:global(.Signin) {
     min-height: 100vh;
     background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
     color: rgba(255, 255, 255, 0.9);
@@ -17,28 +16,28 @@
 }
 
 /* Decorative background elements */
-:global(.Login::before) {
+:global(.Signin::before) {
     content: '';
     position: absolute;
-    top: 20%;
-    left: 10%;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(100, 200, 255, 0.1) 0%, transparent 70%);
+    top: 15%;
+    left: 15%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(255, 100, 200, 0.1) 0%, transparent 70%);
     border-radius: 50%;
-    animation: float 6s ease-in-out infinite;
+    animation: float 7s ease-in-out infinite;
 }
 
-:global(.Login::after) {
+:global(.Signin::after) {
     content: '';
     position: absolute;
-    bottom: 20%;
-    right: 15%;
-    width: 150px;
-    height: 150px;
-    background: radial-gradient(circle, rgba(255, 100, 200, 0.08) 0%, transparent 70%);
+    bottom: 15%;
+    right: 10%;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(100, 255, 150, 0.08) 0%, transparent 70%);
     border-radius: 50%;
-    animation: float 8s ease-in-out infinite reverse;
+    animation: float 9s ease-in-out infinite reverse;
 }
 
 @keyframes float {
@@ -46,12 +45,12 @@
         transform: translateY(0px) scale(1);
     }
     50% {
-        transform: translateY(-20px) scale(1.05);
+        transform: translateY(-25px) scale(1.1);
     }
 }
 
-/* Login Container */
-:global(.Login > h1) {
+/* Signin Container */
+:global(.Signin > h1) {
     font-size: 2.5rem;
     font-weight: 600;
     margin: 0 0 32px 0;
@@ -73,15 +72,15 @@
     }
 }
 
-/* Login Form Container */
-.loginForm {
+/* Signin Form Container */
+.signinForm {
     background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 20px;
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     opacity: 0;
     animation: slideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
@@ -105,7 +104,7 @@
     width: 100%;
     height: 50px;
     padding: 12px 16px;
-    margin: 12px 0;
+    margin: 10px 0;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
@@ -134,15 +133,24 @@
     border-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Modern Login Button */
-.loginButton {
+/* Password matching validation styles */
+.input.valid {
+    border-color: rgba(100, 255, 150, 0.6);
+}
+
+.input.invalid {
+    border-color: rgba(255, 100, 100, 0.6);
+}
+
+/* Modern Signup Button */
+.signupButton {
     display: block;
     width: 100%;
     height: 50px;
     margin: 24px 0 16px 0;
     padding: 0;
-    background: linear-gradient(135deg, rgba(100, 200, 255, 0.8) 0%, rgba(50, 150, 255, 0.8) 100%);
-    border: 1px solid rgba(100, 200, 255, 0.3);
+    background: linear-gradient(135deg, rgba(255, 100, 200, 0.8) 0%, rgba(200, 50, 255, 0.8) 100%);
+    border: 1px solid rgba(255, 100, 200, 0.3);
     border-radius: 12px;
     color: rgba(255, 255, 255, 0.95);
     font-size: 16px;
@@ -155,20 +163,20 @@
     overflow: hidden;
 }
 
-.loginButton:hover {
-    background: linear-gradient(135deg, rgba(100, 200, 255, 0.9) 0%, rgba(50, 150, 255, 0.9) 100%);
-    border-color: rgba(100, 200, 255, 0.5);
+.signupButton:hover {
+    background: linear-gradient(135deg, rgba(255, 100, 200, 0.9) 0%, rgba(200, 50, 255, 0.9) 100%);
+    border-color: rgba(255, 100, 200, 0.5);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(100, 200, 255, 0.3);
+    box-shadow: 0 8px 25px rgba(255, 100, 200, 0.3);
 }
 
-.loginButton:active {
+.signupButton:active {
     transform: translateY(0);
-    box-shadow: 0 4px 12px rgba(100, 200, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(255, 100, 200, 0.2);
 }
 
 /* Button ripple effect */
-.loginButton::after {
+.signupButton::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -181,33 +189,93 @@
     transition: width 0.3s, height 0.3s;
 }
 
-.loginButton:active::after {
+.signupButton:active::after {
     width: 300px;
     height: 300px;
 }
 
-/* Signup Link */
-:global(.Login > p) {
-    margin: 20px 0 0 0;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 14px;
+/* Additional Info Section */
+.additionalInfo {
+    margin-top: 20px;
     opacity: 0;
     animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.8s forwards;
 }
 
-:global(.Login > p > a) {
-    color: rgba(100, 200, 255, 0.9);
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid transparent;
+/* Instagram Link */
+.instagramLink {
+    text-align: center;
+    margin-bottom: 16px;
 }
 
-:global(.Login > p > a:hover) {
+.instagramLink a {
+    color: rgba(255, 100, 200, 0.9);
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 100, 200, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 100, 200, 0.1);
+    transition: all 0.25s ease;
+    display: inline-block;
+}
+
+.instagramLink a:hover {
+    background: rgba(255, 100, 200, 0.15);
+    border-color: rgba(255, 100, 200, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Expandable Sections */
+.expandButton {
+    background: none;
+    border: none;
+    color: rgba(100, 200, 255, 0.8);
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    padding: 8px 0;
+    margin: 4px 0;
+    width: 100%;
+    text-align: left;
+    transition: all 0.25s ease;
+    border-radius: 6px;
+}
+
+.expandButton:hover {
     color: rgba(100, 200, 255, 1);
-    border-bottom-color: rgba(100, 200, 255, 0.5);
+    background: rgba(100, 200, 255, 0.05);
+    padding-left: 8px;
+}
+
+.expandedContent {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+    animation: expandDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    overflow: hidden;
+}
+
+@keyframes expandDown {
+    from {
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        max-height: 200px;
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.expandedContent span {
+    display: block;
+    margin: 6px 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    line-height: 1.4;
 }
 
 @keyframes fadeIn {
@@ -221,17 +289,17 @@
 
 /* Mobile Responsive */
 @media (max-width: 600px) {
-    :global(.Login) {
+    :global(.Signin) {
         padding: 12px;
         justify-content: flex-start;
-        padding-top: 60px;
+        padding-top: 40px;
         width: 100vw;
         max-width: 100vw;
         overflow-x: hidden;
         box-sizing: border-box;
     }
     
-    :global(.Login > h1) {
+    :global(.Signin > h1) {
         font-size: 1.8rem;
         margin-bottom: 20px;
         padding: 0 4px;
@@ -239,7 +307,7 @@
         text-align: center;
     }
     
-    .loginForm {
+    .signinForm {
         padding: 20px 16px;
         border-radius: 16px;
         width: 100%;
@@ -251,27 +319,62 @@
     .input {
         height: 48px;
         font-size: 16px; /* Prevent zoom on iOS */
+        margin: 8px 0;
         width: 100%;
         box-sizing: border-box;
-        margin: 8px 0;
     }
     
-    .loginButton {
+    .signupButton {
         height: 48px;
         font-size: 15px;
         width: 100%;
         box-sizing: border-box;
     }
     
-    :global(.Login > p) {
-        font-size: 13px;
+    .additionalInfo {
+        width: 100%;
+        max-width: calc(100vw - 24px);
+        margin: 16px auto 0;
+        box-sizing: border-box;
         padding: 0 4px;
-        text-align: center;
-        word-break: keep-all;
     }
     
-    :global(.Login::before),
-    :global(.Login::after) {
+    .instagramLink {
+        margin-bottom: 12px;
+    }
+    
+    .instagramLink a {
+        font-size: 13px;
+        padding: 6px 12px;
+        display: inline-block;
+        max-width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+    }
+    
+    .expandButton {
+        font-size: 13px;
+        word-break: keep-all;
+        text-align: left;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .expandedContent {
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 8px 0;
+    }
+    
+    .expandedContent span {
+        font-size: 12px;
+        word-break: keep-all;
+        line-height: 1.5;
+    }
+    
+    :global(.Signin::before),
+    :global(.Signin::after) {
         display: none; /* Hide decorative elements on mobile */
     }
 }
