@@ -522,6 +522,17 @@
     .friendsDrawerBody .cardBio {
         font-size: 10px;
     }
+
+    .mainmenu_topbar {
+        width: 100%;
+        padding: 0;
+    }
+    .mainmenu_topbar td {
+        font-size: 10px;
+        padding: 0;
+        height: 30px;
+        margin: auto;
+    }
 }
 
 /* 사이드(정보, 로봇고 프렌즈)는 기존처럼 늘어나게 */
