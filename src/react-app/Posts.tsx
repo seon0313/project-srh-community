@@ -70,7 +70,7 @@ function Posts() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                         />
-                        <button 
+                        <button
                             className={style.searchButton}
                             onClick={handleSearch}
                         >

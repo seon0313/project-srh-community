@@ -1,0 +1,616 @@
+/* 인스타그램 PC 웹 DM 스타일 채팅 UI */
+.chatContainer {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+}
+
+/* 친구 목록 사이드바 */
+.friendsSidebar {
+    width: 60px;
+    background: rgba(255, 255, 255, 0.02);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    position: relative;
+}
+
+.friendsSidebar.expanded {
+    width: 280px;
+}
+
+/* 친구 목록 헤더 */
+.friendsHeader {
+    padding: 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    min-width: 0;
+    overflow: hidden;
+}
+
+.toggleButton {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+}
+
+.toggleButton:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.friendsHeader h3 {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    font-weight: 600;
+    opacity: 0;
+    animation: fadeInSlide 0.3s ease-out 0.1s forwards;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+/* 친구 목록 */
+.friendsList {
+    padding: 8px 12px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.friendsList::-webkit-scrollbar {
+    width: 3px;
+}
+
+.friendsList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.friendsList::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+}
+
+/* 모든 친구 아이템 기본 스타일 - 항상 왼쪽 정렬 */
+.friendItem {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px 8px;
+    margin-bottom: 4px;
+    height: 52px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    animation: fadeInSlide 0.3s ease-out forwards;
+    position: relative;
+}
+
+/* 기본 친구 아바타 스타일 */
+.friendAvatar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* 사이드바가 펼쳐졌을 때 레이아웃 변경 */
+.friendsSidebar.expanded .friendItem {
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 10px 8px;
+    height: auto;
+    min-height: 48px;
+}
+
+.friendItem:nth-child(1) { animation-delay: 0.1s; }
+.friendItem:nth-child(2) { animation-delay: 0.15s; }
+.friendItem:nth-child(3) { animation-delay: 0.2s; }
+.friendItem:nth-child(4) { animation-delay: 0.25s; }
+.friendItem:nth-child(5) { animation-delay: 0.3s; }
+.friendItem:nth-child(6) { animation-delay: 0.35s; }
+
+.friendItem:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.friendAvatar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 사이드바가 접혀있을 때 아바타 크기 조정 */
+.friendsSidebar:not(.expanded) .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+}
+
+.statusDot {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 사이드바가 접혀있을 때 상태 표시점 크기 조정 */
+.friendsSidebar:not(.expanded) .statusDot {
+    width: 14px;
+    height: 14px;
+    bottom: -1px;
+    right: -1px;
+}
+
+.statusDot.online {
+    background: #4ade80;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+}
+
+.statusDot.offline {
+    background: #6b7280;
+}
+
+.statusDot.away {
+    background: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+.friendInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+.friendName {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lastSeen {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 11px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 채팅방 컨테이너 */
+.chatRoomsContainer {
+    width: calc(100vw - 60px);
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.friendsSidebar.expanded + .chatRoomsContainer {
+    width: calc(100vw - 280px);
+}
+
+/* 오버플로우 비네팅 효과 */
+.chatRoomsContainer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 100%;
+    background: linear-gradient(to right, 
+        rgba(15, 15, 15, 0.95) 0%, 
+        rgba(15, 15, 15, 0.85) 15%, 
+        rgba(15, 15, 15, 0.6) 35%, 
+        rgba(15, 15, 15, 0.3) 60%, 
+        rgba(15, 15, 15, 0.1) 80%, 
+        rgba(15, 15, 15, 0.03) 90%, 
+        rgba(15, 15, 15, 0.01) 95%, 
+        transparent 100%);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 60;
+}
+
+.chatRoomsContainer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25px;
+    height: 100%;
+    background: linear-gradient(to right, 
+        rgba(26, 26, 26, 0.8) 0%, 
+        rgba(26, 26, 26, 0.5) 40%, 
+        rgba(26, 26, 26, 0.2) 70%, 
+        rgba(26, 26, 26, 0.05) 85%, 
+        rgba(26, 26, 26, 0.01) 95%, 
+        transparent 100%);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 70;
+}
+
+.friendsSidebar.expanded + .chatRoomsContainer::before,
+.friendsSidebar.expanded + .chatRoomsContainer::after {
+    opacity: 1;
+}
+
+/* 채팅 헤더 */
+.chatHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    min-width: 0;
+    overflow: hidden;
+}
+
+.chatHeader h2 {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.newChatButton {
+    background: rgba(100, 200, 255, 0.1);
+    color: rgba(100, 200, 255, 0.9);
+    border: 1px solid rgba(100, 200, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.newChatButton:hover {
+    background: rgba(100, 200, 255, 0.15);
+    border-color: rgba(100, 200, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+/* 검색 컨테이너 */
+.searchContainer {
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.searchInput {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.9);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.searchInput:focus {
+    border-color: rgba(100, 200, 255, 0.6);
+    box-shadow: 0 0 0 2px rgba(100, 200, 255, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.searchInput::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* 채팅방 목록 */
+.chatRoomsList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 16px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.chatRoomsList::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chatRoomsList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chatRoomsList::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+}
+
+.chatRoomItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 12px;
+    margin: 2px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    border: 1px solid transparent;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.chatRoomItem:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.chatRoomItem.selected {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.roomAvatar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.roomAvatar .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.groupBadge {
+    position: absolute;
+    bottom: -3px;
+    right: -3px;
+    background: rgba(100, 200, 255, 0.8);
+    color: #0f0f0f;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 6px;
+    border: 1px solid rgba(15, 15, 15, 0.8);
+    min-width: 14px;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.roomInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.roomHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.roomName {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.timestamp {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 400;
+}
+
+.lastMessage {
+    margin: 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.unreadBadge {
+    background: rgba(100, 200, 255, 0.9);
+    color: #0f0f0f;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1;
+}
+
+/* 애니메이션 */
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+    .chatContainer {
+        flex-direction: row;
+        height: 100vh;
+    }
+    
+    .friendsSidebar {
+        width: 50px;
+        height: 100vh;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    
+    .friendsSidebar.expanded {
+        width: 240px;
+    }
+    
+    .chatRoomsContainer {
+        flex: 1;
+        border-left: none;
+    }
+    
+    .friendsList {
+        display: block;
+        gap: 4px;
+        max-height: calc(100vh - 60px);
+        padding: 8px 6px;
+    }
+    
+    .friendItem {
+        flex-direction: row;
+        text-align: left;
+        min-width: auto;
+        padding: 8px 6px;
+        margin-bottom: 4px;
+    }
+    
+    .friendItem .avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    
+    .friendItem .friendName {
+        font-size: 12px;
+    }
+    
+    .friendsHeader {
+        padding: 12px 8px;
+    }
+    
+    .toggleButton {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .friendsHeader h3 {
+        font-size: 14px;
+    }
+    
+    .chatHeader {
+        padding: 16px 18px;
+    }
+    
+    .chatHeader h2 {
+        font-size: 18px;
+    }
+    
+    .newChatButton {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
+    .searchContainer {
+        padding: 12px 18px;
+    }
+    
+    .searchInput {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+    
+    .chatRoomsList {
+        padding: 8px 14px;
+    }
+    
+    .chatRoomItem {
+        padding: 12px 8px;
+        margin: 1px 0;
+        gap: 10px;
+    }
+    
+    .roomAvatar .avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+    
+    .roomName {
+        font-size: 13px;
+    }
+    
+    .lastMessage {
+        font-size: 12px;
+    }
+    
+    .timestamp {
+        font-size: 11px;
+    }
+}

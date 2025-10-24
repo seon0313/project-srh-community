@@ -12,7 +12,7 @@ function Topbar() {
             <table className={styles.mainmenu_topbar}>
                 <tbody>
                     <tr>
-                        <td onClick={() => navigate("/app")}>
+                        <td onClick={() => navigate("/chat")}>
                             <a>채팅</a>
                         </td>
                         <td onClick={() => navigate("/posts")}>
