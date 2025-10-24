@@ -86,7 +86,7 @@
 
 .mainmenu_topbar {
     margin: 0;
-    padding: 6px 10px;
+    padding: 1px;
     width: 100%;
     text-align: center;
     box-sizing: border-box;
@@ -105,15 +105,17 @@
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
+    margin-bottom: 10px;
     table-layout: fixed;
     border-collapse: separate;
-    border-spacing: 6px;
+    border-spacing: 5px;
     vertical-align: middle;
+    border-radius: 12px;
     text-align: center;
 }
 
 .mainmenu_topbar td {
-    padding: 6px 10px;
+    padding: 5px;
     width: 20%;
     background: rgba(255, 255, 255, 0.04);
     border-radius: 10px;
@@ -539,6 +541,11 @@
         width: 100%;
         padding: 0;
     }
+
+    .mainmenu_topbar table {
+        border-radius: 0;
+    }
+
     .mainmenu_topbar td {
         font-size: 10px;
         padding: 0;
