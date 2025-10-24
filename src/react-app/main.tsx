@@ -14,10 +14,12 @@ import Post from "./Post.tsx";
 import Guide from "./Guide.tsx";
 import Guides from "./Guides.tsx";
 import Chat from "./Chat.tsx";
+import ScrollToTop from "./ScrollToTop.tsx";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
         <BrowserRouter>
+            <ScrollToTop />
             <Routes>
                 <Route path="/" element={<Mainmenu />} />
                 <Route path="/app" element={<App />} />
