@@ -66,6 +66,9 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
     gap: clamp(1rem, 4vw, 3rem);
     opacity: 1;
     visibility: visible;
@@ -94,6 +97,9 @@
 .shrinkTitles {
     opacity: 1;
     visibility: visible;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
     animation: shrinkAndMove 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     animation-fill-mode: forwards;
     will-change: transform, gap, top;
@@ -182,7 +188,7 @@
 /* First Line Container - 학연, 지연, 혈연 */
 .titleContainer {
     display: flex;
-    gap: 0.5rem;
+    gap: clamp(1rem, 4vw, 3rem);
     justify-content: center;
     align-items: baseline;
     margin-bottom: 24px;
@@ -247,6 +253,8 @@
     transform: translate(-50%, -50%);
     z-index: 1000;
     display: flex;
+    justify-content: center;
+    align-items: baseline;
     gap: 0.5rem;
     opacity: 1;
     visibility: visible;
