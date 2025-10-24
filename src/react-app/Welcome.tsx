@@ -9,27 +9,27 @@ function Welcome() {
   const words = ["방패가", "도움이", "인맥이"];
 
   useEffect(() => {
-    // Phase 1: Large horizontal words (0s - 2.2s)
-    // Phase 2: Shrink and move to position (2.2s - 3.2s)  
-    // Phase 3: Hide title (opacity 0, height 0) (3.2s - 3.7s)
-    // Phase 4: Show other UI elements (3.7s - 4.2s)
-    // Phase 5: Show final title with animation (4.2s+)
+    // Phase 1: Large horizontal words (0s - 2s)
+    // Phase 2: Shrink and move to position (2s - 3s)  
+    // Phase 3: Hide title (opacity 0, height 0) (3s - 3.5s)
+    // Phase 4: Show other UI elements (3.5s - 4s)
+    // Phase 5: Show final title with animation (4s+)
     
     const timer1 = setTimeout(() => {
       setAnimationPhase('shrinking');
-    }, 2200);
+    }, 2000);
     
     const timer2 = setTimeout(() => {
       setAnimationPhase('hidden');
-    }, 3200);
+    }, 3000);
     
     const timer3 = setTimeout(() => {
       setAnimationPhase('showUI');
-    }, 3700);
+    }, 3500);
     
     const timer4 = setTimeout(() => {
       setAnimationPhase('finalTitle');
-    }, 4200);
+    }, 4000);
 
     return () => {
       clearTimeout(timer1);
