@@ -75,8 +75,6 @@
     color: rgba(255, 255, 255, 0.9);
     font-size: 16px;
     font-weight: 600;
-    opacity: 0;
-    animation: fadeInSlide 0.3s ease-out 0.1s forwards;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -84,6 +82,18 @@
     min-width: 0;
     text-align: center;
     margin-right: 36px;
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.friendsHeader h3.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.friendsHeader h3.hidden {
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
 }
 
 /* 친구 목록 */
@@ -225,6 +235,20 @@
     min-width: 0;
     flex: 1;
     overflow: hidden;
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.friendInfo.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.friendInfo.hidden {
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
+    width: 0;
+    min-width: 0;
 }
 
 .friendName {

@@ -96,7 +96,7 @@ function Chat() {
                     >
                         <span className={styles.toggleIcon}>▶</span>
                     </button>
-                    {isFriendsExpanded && <h3>친구 목록</h3>}
+                    <h3 className={isFriendsExpanded ? styles.visible : styles.hidden}>친구 목록</h3>
                 </div>
                 
                 <div className={styles.friendsList}>
@@ -106,14 +106,12 @@ function Chat() {
                                 <span className={styles.avatar}>{friend.avatar}</span>
                                 <div className={`${styles.statusDot} ${styles[friend.status]}`}></div>
                             </div>
-                            {isFriendsExpanded && (
-                                <div className={styles.friendInfo}>
-                                    <span className={styles.friendName}>{friend.name}</span>
-                                    {friend.status === 'offline' && friend.lastSeen && (
-                                        <span className={styles.lastSeen}>{friend.lastSeen}</span>
-                                    )}
-                                </div>
-                            )}
+                            <div className={`${styles.friendInfo} ${isFriendsExpanded ? styles.visible : styles.hidden}`}>
+                                <span className={styles.friendName}>{friend.name}</span>
+                                {friend.status === 'offline' && friend.lastSeen && (
+                                    <span className={styles.lastSeen}>{friend.lastSeen}</span>
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>
