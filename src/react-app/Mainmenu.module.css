@@ -433,7 +433,7 @@
         gap: 12px;
         overflow-x: auto;
         overflow-y: hidden;
-        padding: 10px 10px 10px 10px;
+        padding: 10px;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
         scroll-padding-left: 10px;
@@ -495,18 +495,20 @@
     /* More Button in Info Panel */
     .infoPanel .moreButtonContainer {
         flex: 0 0 auto;
-        display: block;
+        display: flex;
+        align-items: stretch;
     }
     .infoPanel .moreButton {
-        display: inline-flex !important;
+        display: flex !important;
         align-items: center;
         justify-content: center;
         flex: 0 0 auto;
-        width: auto;
-        min-width: 160px;
+        width: calc(100vw - 260px - 12px - 20px);
+        min-width: 120px;
+        max-width: 300px;
         height: 96px;
         padding: 0 16px;
-        margin: 0 4px;
+        margin: 0;
         box-sizing: border-box;
     }
     .infoPanel .moreButton p {
