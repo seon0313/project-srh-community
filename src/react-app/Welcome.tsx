@@ -10,10 +10,10 @@ function Welcome() {
 
   useEffect(() => {
     // Phase 1: Large horizontal words (0s - 2s)
-    // Phase 2: Shrink and move to position (2s - 4.2s)  
-    // Phase 3: Hide title (opacity 0, height 0) (4.2s - 4.7s)
-    // Phase 4: Show other UI elements (4.7s - 5.5s)
-    // Phase 5: Show final title with animation (5.5s+)
+    // Phase 2: Shrink and move to position (2s - 3s)  
+    // Phase 3: Hide title (opacity 0, height 0) (3s - 3.5s)
+    // Phase 4: Show other UI elements (3.5s - 4s)
+    // Phase 5: Show final title with animation (4s+)
     
     const timer1 = setTimeout(() => {
       setAnimationPhase('shrinking');
@@ -21,15 +21,15 @@ function Welcome() {
     
     const timer2 = setTimeout(() => {
       setAnimationPhase('hidden');
-    }, 4200);
+    }, 3000);
     
     const timer3 = setTimeout(() => {
       setAnimationPhase('showUI');
-    }, 4700);
+    }, 3500);
     
     const timer4 = setTimeout(() => {
       setAnimationPhase('finalTitle');
-    }, 5500);
+    }, 4000);
 
     return () => {
       clearTimeout(timer1);
