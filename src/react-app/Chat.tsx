@@ -91,10 +91,10 @@ function Chat() {
             <div className={`${styles.friendsSidebar} ${isFriendsExpanded ? styles.expanded : ''}`}>
                 <div className={styles.friendsHeader}>
                     <button 
-                        className={styles.toggleButton}
+                        className={`${styles.toggleButton} ${isFriendsExpanded ? styles.expanded : ''}`}
                         onClick={() => setIsFriendsExpanded(!isFriendsExpanded)}
                     >
-                        {isFriendsExpanded ? '←' : '→'}
+                        <span className={styles.toggleIcon}>▶</span>
                     </button>
                     {isFriendsExpanded && <h3>친구 목록</h3>}
                 </div>

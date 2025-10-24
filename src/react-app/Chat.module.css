@@ -23,13 +23,15 @@
 
 /* 친구 목록 헤더 */
 .friendsHeader {
-    padding: 16px 12px;
+    padding: 20px 12px;
     display: flex;
     align-items: center;
     gap: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     min-width: 0;
     overflow: hidden;
+    height: 76px;
+    box-sizing: border-box;
 }
 
 .toggleButton {
@@ -47,6 +49,19 @@
     justify-content: center;
     border: 1px solid rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
+}
+
+.toggleIcon {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: rotate(0deg);
+    line-height: 0;
+    transform-origin: 50% 50%;
+    position: relative;
+}
+
+.toggleButton.expanded .toggleIcon {
+    transform: rotate(180deg);
 }
 
 .toggleButton:hover {
@@ -67,6 +82,8 @@
     text-overflow: ellipsis;
     flex: 1;
     min-width: 0;
+    text-align: center;
+    margin-right: 36px;
 }
 
 /* 친구 목록 */
@@ -91,7 +108,7 @@
     border-radius: 2px;
 }
 
-/* 모든 친구 아이템 기본 스타일 - 항상 왼쪽 정렬 */
+/* 모든 친구 아이템 기본 스타일 */
 .friendItem {
     display: flex;
     align-items: center;
@@ -105,6 +122,12 @@
     opacity: 0;
     animation: fadeInSlide 0.3s ease-out forwards;
     position: relative;
+}
+
+/* 사이드바가 접혀있을 때 중앙 정렬 */
+.friendsSidebar:not(.expanded) .friendItem {
+    justify-content: left;
+    padding: 12px 0;
 }
 
 /* 기본 친구 아바타 스타일 */
@@ -144,20 +167,27 @@
 }
 
 .avatar {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 18px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 사이드바가 접혀있을 때 아바타 크기 조정 */
+/* 사이드바가 접혀있을 때 아바타 크기 유지 */
 .friendsSidebar:not(.expanded) .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+}
+
+/* 사이드바가 펼쳐졌을 때 아바타 크기 유지 */
+.friendsSidebar.expanded .avatar {
     width: 36px;
     height: 36px;
     font-size: 18px;
@@ -165,21 +195,13 @@
 
 .statusDot {
     position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* 사이드바가 접혀있을 때 상태 표시점 크기 조정 */
-.friendsSidebar:not(.expanded) .statusDot {
-    width: 14px;
-    height: 14px;
     bottom: -1px;
     right: -1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .statusDot.online {
@@ -297,6 +319,10 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     min-width: 0;
     overflow: hidden;
+    flex-wrap: nowrap;
+    gap: 16px;
+    height: 76px;
+    box-sizing: border-box;
 }
 
 .chatHeader h2 {
@@ -304,6 +330,8 @@
     color: rgba(255, 255, 255, 0.9);
     font-size: 22px;
     font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .newChatButton {
@@ -316,6 +344,8 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .newChatButton:hover {
@@ -540,10 +570,16 @@
         margin-bottom: 4px;
     }
     
-    .friendItem .avatar {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
+    .friendsSidebar:not(.expanded) .friendItem .avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+    
+    .friendsSidebar.expanded .friendItem .avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
     }
     
     .friendItem .friendName {
