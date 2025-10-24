@@ -413,13 +413,19 @@
         grid-template-areas:
             "info"
             "content";
-        padding: 10px 8px;
+        padding: 10px;
         gap: 10px;
     }
     .mainItem {
         padding: 10px;
-        border-radius: 14px;
+        border-radius: 16px;
     }
+    
+    .main .infoPanel.mainItem {
+        padding: 0 !important;
+        overflow: hidden;
+    }
+    
     /* Horizontal Scroll for Info Panel */
     .infoPanel .guideList {
         display: flex;
@@ -427,20 +433,26 @@
         gap: 12px;
         overflow-x: auto;
         overflow-y: hidden;
-        padding: 8px 4px;
+        padding: 10px 10px 10px 10px;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
+        scroll-padding-left: 10px;
+    }
+    
+    .infoPanel .guideList::before,
+    .infoPanel .guideList::after {
+        content: '';
+        flex: 0 0 0px;
     }
     .infoPanel .guideItem {
         flex: 0 0 auto;
         min-width: 260px;
         max-width: 85vw;
         scroll-snap-align: start;
-        padding: 10px;
     }
     .infoPanel .guideThumbnail {
-        width: 68px;
-        height: 68px;
+        width: 80px;
+        height: 80px;
     }
     /* Minimal Scrollbar */
     .infoPanel .guideList::-webkit-scrollbar {
