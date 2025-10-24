@@ -32,6 +32,13 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: #0f0f0f;
+}
+
 #root {
     min-height: 100vh;
     background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
