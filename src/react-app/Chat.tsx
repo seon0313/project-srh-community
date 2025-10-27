@@ -143,8 +143,10 @@ function Chat() {
                         >
                             <div className={styles.roomAvatar}>
                                 <span className={styles.avatar}>{room.avatar}</span>
-                                {room.isGroup && (
-                                    <span className={styles.groupBadge}>{room.participants}</span>
+                                {room.unreadCount > 0 && (
+                                    <span className={styles.groupBadge}>
+                                        {room.unreadCount > 99 ? '99+' : room.unreadCount}
+                                    </span>
                                 )}
                             </div>
                             
@@ -155,12 +157,6 @@ function Chat() {
                                 </div>
                                 <p className={styles.lastMessage}>{room.lastMessage}</p>
                             </div>
-                            
-                            {room.unreadCount > 0 && (
-                                <div className={styles.unreadBadge}>
-                                    {room.unreadCount > 99 ? '99+' : room.unreadCount}
-                                </div>
-                            )}
                         </div>
                     ))}
                 </div>
