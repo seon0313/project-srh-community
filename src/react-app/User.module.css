@@ -1,0 +1,19 @@
+.businessCard {
+    width: 500px;
+    max-width: 90%;
+    margin: 10px;
+    background-color: rebeccapurple;
+    aspect-ratio: 86/52 !important;
+}
+
+.businessCard canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.User {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
