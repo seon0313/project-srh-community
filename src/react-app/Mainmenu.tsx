@@ -33,9 +33,62 @@ function Mainmenu() {
     const imagesLoadedRef = useRef(0);
     const initializedRef = useRef(false);
     const isAnimatingRef = useRef(false);
+    const pausedMonitorRef = useRef<number | null>(null);
 
-    // Center a slide by index with animation; does not stop the ongoing carousel interval
-    const centerChildAtIndex = (index: number) => {
+    const startPausedMonitor = () => {
+        if (pausedMonitorRef.current != null) return;
+        const loop = () => {
+            const slider = sliderRef.current;
+            if (!slider) return;
+            const container = slider.parentElement as HTMLElement | null;
+            const firstEl = slider.firstElementChild as HTMLElement | null;
+            if (container && firstEl) {
+                // don't mutate DOM while a centering animation is in progress
+                if (isAnimatingRef.current) {
+                    pausedMonitorRef.current = window.requestAnimationFrame(loop);
+                    return;
+                }
+                const containerRect = container.getBoundingClientRect();
+                const firstRect = firstEl.getBoundingClientRect();
+                // if first element is fully out to the left, append it
+                if (firstRect.right <= containerRect.left + 1) {
+                    // compute gap and slideStep
+                    let gap = 0;
+                    if (slider.children.length > 1) {
+                        const second = slider.children[1] as HTMLElement;
+                        gap = second.offsetLeft - (firstEl.offsetLeft + firstEl.offsetWidth);
+                        if (!isFinite(gap) || gap < 0) gap = 0;
+                    }
+                    const slideStep = firstEl.offsetWidth + gap;
+                    // append and adjust offset
+                    slider.appendChild(firstEl);
+                    offsetRef.current = offsetRef.current + slideStep;
+                    slider.style.transition = 'none';
+                    void slider.offsetHeight;
+                    slider.style.transform = `translateX(${offsetRef.current}px)`;
+                    // rotate state to keep React in sync
+                    setBanners(prev => {
+                        if (prev.length === 0) return prev;
+                        const [first, ...rest] = prev;
+                        return [...rest, first];
+                    });
+                }
+            }
+
+            pausedMonitorRef.current = window.requestAnimationFrame(loop);
+        };
+        pausedMonitorRef.current = window.requestAnimationFrame(loop);
+    };
+
+    const stopPausedMonitor = () => {
+        if (pausedMonitorRef.current != null) {
+            window.cancelAnimationFrame(pausedMonitorRef.current);
+            pausedMonitorRef.current = null;
+        }
+    };
+
+    // Center a slide by index with animation; accepts optional onComplete callback
+    const centerChildAtIndex = (index: number, onComplete?: () => void) => {
         const slider = sliderRef.current;
         if (!slider) return;
         const child = slider.children[index] as HTMLElement | undefined;
@@ -43,9 +96,9 @@ function Mainmenu() {
         const container = slider.parentElement as HTMLElement;
         if (!container) return;
 
-        const slideWidth = child.offsetWidth;
-        const childOffsetLeft = child.offsetLeft; // relative to slider
-        const newOffset = (container.clientWidth - slideWidth) / 2 - childOffsetLeft;
+    const slideWidth = child.offsetWidth;
+    const childOffsetLeft = child.offsetLeft; // relative to slider
+    const newOffset = (container.clientWidth - slideWidth) / 2 - childOffsetLeft;
 
         // Animate to the new offset
         slider.style.transition = 'transform 400ms ease';
@@ -57,6 +110,7 @@ function Mainmenu() {
             slider.removeEventListener('transitionend', onEnd);
             // keep isAnimating false so interval can continue
             isAnimatingRef.current = false;
+            if (onComplete) onComplete();
         };
         slider.addEventListener('transitionend', onEnd);
     };
@@ -108,7 +162,7 @@ function Mainmenu() {
     isAnimatingRef.current = isAnimatingRef.current || false;
 
         // 초기 중앙 정렬 (컴포넌트가 처음 셋업될 때만 수행)
-        if (!initializedRef.current) {
+            if (!initializedRef.current) {
             const sliderEl = sliderRef.current!;
             const firstChildInit = sliderEl.children[0] as HTMLElement | undefined;
             let centerOffset = 0;
@@ -248,10 +302,10 @@ function Mainmenu() {
                                 alt={`Banner ${index + 1}`}
                                 className={styles.bannerImage}
                                 tabIndex={0}
-                                onMouseEnter={() => { pausedRef.current = true; centerChildAtIndex(index); }}
-                                onMouseLeave={() => { pausedRef.current = false; }}
-                                onFocus={() => { pausedRef.current = true; centerChildAtIndex(index); }}
-                                onBlur={() => { pausedRef.current = false; }}
+                                                        onMouseEnter={() => { pausedRef.current = true; centerChildAtIndex(index, () => startPausedMonitor()); }}
+                                                        onMouseLeave={() => { pausedRef.current = false; stopPausedMonitor(); }}
+                                                        onFocus={() => { pausedRef.current = true; centerChildAtIndex(index, () => startPausedMonitor()); }}
+                                                        onBlur={() => { pausedRef.current = false; stopPausedMonitor(); }}
                             />
                         ))}
                     </div>

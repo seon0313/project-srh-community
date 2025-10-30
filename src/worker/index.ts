@@ -433,7 +433,7 @@ app.get("/api/banners", (c) => {
   const count = parseInt(url.searchParams.get("count") || "5");
   const banners = [];
   for (let i = 1; i <= count; i++) {
-    banners.push(`https://picsum.photos/800/400?random=${i}`);
+    banners.push(`https://picsum.photos/1200/400?random=${i}`);
   }
   return c.json({ banners });
 });
