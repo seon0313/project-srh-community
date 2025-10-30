@@ -29,8 +29,6 @@ function Mainmenu() {
     const sliderRef = useRef<HTMLDivElement | null>(null);
     const pausedRef = useRef(false);
     const offsetRef = useRef<number>(0);
-    const centerOffsetRef = useRef<number>(0);
-    const imagesLoadedRef = useRef(0);
     const initializedRef = useRef(false);
     const isAnimatingRef = useRef(false);
     const pausedMonitorRef = useRef<number | null>(null);
