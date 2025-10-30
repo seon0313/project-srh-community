@@ -6,6 +6,7 @@ import Topbar from "./Topbar";
 function Posts() {
     const navigate = useNavigate();
     const [posts, setPosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
+    const [noticePosts, setNoticePosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
     const [filteredPosts, setFilteredPosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -20,6 +21,10 @@ function Posts() {
                 setLoading(false);
             })
             .catch(() => setLoading(false));
+        fetch("/api/notice-posts", { method: "POST" })
+            .then(res => res.json())
+            .then(data => setNoticePosts(data));
+            
     }, []);
 
     const handleSearch = () => {
@@ -87,15 +92,55 @@ function Posts() {
                                 </tr>
                             ) : (
                                 <>
+                                    {/* 공지글 먼저 출력 */}
+                                    {noticePosts.map((post, index) => {
+                                        const isFirst = index === 0;
+                                        const isLast = index === noticePosts.length - 1;
+                                        const noticeClass = `${style.postitem} ${style.noticePost}`;
+                                        return (
+                                            <tr
+                                                key={`notice-${post.id}`}
+                                                className={noticeClass}
+                                                style={{ '--item-index': index } as React.CSSProperties}
+                                            >
+                                                <td
+                                                    className={
+                                                        `${style.postTitle} ${isFirst ? style.noticeTdTopLeft : ''} ${isLast ? style.noticeTdBottomLeft : ''}`
+                                                    }
+                                                    onClick={() => navigate(`/post/${post.id}`)}
+                                                >
+                                                    <strong>{post.title}</strong>
+                                                </td>
+                                                <td
+                                                    className={style.postAuthor}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate(`/user/${post.author}`);
+                                                    }}
+                                                >
+                                                    <strong>{post.author}</strong>
+                                                </td>
+                                                <td
+                                                    className={
+                                                        `${style.postDate} ${isFirst ? style.noticeTdTopRight : ''} ${isLast ? style.noticeTdBottomRight : ''}`
+                                                    }
+                                                    onClick={() => navigate(`/post/${post.id}`)}
+                                                >
+                                                    <strong>{post.date}</strong>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                    {/* 일반 게시글 */}
                                     {filteredPosts.map((post, index) => (
                                         <tr
                                             key={post.id}
                                             className={style.postitem}
-                                            style={{ "--item-index": index } as React.CSSProperties}
+                                            style={{ "--item-index": noticePosts.length + index } as React.CSSProperties}
                                         >
                                             <td
                                                 className={style.postTitle}
-                                                onClick={() => navigate("/post/" + post.id)}
+                                                onClick={() => navigate(`/post/${post.id}`)}
                                             >
                                                 <strong>{post.title}</strong>
                                             </td>
@@ -103,14 +148,14 @@ function Posts() {
                                                 className={style.postAuthor}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    navigate("/user/" + post.author);
+                                                    navigate(`/user/${post.author}`);
                                                 }}
                                             >
                                                 <strong>{post.author}</strong>
                                             </td>
                                             <td
                                                 className={style.postDate}
-                                                onClick={() => navigate("/post/" + post.id)}
+                                                onClick={() => navigate(`/post/${post.id}`)}
                                             >
                                                 <strong>{post.date}</strong>
                                             </td>

@@ -16,6 +16,12 @@ const posts = [
   { id: 11, title: "열한 번째 게시글", author: "송민지", date: "2025-10-06" },
   { id: 12, title: "열두 번째 게시글", author: "오준혁", date: "2025-10-05" },
 ];
+const notice_posts = [
+  { id: 1, title: "첫 번째 공지사항", author: "관리자", date: "2025-10-16" },
+  { id: 2, title: "두 번째 공지사항", author: "관리자", date: "2025-10-15" },
+  { id: 3, title: "세 번째 공지사항", author: "관리자", date: "2025-10-14" },
+  { id: 4, title: "네 번째 공지사항", author: "관리자", date: "2025-10-13" },
+]
 
 const guide = [
     { id: 1, title: "김치볶음밥 만들어보자", description: "김치볶음밥에 대한 모든 것", author: "요리왕", date: "2025-10-16", steps: 5, needtime: 15, thumbnail: "/vite.svg" },  
@@ -331,6 +337,7 @@ const users: UserProfile[] = [
 
 // 게시글 목록 API
 app.get("/api/posts", (c) => c.json(posts));
+app.post("/api/notice-posts", (c) => c.json(notice_posts));
 app.get("/api/guides", (c) => c.json(guide));
 
 // 사용자 목록 API

@@ -292,6 +292,37 @@
     font-weight: 500;
 }
 
+.noticePost td {
+    background: rgba(255,255,255,0.10) !important;
+    color: #fff !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px 0 rgba(255,255,255,0.04);
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+.noticeTdTopLeft {
+    border-top-left-radius: 16px !important;
+    padding-top: 12px !important;
+    border-bottom: 0;
+}
+
+.noticeTdTopRight {
+    border-top-right-radius: 16px !important;
+    padding-top: 12px !important;
+}
+
+.noticeTdBottomLeft {
+    border-bottom-left-radius: 16px !important;
+    padding-bottom: 12px !important;
+}
+
+.noticeTdBottomRight {
+    border-bottom-right-radius: 16px !important;
+    padding-bottom: 12px !important;
+}
+
 @media (max-width: 600px) {
     .postContainer {
         padding: 10px 8px;
