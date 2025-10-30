@@ -1,4 +1,66 @@
-/* Modern Minimal Design - Global Reset */
+/* Banner Slider */
+.bannerContainer {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.bannerSlider {
+    --banner-gap: 18px; /* gap between banners, adjust as needed */
+    display: flex;
+    gap: var(--banner-gap);
+}
+
+.bannerImage {
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin: 0;
+    aspect-ratio: 2/1;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.3s ease;
+}
+
+.bannerImage:hover {
+    transform: scale(1.02);
+}
+
+@keyframes slideBanner {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes slideBannerMobile {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-25%);
+    }
+}
+
+@media (max-width: 600px) {
+    .bannerContainer {
+        padding: 0 10px;
+    }
+    
+    .bannerSlider {
+        gap: calc(var(--banner-gap) / 1);
+    }
+    
+    .bannerImage {
+        width: 800px;
+        height: 120px;
+        margin: 0;
+    }
+}
 :global(#root) {
     margin: 0;
     padding: 0;

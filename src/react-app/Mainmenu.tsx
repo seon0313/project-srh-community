@@ -1,6 +1,6 @@
 import styles from "./Mainmenu.module.css";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Topbar from "./Topbar";
 
 function Mainmenu() {
@@ -25,9 +25,45 @@ function Mainmenu() {
         isOnline: boolean;
         badges: string[];
     }[]>([]);
+    const [banners, setBanners] = useState<string[]>([]);
+    const sliderRef = useRef<HTMLDivElement | null>(null);
+    const pausedRef = useRef(false);
+    const offsetRef = useRef<number>(0);
+    const centerOffsetRef = useRef<number>(0);
+    const imagesLoadedRef = useRef(0);
+    const initializedRef = useRef(false);
+    const isAnimatingRef = useRef(false);
+
+    // Center a slide by index with animation; does not stop the ongoing carousel interval
+    const centerChildAtIndex = (index: number) => {
+        const slider = sliderRef.current;
+        if (!slider) return;
+        const child = slider.children[index] as HTMLElement | undefined;
+        if (!child) return;
+        const container = slider.parentElement as HTMLElement;
+        if (!container) return;
+
+        const slideWidth = child.offsetWidth;
+        const childOffsetLeft = child.offsetLeft; // relative to slider
+        const newOffset = (container.clientWidth - slideWidth) / 2 - childOffsetLeft;
+
+        // Animate to the new offset
+        slider.style.transition = 'transform 400ms ease';
+        offsetRef.current = newOffset;
+        isAnimatingRef.current = true;
+        slider.style.transform = `translateX(${newOffset}px)`;
+
+        const onEnd = () => {
+            slider.removeEventListener('transitionend', onEnd);
+            // keep isAnimating false so interval can continue
+            isAnimatingRef.current = false;
+        };
+        slider.addEventListener('transitionend', onEnd);
+    };
     const [loading, setLoading] = useState(true);
     const [guidesLoading, setGuidesLoading] = useState(true);
     const [usersLoading, setUsersLoading] = useState(true);
+    const [bannersLoading, setBannersLoading] = useState(true);
     const [isFriendsOpen, setFriendsOpen] = useState(false);
 
     useEffect(() => {
@@ -54,11 +90,173 @@ function Mainmenu() {
                 setUsersLoading(false);
             })
             .catch(() => setUsersLoading(false));
+
+        fetch("/api/banners?count=10")
+            .then(res => res.json())
+            .then(data => {
+                setBanners(data.banners);
+                setBannersLoading(false);
+            })
+            .catch(() => setBannersLoading(false));
     }, []);
+
+    // 배너 슬라이드 로직 (JS로 한 개씩 스크롤, 화면 밖으로 나간 아이템은 배열 맨 뒤로 이동)
+    useEffect(() => {
+        if (banners.length === 0) return;
+
+    // isAnimatingRef used so other handlers (hover centering) can coordinate animation state
+    isAnimatingRef.current = isAnimatingRef.current || false;
+
+        // 초기 중앙 정렬 (컴포넌트가 처음 셋업될 때만 수행)
+        if (!initializedRef.current) {
+            const sliderEl = sliderRef.current!;
+            const firstChildInit = sliderEl.children[0] as HTMLElement | undefined;
+            let centerOffset = 0;
+            if (firstChildInit) {
+                const slideWidth = firstChildInit.offsetWidth;
+                const container = sliderEl.parentElement as HTMLElement;
+                centerOffset = (container.clientWidth - slideWidth) / 2;
+                sliderEl.style.transition = 'none';
+                sliderEl.style.transform = `translateX(${centerOffset}px)`;
+            }
+            offsetRef.current = centerOffset;
+            initializedRef.current = true;
+        }
+
+        const handleResize = () => {
+            const slider = sliderRef.current;
+            if (!slider) return;
+            const container = slider.parentElement as HTMLElement;
+            if (!container) return;
+
+            // Determine which child is visually closest to the container center
+            const containerRect = container.getBoundingClientRect();
+            const containerCenterX = containerRect.left + container.clientWidth / 2;
+
+            let closestChild: HTMLElement | null = null;
+            let closestDist = Infinity;
+            for (let i = 0; i < slider.children.length; i++) {
+                const child = slider.children[i] as HTMLElement;
+                const rect = child.getBoundingClientRect();
+                const childCenter = rect.left + rect.width / 2;
+                const dist = Math.abs(childCenter - containerCenterX);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestChild = child;
+                }
+            }
+
+            if (!closestChild) return;
+
+            // Compute the new offset so that the closestChild stays centered
+            const slideWidth = closestChild.offsetWidth;
+            const childOffsetLeft = closestChild.offsetLeft; // relative to slider
+            const newOffset = (container.clientWidth - slideWidth) / 2 - childOffsetLeft;
+
+            offsetRef.current = newOffset;
+            slider.style.transition = 'none';
+            // Apply transform immediately and force reflow to avoid visual jumps
+            slider.style.transform = `translateX(${newOffset}px)`;
+            void slider.offsetHeight;
+        };
+        window.addEventListener('resize', handleResize);
+
+        const scrollOnce = () => {
+            if (pausedRef.current) return; // 일시정지 상태면 동작 금지
+            if (!sliderRef.current || isAnimatingRef.current) return;
+            const slider = sliderRef.current;
+            const firstChild = slider.children[0] as HTMLElement | undefined;
+            if (!firstChild) return;
+
+            // compute gap between first two children (if present) because CSS gap is used
+            let gap = 0;
+            if (slider.children.length > 1) {
+                const second = slider.children[1] as HTMLElement;
+                gap = second.offsetLeft - (firstChild.offsetLeft + firstChild.offsetWidth);
+                if (!isFinite(gap) || gap < 0) gap = 0;
+            }
+
+            const slideWidth = firstChild.offsetWidth; // 픽셀 단위로 이동 (content width)
+            const slideStep = slideWidth + gap; // include gap so transform matches visual movement
+            isAnimatingRef.current = true;
+
+            // 애니메이션으로 왼쪽으로 한 칸 이동 (현재 offset에서 slideWidth만큼 왼쪽)
+            slider.style.transition = 'transform 600ms ease';
+            offsetRef.current = offsetRef.current - slideStep;
+            slider.style.transform = `translateX(${offsetRef.current}px)`;
+
+            const onTransitionEnd = () => {
+                slider.removeEventListener('transitionend', onTransitionEnd);
+                // DOM 순서 변경은 요소가 완전히 컨테이너 밖으로 나간 경우에만 수행
+                const container = slider.parentElement as HTMLElement;
+                const firstEl = slider.firstElementChild as HTMLElement | null;
+                const containerRect = container.getBoundingClientRect();
+                const firstRect = firstEl ? firstEl.getBoundingClientRect() : null;
+                const fullyOut = firstRect ? (firstRect.right <= containerRect.left + 1) : false;
+
+                if (fullyOut && firstEl) {
+                    // 요소가 완전히 나갔을 때만 끝으로 옮기고 offset을 복원
+                    slider.appendChild(firstEl);
+                    // offset을 한 칸 오른쪽으로 되돌려 중앙 기준 유지 (include gap)
+                    offsetRef.current = offsetRef.current + slideStep;
+
+                    // transition 제거하고 즉시 위치 복원
+                    slider.style.transition = 'none';
+                    void slider.offsetHeight;
+                    slider.style.transform = `translateX(${offsetRef.current}px)`;
+
+                    // 상태도 배열 회전으로 동기화 (다음 프레임에 수행)
+                    requestAnimationFrame(() => {
+                        setBanners(prev => {
+                            if (prev.length === 0) return prev;
+                            const [first, ...rest] = prev;
+                            return [...rest, first];
+                        });
+                        requestAnimationFrame(() => { isAnimatingRef.current = false; });
+                    });
+                } else {
+                    // 아직 완전히 나가지 않았으면 단순히 애니메이션 플래그 해제 (다음 간격에 다시 이동)
+                    slider.style.transition = 'none';
+                    void slider.offsetHeight;
+                    slider.style.transform = `translateX(${offsetRef.current}px)`;
+                    requestAnimationFrame(() => { isAnimatingRef.current = false; });
+                }
+            };
+
+            slider.addEventListener('transitionend', onTransitionEnd);
+        };
+
+        const interval = setInterval(scrollOnce, 1200);
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [banners]);
 
     return (
         <div className={styles.Mainmenu}>
             <Topbar />
+
+            {/* 배너 슬라이더 */}
+            {!bannersLoading && banners.length > 0 && (
+                <div className={styles.bannerContainer} tabIndex={0}>
+                    <div className={styles.bannerSlider} ref={sliderRef}>
+                        {banners.map((banner, index) => (
+                            <img
+                                key={banner}
+                                src={banner}
+                                alt={`Banner ${index + 1}`}
+                                className={styles.bannerImage}
+                                tabIndex={0}
+                                onMouseEnter={() => { pausedRef.current = true; centerChildAtIndex(index); }}
+                                onMouseLeave={() => { pausedRef.current = false; }}
+                                onFocus={() => { pausedRef.current = true; centerChildAtIndex(index); }}
+                                onBlur={() => { pausedRef.current = false; }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* 모바일 전용 프렌즈 토글 버튼 */}
             <button

@@ -427,6 +427,17 @@ app.get("/api/guide-items", (c) => {
   return c.json(guide_items);
 });
 
+// 배너 이미지 생성 API (Lorem Picsum 사용)
+app.get("/api/banners", (c) => {
+  const url = new URL(c.req.url);
+  const count = parseInt(url.searchParams.get("count") || "5");
+  const banners = [];
+  for (let i = 1; i <= count; i++) {
+    banners.push(`https://picsum.photos/800/400?random=${i}`);
+  }
+  return c.json({ banners });
+});
+
 app.get("/api/", (c) => c.json({ name: "Cloudflare" }));
 
 // AI API - POST로 메시지 리스트 전체 전송
