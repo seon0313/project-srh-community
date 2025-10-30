@@ -125,7 +125,7 @@ function Mainmenu() {
     const newOffset = (container.clientWidth - slideWidth) / 2 - childOffsetLeft;
 
         // Animate to the new offset
-        slider.style.transition = 'transform 400ms ease';
+    slider.style.transition = 'transform 500ms cubic-bezier(0.4,0,0.2,1)';
         offsetRef.current = newOffset;
         isAnimatingRef.current = true;
         slider.style.transform = `translateX(${newOffset}px)`;
@@ -259,7 +259,7 @@ function Mainmenu() {
             isAnimatingRef.current = true;
 
             // 애니메이션으로 왼쪽으로 한 칸 이동 (현재 offset에서 slideWidth만큼 왼쪽)
-            slider.style.transition = 'transform 600ms ease';
+            slider.style.transition = 'transform 700ms cubic-bezier(0.4,0,0.2,1)';
             offsetRef.current = offsetRef.current - slideStep;
             slider.style.transform = `translateX(${offsetRef.current}px)`;
 
