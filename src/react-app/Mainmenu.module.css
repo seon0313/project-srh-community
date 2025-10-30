@@ -66,19 +66,22 @@
     .bannerContainer {
         padding: 0 10px;
     }
-    
     .bannerSlider {
         gap: calc(var(--banner-gap) / 1);
     }
-    
     .bannerImage {
-        /* On mobile, use percentage width instead of fixed px height
-           so each banner takes ~80% of the container width. Height auto
-           preserves aspect ratio. */
         width: 80vw;
-        height: auto;
-        aspect-ratio: 3/1;
+        height: auto !important;
+        aspect-ratio: 3/1 !important;
+        min-height: 0;
         margin: 0;
+    }
+    .bannerLoading {
+        width: 80vw;
+        aspect-ratio: 3/1 !important;
+        height: auto !important;
+        max-width: 100%;
+        min-height: 0;
     }
 }
 :global(#root) {
@@ -908,9 +911,5 @@
 
 /* Ensure on small screens we do NOT force a fixed height — use width/aspect-ratio instead */
 @media (max-width: 600px) {
-    .bannerLoading {
-        width: 80vw;
-        aspect-ratio: 3/1;
-        height: auto;
-    }
+    /* 위에서 height: auto로 덮으므로 height: 0 제거 */
 }
