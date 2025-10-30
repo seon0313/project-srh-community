@@ -56,8 +56,12 @@
     }
     
     .bannerImage {
-        width: 800px;
-        height: 120px;
+        /* On mobile, use percentage width instead of fixed px height
+           so each banner takes ~80% of the container width. Height auto
+           preserves aspect ratio. */
+        width: 80%;
+        flex: 0 0 80%;
+        height: auto;
         margin: 0;
     }
 }
