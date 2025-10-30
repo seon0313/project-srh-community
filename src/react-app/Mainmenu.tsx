@@ -29,12 +29,12 @@ function Mainmenu() {
     const [loadedBanners, setLoadedBanners] = useState<Record<string, boolean>>({});
     const sliderRef = useRef<HTMLDivElement | null>(null);
     const pausedRef = useRef(false);
+    const intervalRef = useRef<number | null>(null);
     const offsetRef = useRef<number>(0);
     const initializedRef = useRef(false);
     const isAnimatingRef = useRef(false);
     const pausedMonitorRef = useRef<number | null>(null);
     const scrollOnceRef = useRef<() => void>(() => {});
-    const resumeTimerRef = useRef<number | null>(null);
 
     const startPausedMonitor = () => {
         if (pausedMonitorRef.current != null) return;
@@ -85,6 +85,29 @@ function Mainmenu() {
         if (pausedMonitorRef.current != null) {
             window.cancelAnimationFrame(pausedMonitorRef.current);
             pausedMonitorRef.current = null;
+        }
+    };
+
+    const AUTO_SCROLL_INTERVAL = 1200; // ms
+
+    const startAutoScroll = () => {
+        // clear any existing interval
+        if (intervalRef.current != null) {
+            window.clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        // ensure paused flag is false and paused-monitor is stopped
+        pausedRef.current = false;
+        stopPausedMonitor();
+        intervalRef.current = window.setInterval(() => {
+            try { scrollOnceRef.current(); } catch (e) { /* ignore */ }
+        }, AUTO_SCROLL_INTERVAL);
+    };
+
+    const stopAutoScroll = () => {
+        if (intervalRef.current != null) {
+            window.clearInterval(intervalRef.current);
+            intervalRef.current = null;
         }
     };
 
@@ -284,12 +307,12 @@ function Mainmenu() {
     // expose scrollOnce so handlers outside the effect can trigger a single step
     scrollOnceRef.current = scrollOnce;
 
-        const interval = setInterval(scrollOnce, 1200);
+        // start auto-scroll interval (resetting the timer)
+        startAutoScroll();
         return () => {
-            clearInterval(interval);
+            // stop auto-scroll interval and listeners
+            stopAutoScroll();
             window.removeEventListener('resize', handleResize);
-            // clear any pending resume timer
-            if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null; }
             // stop paused monitor if running
             stopPausedMonitor();
         };
@@ -310,49 +333,45 @@ function Mainmenu() {
                                     src={banner}
                                     className={styles.bannerImage}
                                     tabIndex={0}
-                                    onMouseEnter={() => { 
-                                        // cancel pending resume timer
-                                        if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null; }
-                                        pausedRef.current = true; 
-                                        // allow scaled image to overflow the container while hovered
-                                        const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                        if (container) container.style.overflow = 'visible';
-                                        centerChildAtIndex(index, () => startPausedMonitor()); 
-                                    }}
-                                    onMouseLeave={() => { 
-                                        // schedule a guaranteed resume+step after 1s
-                                        if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); }
-                                        pausedRef.current = false; 
-                                        stopPausedMonitor(); 
-                                        const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                        if (container) container.style.overflow = '';
-                                        resumeTimerRef.current = window.setTimeout(() => {
-                                            resumeTimerRef.current = null;
-                                            pausedRef.current = false;
-                                            stopPausedMonitor();
-                                            try { scrollOnceRef.current(); } catch (e) { /* ignore */ }
-                                        }, 1000);
-                                    }}
-                                    onFocus={() => { 
-                                        if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null; }
-                                        pausedRef.current = true; 
-                                        const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                        if (container) container.style.overflow = 'visible';
-                                        centerChildAtIndex(index, () => startPausedMonitor()); 
-                                    }}
-                                    onBlur={() => { 
-                                        if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); }
-                                        pausedRef.current = false; 
-                                        stopPausedMonitor(); 
-                                        const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                        if (container) container.style.overflow = '';
-                                        resumeTimerRef.current = window.setTimeout(() => {
-                                            resumeTimerRef.current = null;
-                                            pausedRef.current = false;
-                                            stopPausedMonitor();
-                                            try { scrollOnceRef.current(); } catch (e) { /* ignore */ }
-                                        }, 1000);
-                                    }}
+                                    onMouseEnter={() => {
+                                            // pause auto-scroll while hovering and allow scaled image to overflow
+                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                            if (container) container.style.overflow = 'visible';
+                                            pausedRef.current = true;
+                                            stopAutoScroll();
+                                            startPausedMonitor();
+                                        }}
+                                        onMouseLeave={() => {
+                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                            if (container) container.style.overflow = '';
+                                            // restart auto-scroll interval from zero when hover ends
+                                            startAutoScroll();
+                                        }}
+                                        onFocus={() => {
+                                            // on keyboard focus, behave similarly to click: pause+center
+                                            pausedRef.current = true;
+                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                            if (container) container.style.overflow = 'visible';
+                                            centerChildAtIndex(index, () => startPausedMonitor());
+                                        }}
+                                        onBlur={() => {
+                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                            if (container) container.style.overflow = '';
+                                            // restart auto-scroll interval from zero when keyboard blur occurs
+                                            startAutoScroll();
+                                        }}
+                                        onClick={(e) => {
+                                            const img = e.currentTarget as HTMLImageElement;
+                                            // if this image is not focused, focus it and center
+                                            if (document.activeElement !== img) {
+                                                img.focus();
+                                                pausedRef.current = true;
+                                                stopAutoScroll();
+                                                const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                                if (container) container.style.overflow = 'visible';
+                                                centerChildAtIndex(index, () => startPausedMonitor());
+                                            }
+                                        }}
                                     onLoad={() => setLoadedBanners(prev => ({ ...prev, [banner]: true }))}
                                     onError={() => setLoadedBanners(prev => ({ ...prev, [banner]: true }))}
                                 />
