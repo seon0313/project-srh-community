@@ -34,6 +34,8 @@ function Mainmenu() {
     const initializedRef = useRef(false);
     const isAnimatingRef = useRef(false);
     const pausedMonitorRef = useRef<number | null>(null);
+    const scrollOnceRef = useRef<() => void>(() => {});
+    const resumeTimerRef = useRef<number | null>(null);
 
     const startPausedMonitor = () => {
         if (pausedMonitorRef.current != null) return;
@@ -215,7 +217,7 @@ function Mainmenu() {
         };
         window.addEventListener('resize', handleResize);
 
-        const scrollOnce = () => {
+    const scrollOnce = () => {
             if (pausedRef.current) return; // 일시정지 상태면 동작 금지
             if (!sliderRef.current || isAnimatingRef.current) return;
             const slider = sliderRef.current;
@@ -280,10 +282,17 @@ function Mainmenu() {
             slider.addEventListener('transitionend', onTransitionEnd);
         };
 
+    // expose scrollOnce so handlers outside the effect can trigger a single step
+    scrollOnceRef.current = scrollOnce;
+
         const interval = setInterval(scrollOnce, 1200);
         return () => {
             clearInterval(interval);
             window.removeEventListener('resize', handleResize);
+            // clear any pending resume timer
+            if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null; }
+            // stop paused monitor if running
+            stopPausedMonitor();
         };
     }, [banners]);
 
@@ -302,10 +311,49 @@ function Mainmenu() {
                                 alt={`Banner ${index + 1}`}
                                 className={styles.bannerImage}
                                 tabIndex={0}
-                                                        onMouseEnter={() => { pausedRef.current = true; centerChildAtIndex(index, () => startPausedMonitor()); }}
-                                                        onMouseLeave={() => { pausedRef.current = false; stopPausedMonitor(); }}
-                                                        onFocus={() => { pausedRef.current = true; centerChildAtIndex(index, () => startPausedMonitor()); }}
-                                                        onBlur={() => { pausedRef.current = false; stopPausedMonitor(); }}
+                                                        onMouseEnter={() => { 
+                                                            // cancel pending resume timer
+                                                            if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null; }
+                                                            pausedRef.current = true; 
+                                                            // allow scaled image to overflow the container while hovered
+                                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                                            if (container) container.style.overflow = 'visible';
+                                                            centerChildAtIndex(index, () => startPausedMonitor()); 
+                                                        }}
+                                                        onMouseLeave={() => { 
+                                                            // schedule a guaranteed resume+step after 1s
+                                                            if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); }
+                                                            pausedRef.current = false; 
+                                                            stopPausedMonitor(); 
+                                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                                            if (container) container.style.overflow = '';
+                                                            resumeTimerRef.current = window.setTimeout(() => {
+                                                                resumeTimerRef.current = null;
+                                                                pausedRef.current = false;
+                                                                stopPausedMonitor();
+                                                                try { scrollOnceRef.current(); } catch (e) { /* ignore */ }
+                                                            }, 1000);
+                                                        }}
+                                                        onFocus={() => { 
+                                                            if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null; }
+                                                            pausedRef.current = true; 
+                                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                                            if (container) container.style.overflow = 'visible';
+                                                            centerChildAtIndex(index, () => startPausedMonitor()); 
+                                                        }}
+                                                        onBlur={() => { 
+                                                            if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); }
+                                                            pausedRef.current = false; 
+                                                            stopPausedMonitor(); 
+                                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                                            if (container) container.style.overflow = '';
+                                                            resumeTimerRef.current = window.setTimeout(() => {
+                                                                resumeTimerRef.current = null;
+                                                                pausedRef.current = false;
+                                                                stopPausedMonitor();
+                                                                try { scrollOnceRef.current(); } catch (e) { /* ignore */ }
+                                                            }, 1000);
+                                                        }}
                             />
                         ))}
                     </div>
