@@ -856,3 +856,16 @@
     line-clamp: 2;
     -webkit-box-orient: vertical;
 }
+
+/* Responsive banner heights: only height changes by viewport width */
+@media (max-width: 1200px) {
+    .bannerImage {
+        height: 180px;
+    }
+}
+
+@media (max-width: 900px) {
+    .bannerImage {
+        height: 160px;
+    }
+}
