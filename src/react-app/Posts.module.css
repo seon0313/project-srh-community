@@ -345,12 +345,19 @@
         min-width: unset;
     }
 
-    .postAuthor,
-    .postDate {
-        width: 80px;
-        font-size: 13px;
+    .postAuthor {
+        display: none;
     }
-    
+
+    .postTitle {
+        width: 100%;
+    }
+
+    .postDate {
+        width: 100px;
+        text-align: center;
+    }
+
     .postitem td {
         padding: 8px 6px;
     }
