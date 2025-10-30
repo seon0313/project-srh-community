@@ -24,6 +24,22 @@
     transition: transform 0.3s ease;
 }
 
+.bannerItem {
+    position: relative;
+    display: inline-block;
+}
+
+.bannerSpinnerOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    background: rgba(0,0,0,0.04);
+    border-radius: 12px;
+}
+
 .bannerImage:hover {
     transform: scale(1.08);
 }
@@ -59,9 +75,9 @@
         /* On mobile, use percentage width instead of fixed px height
            so each banner takes ~80% of the container width. Height auto
            preserves aspect ratio. */
-        width: 80%;
-        flex: 0 0 80%;
+        width: 80vw;
         height: auto;
+        aspect-ratio: 3/1;
         margin: 0;
     }
 }
@@ -309,7 +325,7 @@
 .loadingSpace {
     height: 400px;
     text-align: center;
-    vertical-align: middle;
+        aspect-ratio: 3/1;
     border-bottom: none !important;
 }
 
@@ -871,5 +887,30 @@
 @media (max-width: 900px) {
     .bannerImage {
         height: 160px;
+    }
+}
+
+/* Loading placeholder for banner area to match banner heights */
+.bannerLoading {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 1200px) {
+    .bannerLoading { height: 180px; }
+}
+
+@media (max-width: 900px) {
+    .bannerLoading { height: 160px; }
+}
+
+/* Ensure on small screens we do NOT force a fixed height — use width/aspect-ratio instead */
+@media (max-width: 600px) {
+    .bannerLoading {
+        width: 80vw;
+        aspect-ratio: 3/1;
+        height: auto;
     }
 }

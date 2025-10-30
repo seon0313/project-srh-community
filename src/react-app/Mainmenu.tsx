@@ -26,6 +26,7 @@ function Mainmenu() {
         badges: string[];
     }[]>([]);
     const [banners, setBanners] = useState<string[]>([]);
+    const [loadedBanners, setLoadedBanners] = useState<Record<string, boolean>>({});
     const sliderRef = useRef<HTMLDivElement | null>(null);
     const pausedRef = useRef(false);
     const offsetRef = useRef<number>(0);
@@ -299,61 +300,76 @@ function Mainmenu() {
             <Topbar />
 
             {/* 배너 슬라이더 */}
-            {!bannersLoading && banners.length > 0 && (
+            {!bannersLoading && banners.length > 0 ? (
                 <div className={styles.bannerContainer} tabIndex={0}>
                     <div className={styles.bannerSlider} ref={sliderRef}>
                         {banners.map((banner, index) => (
-                            <img
-                                key={banner}
-                                src={banner}
-                                alt={`Banner ${index + 1}`}
-                                className={styles.bannerImage}
-                                tabIndex={0}
-                                                        onMouseEnter={() => { 
-                                                            // cancel pending resume timer
-                                                            if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null; }
-                                                            pausedRef.current = true; 
-                                                            // allow scaled image to overflow the container while hovered
-                                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                                            if (container) container.style.overflow = 'visible';
-                                                            centerChildAtIndex(index, () => startPausedMonitor()); 
-                                                        }}
-                                                        onMouseLeave={() => { 
-                                                            // schedule a guaranteed resume+step after 1s
-                                                            if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); }
-                                                            pausedRef.current = false; 
-                                                            stopPausedMonitor(); 
-                                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                                            if (container) container.style.overflow = '';
-                                                            resumeTimerRef.current = window.setTimeout(() => {
-                                                                resumeTimerRef.current = null;
-                                                                pausedRef.current = false;
-                                                                stopPausedMonitor();
-                                                                try { scrollOnceRef.current(); } catch (e) { /* ignore */ }
-                                                            }, 1000);
-                                                        }}
-                                                        onFocus={() => { 
-                                                            if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null; }
-                                                            pausedRef.current = true; 
-                                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                                            if (container) container.style.overflow = 'visible';
-                                                            centerChildAtIndex(index, () => startPausedMonitor()); 
-                                                        }}
-                                                        onBlur={() => { 
-                                                            if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); }
-                                                            pausedRef.current = false; 
-                                                            stopPausedMonitor(); 
-                                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                                            if (container) container.style.overflow = '';
-                                                            resumeTimerRef.current = window.setTimeout(() => {
-                                                                resumeTimerRef.current = null;
-                                                                pausedRef.current = false;
-                                                                stopPausedMonitor();
-                                                                try { scrollOnceRef.current(); } catch (e) { /* ignore */ }
-                                                            }, 1000);
-                                                        }}
-                            />
+                            <div key={banner} className={styles.bannerItem}>
+                                <img
+                                    key={banner}
+                                    src={banner}
+                                    className={styles.bannerImage}
+                                    tabIndex={0}
+                                    onMouseEnter={() => { 
+                                        // cancel pending resume timer
+                                        if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null; }
+                                        pausedRef.current = true; 
+                                        // allow scaled image to overflow the container while hovered
+                                        const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                        if (container) container.style.overflow = 'visible';
+                                        centerChildAtIndex(index, () => startPausedMonitor()); 
+                                    }}
+                                    onMouseLeave={() => { 
+                                        // schedule a guaranteed resume+step after 1s
+                                        if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); }
+                                        pausedRef.current = false; 
+                                        stopPausedMonitor(); 
+                                        const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                        if (container) container.style.overflow = '';
+                                        resumeTimerRef.current = window.setTimeout(() => {
+                                            resumeTimerRef.current = null;
+                                            pausedRef.current = false;
+                                            stopPausedMonitor();
+                                            try { scrollOnceRef.current(); } catch (e) { /* ignore */ }
+                                        }, 1000);
+                                    }}
+                                    onFocus={() => { 
+                                        if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null; }
+                                        pausedRef.current = true; 
+                                        const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                        if (container) container.style.overflow = 'visible';
+                                        centerChildAtIndex(index, () => startPausedMonitor()); 
+                                    }}
+                                    onBlur={() => { 
+                                        if (resumeTimerRef.current != null) { window.clearTimeout(resumeTimerRef.current); }
+                                        pausedRef.current = false; 
+                                        stopPausedMonitor(); 
+                                        const container = sliderRef.current?.parentElement as HTMLElement | null;
+                                        if (container) container.style.overflow = '';
+                                        resumeTimerRef.current = window.setTimeout(() => {
+                                            resumeTimerRef.current = null;
+                                            pausedRef.current = false;
+                                            stopPausedMonitor();
+                                            try { scrollOnceRef.current(); } catch (e) { /* ignore */ }
+                                        }, 1000);
+                                    }}
+                                    onLoad={() => setLoadedBanners(prev => ({ ...prev, [banner]: true }))}
+                                    onError={() => setLoadedBanners(prev => ({ ...prev, [banner]: true }))}
+                                />
+                                {!loadedBanners[banner] && (
+                                    <div className={styles.bannerSpinnerOverlay}>
+                                        <div className={styles.loadingSpinner}></div>
+                                    </div>
+                                )}
+                            </div>
                         ))}
+                    </div>
+                </div>
+            ) : (
+                // Show loading placeholder while banners are loading
+                <div className={styles.bannerContainer}>
+                    <div className={styles.bannerLoading}>
+                        <div className={styles.loadingSpinner}></div>
                     </div>
                 </div>
             )}
