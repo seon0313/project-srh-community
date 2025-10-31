@@ -23,7 +23,7 @@ function useJwtAuthOnRouteChange() {
     const location = useLocation();
     useEffect(() => {
         const authenticateJWT = async () => {
-            const jwtToken = localStorage.getItem("jwt_token");
+            const jwtToken = localStorage.getItem("token");
             if (!jwtToken) {
                 alert("JWT 토큰이 없습니다.");
                 return;
