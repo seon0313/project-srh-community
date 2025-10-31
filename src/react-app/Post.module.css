@@ -1,112 +1,130 @@
-/* Dark-themed styles for the Post component to match site layout */
+/* Modern, minimalist Post styles (dark theme, trendy, clean spacing) */
 
-.postContainer {
-    max-width: 1100px;
-    margin: 18px auto;
-    padding: 18px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-sizing: border-box;
+:root {
+    --card-bg: rgba(255,255,255,0.03);
+    --muted: rgba(255,255,255,0.6);
+    --accent: rgba(100,200,255,0.95);
 }
 
+.postContainer {
+    max-width: 900px;
+    margin: 28px auto;
+    padding: 28px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.actionBar {
+    display:flex;
+    gap:12px;
+    align-items:center;
+}
+
+.backButton, .shareButton {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--muted);
+    padding: 8px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight:600;
+    transition: all 0.18s ease;
+}
+.backButton:hover, .shareButton:hover { transform: translateY(-3px); color: var(--accent); border-color: rgba(100,200,255,0.18); }
+.actionSpacer { flex:1 1 auto; }
+
 .postHeader {
-    padding-bottom: 12px;
-    margin-bottom: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
 }
 
 .postTitle {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.95);
-    margin: 0 0 8px 0;
+    font-size:2.1rem;
+    font-weight:800;
+    color: rgba(255,255,255,0.96);
+    margin:0;
+    letter-spacing:-0.02em;
 }
 
 .postMeta {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.55);
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+}
+.postMeta span { color: var(--muted); font-size:0.95rem; }
+.metaChip {
+    background: rgba(255,255,255,0.03);
+    padding:6px 10px;
+    border-radius:999px;
+    border: 1px solid rgba(255,255,255,0.03);
+    color: var(--muted);
+    font-weight:600;
 }
 
-.postBody {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
+.postBody { display:flex; flex-direction:column; gap:18px; }
 
 .postThumbnail {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-    object-fit: cover;
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    width:100%;
+    aspect-ratio: 16/9;
+    object-fit:cover;
+    border-radius:12px;
+    overflow:hidden;
+    border: 1px solid rgba(255,255,255,0.03);
 }
 
 .postContent {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255,255,255,0.94);
+    font-size:1.05rem;
+    line-height:1.8;
 }
-
-.postContent p {
-    margin-bottom: 14px;
-}
-
-.postContent img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin: 10px 0;
-}
+.postContent p { margin:0 0 14px 0; }
 
 .postFooter {
-    margin-top: 18px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
-    display: flex;
-    justify-content: space-between;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.9rem;
+    display:flex;
+    gap:12px;
+    justify-content:flex-start;
+    color: var(--muted);
+    border-top: none;
+    padding-top:0;
 }
 
-.loadingContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 60vh;
+.commentSection { margin-top: 8px; }
+.commentHeading { color: rgba(255,255,255,0.95); margin:0 0 8px 0; font-size:1.1rem; }
+.commentForm { display:flex; gap:8px; flex-direction:column; }
+.commentInput, .commentTextarea {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.95);
+    padding:10px 12px; border-radius:10px; font-family:inherit;
 }
+.commentTextarea { min-height:80px; resize:vertical; }
+.commentActions { display:flex; justify-content:flex-end; }
+.commentSubmit { background: linear-gradient(90deg,var(--accent), #6cc8ff); border:none; color:#08121a; padding:8px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
 
-.loadingSpinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid rgba(255, 255, 255, 0.08);
-    border-top-color: rgba(100, 200, 255, 0.9);
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
-}
+.commentList { margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+.commentItem { padding:10px; background: rgba(255,255,255,0.02); border-radius:8px; border: 1px solid rgba(255,255,255,0.03); }
+.commentHeader { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:6px; }
+.commentAuthor { color: var(--accent); font-weight:700; }
+.commentTime { color: rgba(255,255,255,0.5); font-size:0.85rem; }
+.commentBody { color: rgba(255,255,255,0.92); white-space:pre-wrap; }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
+.loadingContainer { display:flex; justify-content:center; align-items:center; height:60vh; }
+.loadingSpinner { width:44px; height:44px; border-radius:50%; border:4px solid rgba(255,255,255,0.06); border-top-color: var(--accent); animation: spin 0.9s linear infinite; }
+@keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
 
-.notFound {
-    color: rgba(255, 255, 255, 0.7);
-    text-align: center;
-    padding: 40px 16px;
-}
+.notFound { color: rgba(255,255,255,0.7); text-align:center; padding:40px 16px; }
 
-@media (max-width: 900px) {
-    .postContainer {
-        margin: 12px;
-        padding: 12px;
-        border-radius: 12px;
-    }
-    .postTitle { font-size: 1.4rem; }
+@media (max-width: 800px) {
+    .postContainer { padding:16px; margin:14px; }
+    .postTitle { font-size:1.5rem; }
 }
 
 .actionBar {
