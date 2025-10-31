@@ -440,7 +440,7 @@ app.post("/api/extend-jwt", async (c) => {
     // IP 교차검증
     const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
     if (!payload.ip || payload.ip !== reqIp) {
-      return c.json({ error: "IP 불일치: 인증 실패" }, 401);
+      return c.json({ error: "유효하지 않은 JWT입니다" }, 401);
     }
     // exp가 현재 시간보다 크면(아직 만료 전)
     const now = Math.floor(Date.now() / 1000);
