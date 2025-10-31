@@ -52,6 +52,11 @@ function Posts() {
         handleSearch();
     }, [posts, searchTerm, filterType]);
 
+    const handleWriteClick = () => {
+        // Handle the click event for the 글쓰기 button
+        navigate("/manager"); // Navigate to the write post page
+    };
+
     return (
         <>
             <div className="Post">
@@ -185,6 +190,9 @@ function Posts() {
                     >
                         검색
                     </button>
+                </div>
+                <div className={style.writeButtonContainer}>
+                    <button className={style.writeButton} onClick={handleWriteClick}>글쓰기</button>
                 </div>
             </div>
         </>

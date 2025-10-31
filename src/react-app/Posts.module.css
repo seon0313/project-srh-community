@@ -1,3 +1,33 @@
+/* Write Button (글쓰기 버튼) */
+.writeButton {
+    display: block;
+    margin: 0 auto 16px auto;
+    max-width: 800px;
+    width: 100%;
+    padding: 12px 0;
+    background: rgba(255, 128, 179, 0.10); /* 핑크빛 배경 */
+    border: 1px solid rgba(255, 128, 179, 0.3);
+    border-radius: 12px;
+    color: rgba(255, 128, 179, 0.95);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.writeButton:hover {
+    background: rgba(255, 128, 179, 0.18);
+    border-color: rgba(255, 128, 179, 0.5);
+    color: #ff80b3;
+    transform: translateY(-1px);
+}
+
+.writeButton:active {
+    transform: scale(0.98);
+}
 /* Modern Page Layout */
 :global(.Post) {
     min-height: 100vh;

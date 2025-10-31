@@ -1,4 +1,11 @@
 import { Hono } from "hono";
+import { sign } from "hono/jwt";
+
+type Env = {
+  SECRET_KEY: string;
+  // 여기에 기존 Env의 다른 속성들도 추가하세요 (예: NODE_ENV 등)
+};
+
 const app = new Hono<{ Bindings: Env & { AI: any, DB: D1Database } }>();
 
 // 게시글 목록 예시 데이터
@@ -334,6 +341,37 @@ const users: UserProfile[] = [
     }
   }
 ];
+
+// 로그인 API (DB users 테이블 기반)
+app.post("/api/login", async (c) => {
+  const { id, password } = await c.req.json<{ id: string; password: string }>();
+  if (!id || !password) {
+    return c.json({ error: "아이디와 비밀번호를 입력하세요." }, 400);
+  }
+  try {
+    // users 테이블에서 id, password 일치하는 사용자 조회 (패스워드 평문 예시)
+    const { results } = await c.env.DB.prepare(
+      "SELECT * FROM users WHERE id = ? AND password = ?"
+    ).bind(id, password).all();
+    if (results.length === 0) {
+      return c.json({ error: "아이디 또는 비밀번호가 올바르지 않습니다." }, 401);
+    }
+    // JWT 발급 (비밀번호 제외)
+    const user = results[0];
+    delete user.password;
+    const token = await sign(
+      { id: user.id,
+        username: user.username,
+        exp: Math.floor(Date.now() / 1000) + 60 * 5,
+        role: user.role
+      },
+      c.env.SECRET_KEY
+    );
+    return c.json({ success: true, token, user });
+  } catch (error) {
+    return c.json({ error: "로그인 처리 중 오류가 발생했습니다." }, 500);
+  }
+});
 
 // 게시글 목록 API
 app.get("/api/posts", async (c) => {
