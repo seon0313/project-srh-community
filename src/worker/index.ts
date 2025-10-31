@@ -347,14 +347,20 @@ app.get("/api/posts", async (c) => {
   }
 });
 app.get("/api/post", async (c) => {
-  const postId = c.req.param("id");
+  const postId = c.req.query("id");
+  if (!postId) {
+    return c.json({ error: "Missing 'id' parameter" }, 400);
+  }
+
   try {
-    const result = await c.env.DB.prepare("SELECT * FROM post WHERE id = ?").bind(postId).run();
-    console.log("쿼리 결과:", result);
-    return c.json(result);
+    const { results } = await c.env.DB.prepare("SELECT * FROM post WHERE id = ?").bind(postId).all();
+    return c.json(results[0] || { error: "Post not found" }, results.length ? 200 : 404);
   } catch (error) {
-    console.error("게시글 가져오기 오류:", error);
-    return c.json({ error: "게시글을 가져오는 데 실패했습니다.", message: error });
+    console.error("Database query error:", error);
+
+    // 명시적으로 에러 메시지를 추출
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return c.json({ error: errorMessage }, 500);
   }
 });
 app.post("/api/notice-posts", (c) => c.json(notice_posts));
