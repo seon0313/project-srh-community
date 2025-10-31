@@ -7,13 +7,14 @@ import cloudflareLogo from "./assets/Cloudflare_Logo.svg";
 import honoLogo from "./assets/hono.svg";
 import "./App.css";
 
+
 function App() {
     const [name, setName] = useState("");
     const [cmd, setCmd] = useState("/api/");
     const [aiPrompt, setAiPrompt] = useState("");
     const [aiOutput, setAiOutput] = useState("");
-
     const [tables, setTables] = useState<string[]>([]);
+    const [jwtResult, setJwtResult] = useState<string>("");
 
     // AI 스트림 요청 함수
     const fetchAiStream = async () => {
@@ -53,6 +54,30 @@ function App() {
             }
         } catch (error) {
             setTables([`Error: ${error instanceof Error ? error.message : "Unknown error"}`]);
+        }
+    };
+
+    // JWT 인증 버튼 핸들러
+    const handleJwtAuth = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("JWT 토큰이 없습니다.");
+            setJwtResult("JWT 토큰이 없습니다.");
+            return;
+        }
+        try {
+            const res = await fetch("/api/extend-jwt", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: token }),
+            });
+            const data = await res.json();
+            setJwtResult(JSON.stringify(data, null, 2));
+            alert("JWT 인증 결과: " + JSON.stringify(data));
+        } catch (error) {
+            setJwtResult("에러: " + (error instanceof Error ? error.message : "알 수 없는 에러"));
+            alert("JWT 인증 에러: " + error);
         }
     };
 
@@ -111,6 +136,11 @@ function App() {
                     <li>No tables found or not fetched yet.</li>
                 )}
             </ul>
+
+            <hr />
+            <h2>JWT 인증 테스트</h2>
+            <button onClick={handleJwtAuth}>JWT 인증</button>
+            <pre style={{ textAlign: "left", minHeight: "40px" }}>{jwtResult}</pre>
 
             <p>
                 Edit <code>src/App.tsx</code> and save to test HMR
