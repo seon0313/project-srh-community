@@ -1,4 +1,3 @@
-import { env } from "cloudflare:workers";
 import { Hono } from "hono";
 const app = new Hono<{ Bindings: Env & { AI: any, DB: D1Database } }>();
 
@@ -338,9 +337,14 @@ const users: UserProfile[] = [
 
 // 게시글 목록 API
 app.get("/api/posts", async (c) => {
-  const { results } = await c.env.DB.prepare("select * FROM post").run();
-  console.log(results);
-  return c.json(results);
+  try {
+    const { results } = await c.env.DB.prepare("SELECT * FROM post").all();
+    console.log("쿼리 결과:", results);
+    return c.json(results);
+  } catch (error) {
+    console.error("게시글 가져오기 오류:", error);
+    return c.json(posts);
+  }
 });
 app.post("/api/notice-posts", (c) => c.json(notice_posts));
 app.get("/api/guides", (c) => c.json(guide));
