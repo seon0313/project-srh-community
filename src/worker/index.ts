@@ -385,7 +385,7 @@ app.get("/api/auth", async (c) => {
     // 현재 요청의 IP 추출
     const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
     if (!payload.ip || payload.ip !== reqIp) {
-      return c.json({ error: "IP 불일치: 인증 실패" }, 401);
+      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
     return c.json({ success: true, payload });
   } catch (e) {

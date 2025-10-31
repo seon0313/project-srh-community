@@ -61,7 +61,6 @@ function App() {
     const handleJwtAuth = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
-            alert("JWT 토큰이 없습니다.");
             setJwtResult("JWT 토큰이 없습니다.");
             return;
         }
@@ -74,10 +73,8 @@ function App() {
             });
             const data = await res.json();
             setJwtResult(JSON.stringify(data, null, 2));
-            alert("JWT 인증 결과: " + JSON.stringify(data));
         } catch (error) {
             setJwtResult("에러: " + (error instanceof Error ? error.message : "알 수 없는 에러"));
-            alert("JWT 인증 에러: " + error);
         }
     };
 
