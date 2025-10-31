@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import styles from "./Post.module.css";
 import Topbar from "./Topbar";
 
 function Post() {
-    const [searchParams] = useSearchParams();
+    const { id } = useParams();
     const [post, setPost] = useState<{
         id: string;
         type: string;
@@ -21,20 +21,19 @@ function Post() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const postId = searchParams.get("id");
-        if (!postId) {
+        if (!id) {
             setLoading(false);
             return;
         }
 
-        fetch(`/api/post?id=${postId}`)
+        fetch(`/api/post?id=${id}`)
             .then((res) => res.json())
             .then((data) => {
                 setPost(data);
                 setLoading(false);
             })
             .catch(() => setLoading(false));
-    }, [searchParams]);
+    }, [id]);
 
     if (loading) {
         return (
@@ -42,6 +41,10 @@ function Post() {
                 <div className={styles.loadingSpinner}></div>
             </div>
         );
+    }
+
+    if (!post) {
+        return <div className={styles.notFound}>Post not found.</div>;
     }
 
     return (
