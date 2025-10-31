@@ -135,6 +135,17 @@ function Post() {
         return <div className={styles.notFound}>Post not found.</div>;
     }
 
+    // 날짜 포맷: YYYY.MM.DD HH:mm
+    const formatDate = (d: number | string) => {
+        const date = new Date(typeof d === "string" ? parseFloat(d) : d);
+        const y = date.getFullYear();
+        const m = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        const h = date.getHours().toString().padStart(2, "0");
+        const min = date.getMinutes().toString().padStart(2, "0");
+        return `${y}.${m}.${day} ${h}:${min}`;
+    };
+
     return (
         <>
             <Topbar />
@@ -148,9 +159,8 @@ function Post() {
                 <header className={styles.postHeader}>
                     <h1 className={styles.postTitle}>{post.title}</h1>
                     <div className={styles.postMeta}>
-                        <span>Author: {post.author}</span>
-                        <span>Category: {post.category}</span>
-                        <span>Uploaded: {new Date(post.upload_time).toLocaleString()}</span>
+                        <span className={styles.authorBadge}>by {post.author}</span>
+                        <span className={styles.dateLabel}>{formatDate(post.upload_time)}</span>
                     </div>
                 </header>
 
@@ -160,12 +170,6 @@ function Post() {
                     )}
                     <div className={styles.postContent} dangerouslySetInnerHTML={{ __html: post.content }} />
                 </div>
-
-                <footer className={styles.postFooter}>
-                    <span>Type: {post.type}</span>
-                    <span>State: {post.state}</span>
-                    <span>Edited: {post.edited ? "Yes" : "No"}</span>
-                </footer>
 
                 {/* Comments */}
                 <section className={styles.commentSection} aria-label="댓글">
@@ -198,7 +202,7 @@ function Post() {
                                 <li key={c.id} className={styles.commentItem}>
                                     <div className={styles.commentHeader}>
                                         <strong className={styles.commentAuthor}>{c.author}</strong>
-                                        <time className={styles.commentTime}>{new Date(c.created_at).toLocaleString()}</time>
+                                        <time className={styles.commentTime}>{formatDate(c.created_at)}</time>
                                     </div>
                                     <div className={styles.commentBody}>{c.content}</div>
                                 </li>
