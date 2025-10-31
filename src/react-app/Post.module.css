@@ -1,41 +1,59 @@
-/* Styles for the Post component */
+/* Dark-themed styles for the Post component to match site layout */
 
 .postContainer {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 1100px;
+    margin: 18px auto;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+}
+
+.postHeader {
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .postTitle {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 10px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0 0 8px 0;
 }
 
 .postMeta {
     font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 20px;
+    color: rgba(255, 255, 255, 0.55);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.postBody {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .postThumbnail {
     width: 100%;
     height: auto;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
 }
 
 .postContent {
     font-size: 1rem;
-    line-height: 1.6;
-    color: #333;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .postContent p {
-    margin-bottom: 15px;
+    margin-bottom: 14px;
 }
 
 .postContent img {
@@ -43,4 +61,50 @@
     height: auto;
     border-radius: 8px;
     margin: 10px 0;
+}
+
+.postFooter {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+}
+
+.loadingSpinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255, 255, 255, 0.08);
+    border-top-color: rgba(100, 200, 255, 0.9);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.notFound {
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    padding: 40px 16px;
+}
+
+@media (max-width: 900px) {
+    .postContainer {
+        margin: 12px;
+        padding: 12px;
+        border-radius: 12px;
+    }
+    .postTitle { font-size: 1.4rem; }
 }
