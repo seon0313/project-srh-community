@@ -13,6 +13,8 @@ function App() {
     const [aiPrompt, setAiPrompt] = useState("");
     const [aiOutput, setAiOutput] = useState("");
 
+    const [tables, setTables] = useState<string[]>([]);
+
     // AI 스트림 요청 함수
     const fetchAiStream = async () => {
         setAiOutput(""); // 초기화
@@ -37,6 +39,20 @@ function App() {
                 }
             }
             done = readerDone;
+        }
+    };
+
+    const fetchTables = async () => {
+        try {
+            const res = await fetch("/api/tables");
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setTables(data.map((table: { name: string }) => table.name));
+            } else {
+                setTables(["Error: Unexpected response format"]);
+            }
+        } catch (error) {
+            setTables([`Error: ${error instanceof Error ? error.message : "Unknown error"}`]);
         }
     };
 
@@ -85,6 +101,16 @@ function App() {
             />
             <button onClick={fetchAiStream}>AI 질문</button>
             <pre style={{ textAlign: "left", minHeight: "80px" }}>{aiOutput}</pre>
+
+            <h2>Database Tables</h2>
+            <button onClick={fetchTables}>Fetch Tables</button>
+            <ul>
+                {tables.length > 0 ? (
+                    tables.map((table, index) => <li key={index}>{table}</li>)
+                ) : (
+                    <li>No tables found or not fetched yet.</li>
+                )}
+            </ul>
 
             <p>
                 Edit <code>src/App.tsx</code> and save to test HMR

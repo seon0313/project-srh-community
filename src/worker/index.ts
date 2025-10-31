@@ -1,3 +1,4 @@
+import { env } from "cloudflare:workers";
 import { Hono } from "hono";
 const app = new Hono<{ Bindings: Env & { AI: any, DB: D1Database } }>();
 
@@ -336,7 +337,11 @@ const users: UserProfile[] = [
 ];
 
 // 게시글 목록 API
-app.get("/api/posts", (c) => c.json(posts));
+app.get("/api/posts", async (c) => {
+  const { results } = await c.env.DB.prepare("select * FROM post").run();
+  console.log(results);
+  return c.json(results);
+});
 app.post("/api/notice-posts", (c) => c.json(notice_posts));
 app.get("/api/guides", (c) => c.json(guide));
 
@@ -472,6 +477,21 @@ app.post("/api/ai", async (c) => {
       "Access-Control-Allow-Origin": "*"
     }
   });
+});
+
+// API to fetch and print the list of existing tables
+app.get("/api/tables", async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
+    ).all();
+
+    console.log("Tables:", results);
+    return c.json(results);
+  } catch (error) {
+    console.error("Error fetching tables:", error);
+    return c.json({ error: "Failed to fetch tables." }, 500);
+  }
 });
 
 export default app;
