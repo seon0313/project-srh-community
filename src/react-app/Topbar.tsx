@@ -24,7 +24,7 @@ function Topbar() {
                         <td onClick={() => navigate("/ai")}>
                             <a>AI Chat</a>
                         </td>
-                        <td onClick={() => navigate("/login")}>
+                        <td onClick={() => navigate("/profile")}>
                             <a>프로필</a>
                         </td>
                     </tr>

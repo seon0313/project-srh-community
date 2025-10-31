@@ -36,6 +36,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/guides" element={<Guides />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/manager" element={<Manager />} />
+                <Route path="/profile" element={<User />} />
                 <Route path="*" element={<div>Not Found</div>} />
             </Routes>
         </BrowserRouter>

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { sign } from "hono/jwt";
+import { sign, verify } from "hono/jwt";
 
 type Env = {
   SECRET_KEY: string;
@@ -373,6 +373,18 @@ app.post("/api/login", async (c) => {
   }
 });
 
+
+// 인증 테스트용 API
+app.get("/api/auth", async (c) => {
+    const { token } = await c.req.json<{ token: string }>();
+    try {
+        const payload = await verify(token, c.env.SECRET_KEY);
+        return c.json({ success: true, payload });
+    } catch (e) {
+        return c.json({ error: "유효하지 않은 토큰입니다." }, 401);
+    }
+});
+
 // 게시글 목록 API
 app.get("/api/posts", async (c) => {
   try {
@@ -403,6 +415,34 @@ app.get("/api/post", async (c) => {
 });
 app.post("/api/notice-posts", (c) => c.json(notice_posts));
 app.get("/api/guides", (c) => c.json(guide));
+
+// JWT 연장 API
+app.post("/api/extend-jwt", async (c) => {
+  try {
+    const { token } = await c.req.json<{ token: string }>();
+    if (!token) {
+      return c.json({ error: "JWT가 필요합니다." }, 400);
+    }
+    let payload;
+    try {
+      payload = await verify(token, c.env.SECRET_KEY);
+    } catch (e) {
+      return c.json({ error: "유효하지 않은 JWT입니다." }, 401);
+    }
+    // exp가 현재 시간보다 크면(아직 만료 전)
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < now) {
+      return c.json({ error: "만료된 JWT입니다." }, 401);
+    }
+    // exp, iat 등 기존 payload에서 제거 후 새 exp로 재발급
+    const { exp, iat, ...rest } = payload;
+    const newExp = now + 60 * 5; // 5분 연장
+    const newToken = await sign({ ...rest, exp: newExp }, c.env.SECRET_KEY);
+    return c.json({ success: true, token: newToken });
+  } catch (e) {
+    return c.json({ error: "JWT 연장 처리 중 오류가 발생했습니다." }, 500);
+  }
+});
 
 // 사용자 목록 API
 app.get("/api/users", (c) => {
