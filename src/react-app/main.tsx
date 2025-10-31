@@ -1,9 +1,10 @@
-import { StrictMode } from "react";
+
+import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import Mainmenu from "./Mainmenu.tsx";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import Login from "./Login.tsx";
 import Signin from "./Signin.tsx";
 import Welcome from "./Welcome.tsx";
@@ -17,9 +18,42 @@ import Chat from "./Chat.tsx";
 import ScrollToTop from "./ScrollToTop.tsx";
 import Manager from "./Manager.tsx";
 
-createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-        <BrowserRouter>
+// 커스텀 훅: 페이지 이동 시마다 JWT 인증
+function useJwtAuthOnRouteChange() {
+    const location = useLocation();
+    useEffect(() => {
+        const authenticateJWT = async () => {
+            const jwtToken = localStorage.getItem("jwt_token");
+            if (!jwtToken) {
+                alert("JWT 토큰이 없습니다.");
+                return;
+            }
+            try {
+                const response = await fetch("/api/extend-jwt", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ token: jwtToken }),
+                });
+                const data = await response.json();
+                // 결과값 저장 (예: localStorage)
+                localStorage.setItem("token", JSON.stringify(data));
+                alert("JWT 인증 결과: " + JSON.stringify(data));
+            } catch (error) {
+                alert("JWT 인증 에러: " + error);
+            }
+        };
+        authenticateJWT();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location.pathname]);
+}
+
+function AppWithJwtAuth() {
+    useJwtAuthOnRouteChange();
+    return (
+        <>
             <ScrollToTop />
             <Routes>
                 <Route path="/" element={<Mainmenu />} />
@@ -39,7 +73,14 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/profile" element={<User />} />
                 <Route path="*" element={<div>Not Found</div>} />
             </Routes>
+        </>
+    );
+}
+
+createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+        <BrowserRouter>
+            <AppWithJwtAuth />
         </BrowserRouter>
-        
-    </StrictMode>,
+    </StrictMode>
 );

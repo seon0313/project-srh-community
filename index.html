@@ -20,31 +20,6 @@
     <body>
         <div id="root"></div>
         <script type="module" src="/src/react-app/main.tsx"></script>
-        <script>
-            // JWT 연장 API 자동 실행 및 결과 alert
-            (async function extendJWT() {
-                try {
-                    // localStorage 또는 다른 저장소에서 JWT 토큰을 읽어옴
-                    const jwtToken = localStorage.getItem('token');
-                    if (!jwtToken) {
-                        alert('JWT 토큰이 없습니다.');
-                        return;
-                    }
-                    const response = await fetch('/api/extend-jwt', {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ token: jwtToken })
-                    });
-                    const data = await response.json();
-                    alert('JWT 연장 결과: ' + JSON.stringify(data));
-                } catch (error) {
-                    alert('에러 발생: ' + error);
-                }
-            })();
-        </script>
         <div class="Footer footer">
             <p>개발 / 배포 <a href="https://pages.seon06.co.kr">추윤선</a></p>
             <p><a>개인정보 처리방침</a> | <a>이용약관</a></p>
