@@ -1,4 +1,3 @@
-
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
@@ -38,8 +37,11 @@ function useJwtAuthOnRouteChange() {
                     body: JSON.stringify({ token: jwtToken }),
                 });
                 const data = await response.json();
-                // 결과값 저장 (예: localStorage)
-                localStorage.setItem("token", JSON.stringify(data));
+                if (data.success && data.token) {
+                    localStorage.setItem("token", data.token); // JWT만 저장
+                } else {
+                    // 실패 시 기존 동작
+                }
                 alert("JWT 인증 결과: " + JSON.stringify(data));
             } catch (error) {
                 alert("JWT 인증 에러: " + error);
