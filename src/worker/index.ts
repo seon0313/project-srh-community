@@ -354,7 +354,7 @@ app.get("/api/post", async (c) => {
     return c.json(result);
   } catch (error) {
     console.error("게시글 가져오기 오류:", error);
-    return c.json({ error: "게시글을 가져오는 데 실패했습니다." });
+    return c.json({ error: "게시글을 가져오는 데 실패했습니다.", message: error });
   }
 });
 app.post("/api/notice-posts", (c) => c.json(notice_posts));

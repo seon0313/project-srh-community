@@ -44,6 +44,10 @@ function Post() {
         );
     }
 
+    if (!post) {
+        return <div className={styles.notFound}>Post not found.</div>;
+    }
+
     return (
         <>
             <Topbar />
