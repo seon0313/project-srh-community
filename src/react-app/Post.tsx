@@ -37,6 +37,13 @@ function Post() {
     const [commentAuthor, setCommentAuthor] = useState("");
     const [commentContent, setCommentContent] = useState("");
 
+    // report state
+    const [reportOpen, setReportOpen] = useState(false);
+    const [reportType, setReportType] = useState("");
+    const [reportMsg, setReportMsg] = useState("");
+    const [reportError, setReportError] = useState("");
+    const [reportSuccess, setReportSuccess] = useState(false);
+
     useEffect(() => {
         if (!id) {
             setLoading(false);
@@ -123,6 +130,33 @@ function Post() {
         }
     };
 
+    const handleReportOpen = () => {
+        setReportOpen(true);
+        setReportType("");
+        setReportMsg("");
+        setReportError("");
+        setReportSuccess(false);
+    };
+    const handleReportClose = () => {
+        setReportOpen(false);
+        setReportType("");
+        setReportMsg("");
+        setReportError("");
+        setReportSuccess(false);
+    };
+    const handleReportSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!reportType) {
+            setReportError("신고 유형을 선택하세요.");
+            return;
+        }
+        // 실제 신고 전송 로직 (API 연동 가능)
+        setReportSuccess(true);
+        setTimeout(() => {
+            setReportOpen(false);
+        }, 1200);
+    };
+
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
@@ -154,6 +188,7 @@ function Post() {
                     <button className={styles.backButton} onClick={handleBack} aria-label="뒤로가기">← 뒤로</button>
                     <div className={styles.actionSpacer} />
                     <button className={styles.shareButton} onClick={handleShare} aria-label="공유">공유</button>
+                    <button className={styles.reportButton} onClick={handleReportOpen} aria-label="신고">신고</button>
                 </div>
 
                 <header className={styles.postHeader}>
@@ -214,6 +249,50 @@ function Post() {
                     </ul>
                 )}
             </section>
+
+            {reportOpen && (
+                <div className={styles.reportModalOverlay}>
+                    <div className={styles.reportModal} role="dialog" aria-modal="true">
+                        <h3 className={styles.reportTitle}>게시글 신고</h3>
+                        {reportSuccess ? (
+                            <div className={styles.reportSuccessMsg}>신고가 접수되었습니다.</div>
+                        ) : (
+                        <form className={styles.reportForm} onSubmit={handleReportSubmit}>
+                            <label className={styles.reportLabel}>
+                                신고 유형
+                                <select
+                                    className={styles.reportSelect}
+                                    value={reportType}
+                                    onChange={e => setReportType(e.target.value)}
+                                    required
+                                >
+                                    <option value="">선택하세요</option>
+                                    <option value="스팸">스팸</option>
+                                    <option value="욕설">욕설/비방</option>
+                                    <option value="부적절">부적절한 내용</option>
+                                    <option value="기타">기타</option>
+                                </select>
+                            </label>
+                            <label className={styles.reportLabel}>
+                                신고 메세지
+                                <textarea
+                                    className={styles.reportTextarea}
+                                    value={reportMsg}
+                                    onChange={e => setReportMsg(e.target.value)}
+                                    placeholder="신고 사유를 입력하세요 (선택)"
+                                    rows={3}
+                                />
+                            </label>
+                            {reportError && <div className={styles.reportError}>{reportError}</div>}
+                            <div className={styles.reportActions}>
+                                <button type="button" className={styles.reportCancel} onClick={handleReportClose}>취소</button>
+                                <button type="submit" className={styles.reportSubmit}>확인</button>
+                            </div>
+                        </form>
+                        )}
+                    </div>
+                </div>
+            )}
         </>
     );
 }
