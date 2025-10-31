@@ -349,7 +349,7 @@ app.get("/api/posts", async (c) => {
 app.get("/api/post", async (c) => {
   const postId = c.req.param("id");
   try {
-    const result = await c.env.DB.prepare("SELECT * FROM post WHERE id = ?").bind(postId).first();
+    const result = await c.env.DB.prepare("SELECT * FROM post WHERE id = ?").bind(postId).run();
     console.log("쿼리 결과:", result);
     return c.json(result);
   } catch (error) {
