@@ -24,7 +24,6 @@ function useJwtAuthOnRouteChange() {
         const authenticateJWT = async () => {
             const jwtToken = localStorage.getItem("token");
             if (!jwtToken) {
-                alert("JWT 토큰이 없습니다.");
                 return;
             }
             try {
@@ -42,9 +41,7 @@ function useJwtAuthOnRouteChange() {
                 } else {
                     // 실패 시 기존 동작
                 }
-                alert("JWT 인증 결과: " + JSON.stringify(data));
             } catch (error) {
-                alert("JWT 인증 에러: " + error);
             }
         };
         authenticateJWT();
