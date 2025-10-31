@@ -359,11 +359,14 @@ app.post("/api/login", async (c) => {
     // JWT 발급 (비밀번호 제외)
     const user = results[0];
     delete user.password;
+    // 클라이언트 IP 추출 (Cloudflare 환경에서는 cf-connecting-ip 헤더 사용)
+    const ip = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
     const token = await sign(
       { id: user.id,
         username: user.username,
         exp: Math.floor(Date.now() / 1000) + 60 * 5,
-        role: user.role
+        role: user.role,
+        ip
       },
       c.env.SECRET_KEY
     );
@@ -376,13 +379,18 @@ app.post("/api/login", async (c) => {
 
 // 인증 테스트용 API
 app.get("/api/auth", async (c) => {
-    const { token } = await c.req.json<{ token: string }>();
-    try {
-        const payload = await verify(token, c.env.SECRET_KEY);
-        return c.json({ success: true, payload });
-    } catch (e) {
-        return c.json({ error: "유효하지 않은 토큰입니다." }, 401);
+  const { token } = await c.req.json<{ token: string }>();
+  try {
+    const payload = await verify(token, c.env.SECRET_KEY);
+    // 현재 요청의 IP 추출
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "IP 불일치: 인증 실패" }, 401);
     }
+    return c.json({ success: true, payload });
+  } catch (e) {
+    return c.json({ error: "유효하지 않은 토큰입니다." }, 401);
+  }
 });
 
 // 게시글 목록 API
@@ -428,6 +436,11 @@ app.post("/api/extend-jwt", async (c) => {
       payload = await verify(token, c.env.SECRET_KEY);
     } catch (e) {
       return c.json({ error: "유효하지 않은 JWT입니다." }, 401);
+    }
+    // IP 교차검증
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "IP 불일치: 인증 실패" }, 401);
     }
     // exp가 현재 시간보다 크면(아직 만료 전)
     const now = Math.floor(Date.now() / 1000);
