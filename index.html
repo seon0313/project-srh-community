@@ -24,12 +24,19 @@
             // JWT 연장 API 자동 실행 및 결과 alert
             (async function extendJWT() {
                 try {
+                    // localStorage 또는 다른 저장소에서 JWT 토큰을 읽어옴
+                    const jwtToken = localStorage.getItem('jwt_token');
+                    if (!jwtToken) {
+                        alert('JWT 토큰이 없습니다.');
+                        return;
+                    }
                     const response = await fetch('/api/extend-jwt', {
                         method: 'POST',
                         credentials: 'include',
                         headers: {
                             'Content-Type': 'application/json',
                         },
+                        body: JSON.stringify({ token: jwtToken })
                     });
                     const data = await response.json();
                     alert('JWT 연장 결과: ' + JSON.stringify(data));
