@@ -13,7 +13,6 @@
     "publish": true
   },
   "dependencies": {
-    "@toast-ui/react-editor": "^3.1.0",
     "@types/react-router-dom": "^5.3.3",
     "hono": "^4.9.12",
     "react": "19.0.0",
