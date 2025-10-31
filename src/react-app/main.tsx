@@ -15,6 +15,7 @@ import Guide from "./Guide.tsx";
 import Guides from "./Guides.tsx";
 import Chat from "./Chat.tsx";
 import ScrollToTop from "./ScrollToTop.tsx";
+import Manager from "./Manager.tsx";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
@@ -34,6 +35,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/guide/:id" element={<Guide />} />
                 <Route path="/guides" element={<Guides />} />
                 <Route path="/chat" element={<Chat />} />
+                <Route path="/manager" element={<Manager />} />
                 <Route path="*" element={<div>Not Found</div>} />
             </Routes>
         </BrowserRouter>
