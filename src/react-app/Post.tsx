@@ -170,50 +170,50 @@ function Post() {
                     )}
                     <div className={styles.postContent} dangerouslySetInnerHTML={{ __html: post.content }} />
                 </div>
-
-                {/* Comments */}
-                <section className={styles.commentSection} aria-label="댓글">
-                    <h3 className={styles.commentHeading}>댓글</h3>
-
-                    <form className={styles.commentForm} onSubmit={handlePostComment}>
-                        <input
-                            className={styles.commentInput}
-                            placeholder="이름 (선택)"
-                            value={commentAuthor}
-                            onChange={(e) => setCommentAuthor(e.target.value)}
-                        />
-                        <textarea
-                            className={styles.commentTextarea}
-                            placeholder="댓글을 입력하세요..."
-                            value={commentContent}
-                            onChange={(e) => setCommentContent(e.target.value)}
-                            rows={4}
-                        />
-                        <div className={styles.commentActions}>
-                            <button type="submit" className={styles.commentSubmit}>댓글 등록</button>
-                        </div>
-                    </form>
-
-                    {commentsLoading ? (
-                        <div className={styles.commentsLoading}><div className={styles.loadingSpinner}></div></div>
-                    ) : (
-                        <ul className={styles.commentList}>
-                            {comments.map((c) => (
-                                <li key={c.id} className={styles.commentItem}>
-                                    <div className={styles.commentHeader}>
-                                        <strong className={styles.commentAuthor}>{c.author}</strong>
-                                        <time className={styles.commentTime}>{formatDate(c.created_at)}</time>
-                                    </div>
-                                    <div className={styles.commentBody}>{c.content}</div>
-                                </li>
-                            ))}
-                            {comments.length === 0 && (
-                                <div className={styles.emptyComments}>첫 댓글을 작성해보세요.</div>
-                            )}
-                        </ul>
-                    )}
-                </section>
             </div>
+
+            {/* Comments container is now outside the postContainer */}
+            <section className={styles.commentSection} aria-label="댓글">
+                <h3 className={styles.commentHeading}>댓글</h3>
+
+                <form className={styles.commentForm} onSubmit={handlePostComment}>
+                    <input
+                        className={styles.commentInput}
+                        placeholder="이름 (선택)"
+                        value={commentAuthor}
+                        onChange={(e) => setCommentAuthor(e.target.value)}
+                    />
+                    <textarea
+                        className={styles.commentTextarea}
+                        placeholder="댓글을 입력하세요..."
+                        value={commentContent}
+                        onChange={(e) => setCommentContent(e.target.value)}
+                        rows={4}
+                    />
+                    <div className={styles.commentActions}>
+                        <button type="submit" className={styles.commentSubmit}>댓글 등록</button>
+                    </div>
+                </form>
+
+                {commentsLoading ? (
+                    <div className={styles.commentsLoading}><div className={styles.loadingSpinner}></div></div>
+                ) : (
+                    <ul className={styles.commentList}>
+                        {comments.map((c) => (
+                            <li key={c.id} className={styles.commentItem}>
+                                <div className={styles.commentHeader}>
+                                    <strong className={styles.commentAuthor}>{c.author}</strong>
+                                    <time className={styles.commentTime}>{formatDate(c.created_at)}</time>
+                                </div>
+                                <div className={styles.commentBody}>{c.content}</div>
+                            </li>
+                        ))}
+                        {comments.length === 0 && (
+                            <div className={styles.emptyComments}>첫 댓글을 작성해보세요.</div>
+                        )}
+                    </ul>
+                )}
+            </section>
         </>
     );
 }

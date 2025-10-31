@@ -84,8 +84,25 @@
     color: rgba(255,255,255,0.94);
     font-size:1.05rem;
     line-height:1.8;
+    /* Remove all text alignment, margin, and spacing rules */
 }
-.postContent p { margin:0 0 14px 0; }
+
+.postContent p,
+.postContent h1,
+.postContent h2,
+.postContent h3,
+.postContent h4,
+.postContent h5,
+.postContent h6,
+.postContent ul,
+.postContent ol,
+.postContent li,
+.postContent blockquote {
+    /* Remove all margin, padding, alignment for clean inherit */
+    margin: 0;
+    padding: 0;
+    text-align: inherit;
+}
 
 .postFooter {
     display:flex;
@@ -103,13 +120,24 @@
     box-shadow: 0 2px 12px rgba(2,6,23,0.10);
     padding: 24px 18px 18px 18px;
     border: 1px solid rgba(255,255,255,0.04);
-    max-width: 700px;
+    max-width: 900px;
     margin-left: auto;
     margin-right: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    box-sizing: border-box;
 }
+
+@media (max-width: 800px) {
+    .postContainer { padding:16px; margin:14px; }
+    .postTitle { font-size:1.5rem; }
+    .commentSection {
+        max-width: 100%;
+        padding: 14px 6px 12px 6px;
+    }
+}
+
 .commentHeading { color: rgba(255,255,255,0.95); margin:0 0 8px 0; font-size:1.1rem; }
 .commentForm { display:flex; gap:8px; flex-direction:column; }
 .commentInput, .commentTextarea {
@@ -166,12 +194,13 @@
     box-shadow: 0 2px 12px rgba(2,6,23,0.10);
     padding: 24px 18px 18px 18px;
     border: 1px solid rgba(255,255,255,0.04);
-    max-width: 700px;
+    max-width: 900px;
     margin-left: auto;
     margin-right: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    box-sizing: border-box;
 }
 .commentHeading {
     margin: 0 0 10px 0;
