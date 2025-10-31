@@ -58,18 +58,17 @@ function Posts() {
                 <Topbar />
 
                 <div className={style.stageContainer}>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=all")}>일반</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=notice")}>익명</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=general")}>도움</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=discussion")}>토론</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=all")}>재학생</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=notice")}>학부모</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=general")}>게스트</button>
                 </div>
 
                 <div className={style.categoryContainer}>
                     <button className={style.categoryButton} onClick={() => navigate("/posts?category=all")}>전체</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=notice")}>공지</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=general")}>일반</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=notice")}>일반</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=general")}>공지</button>
                     <button className={style.categoryButton} onClick={() => navigate("/posts?category=question")}>질문</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=discussion")}>토론</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=discussion")}>익명</button>
                 </div>
                 
                 <div className={style.postContainer}>
