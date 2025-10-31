@@ -167,11 +167,6 @@
 
 .notFound { color: rgba(255,255,255,0.7); text-align:center; padding:40px 16px; }
 
-@media (max-width: 800px) {
-    .postContainer { padding:16px; margin:14px; }
-    .postTitle { font-size:1.5rem; }
-}
-
 .actionBar {
     display: flex;
     align-items: center;
