@@ -56,32 +56,23 @@ function Posts() {
         <>
             <div className="Post">
                 <Topbar />
+
+                <div className={style.stageContainer}>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=all")}>일반</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=notice")}>익명</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=general")}>도움</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=discussion")}>토론</button>
+                </div>
+
+                <div className={style.categoryContainer}>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=all")}>전체</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=notice")}>공지</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=general")}>일반</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=question")}>질문</button>
+                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=discussion")}>토론</button>
+                </div>
+                
                 <div className={style.postContainer}>
-                    <div className={style.searchBar}>
-                        <select 
-                            className={style.filterSelect}
-                            value={filterType}
-                            onChange={(e) => setFilterType(e.target.value)}
-                        >
-                            <option value="all">전체</option>
-                            <option value="title">제목</option>
-                            <option value="author">작성자</option>
-                        </select>
-                        <input
-                            type="text"
-                            className={style.searchInput}
-                            placeholder="검색어를 입력하세요..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                        />
-                        <button
-                            className={style.searchButton}
-                            onClick={handleSearch}
-                        >
-                            검색
-                        </button>
-                    </div>
                     <table className={style.posttable}>
                         <tbody>
                             {loading ? (
@@ -170,6 +161,31 @@ function Posts() {
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div className={style.searchBar}>
+                    <select 
+                        className={style.filterSelect}
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                    >
+                        <option value="all">전체</option>
+                        <option value="title">제목</option>
+                        <option value="author">작성자</option>
+                    </select>
+                    <input
+                        type="text"
+                        className={style.searchInput}
+                        placeholder="검색어를 입력하세요..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    />
+                    <button
+                        className={style.searchButton}
+                        onClick={handleSearch}
+                    >
+                        검색
+                    </button>
                 </div>
             </div>
         </>
