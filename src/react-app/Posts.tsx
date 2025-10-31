@@ -144,7 +144,7 @@ function Posts() {
                                                 <strong>{post.author}</strong>
                                             </td>
                                             <td
-                                                className={style.postDate}
+                                                className={style.upload_time}
                                                 onClick={() => navigate(`/post/${post.id}`)}
                                             >
                                                 <strong>{post.date}</strong>

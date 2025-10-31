@@ -5,7 +5,19 @@ import Topbar from "./Topbar";
 
 function Mainmenu() {
     const navigate = useNavigate();
-    const [posts, setPosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
+    const [posts, setPosts] = useState<{
+        id: string; 
+        type: string; 
+        category: string; 
+        author: string; 
+        author_id: string; 
+        thumbnail_url: string; 
+        title: string; 
+        content: string; 
+        upload_time: number; 
+        edited: number; 
+        state: string; 
+    }[]>([]);
     const [noticePosts, setNoticePosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
     const [guides, setGuides] = useState<{ 
         id: number; 
@@ -581,7 +593,7 @@ function Mainmenu() {
                                                 className={styles.postDate}
                                                 onClick={() => navigate("/post/" + post.id)}
                                             >
-                                                <strong>{post.date}</strong>
+                                                <strong>{post.upload_time}</strong>
                                             </td>
                                         </tr>
                                     ))}

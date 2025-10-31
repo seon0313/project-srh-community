@@ -346,6 +346,17 @@ app.get("/api/posts", async (c) => {
     return c.json(posts);
   }
 });
+app.get("/api/post", async (c) => {
+  const postId = c.req.param("id");
+  try {
+    const result = await c.env.DB.prepare("SELECT * FROM post WHERE id = ?").bind(postId).first();
+    console.log("쿼리 결과:", result);
+    return c.json(result);
+  } catch (error) {
+    console.error("게시글 가져오기 오류:", error);
+    return c.json({ error: "게시글을 가져오는 데 실패했습니다." });
+  }
+});
 app.post("/api/notice-posts", (c) => c.json(notice_posts));
 app.get("/api/guides", (c) => c.json(guide));
 
