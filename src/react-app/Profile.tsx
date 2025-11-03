@@ -315,9 +315,6 @@ function Profile() {
                                     <>
                                         <button onClick={onSave} disabled={saving} className={`${styles.btn} ${styles.btnPrimary}`}>{saving ? "저장 중…" : "저장"}</button>
                                         <button onClick={onCancel} disabled={saving} className={`${styles.btn} ${styles.btnSecondary}`}>취소</button>
-                                        <button onClick={openDeleteModal} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
-                                        <button className={`${styles.btn} ${styles.btnSecondary}`}>인증</button>
-                                        <button onClick={onLogout} className={`${styles.btn} ${styles.btnSecondary}`}>로그아웃</button>
                                     </>
                                 )}
                             </div>
