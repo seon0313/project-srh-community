@@ -255,7 +255,7 @@ function Profile() {
 
                                 {/* 비밀번호 (편집 모드에서만) */}
                                 {editing && (
-                                    <>
+                                    <div className={styles.twoCol}>
                                         <div className={styles.row}>
                                             <span className={styles.label}>비밀번호 변경 (선택)</span>
                                             <input
@@ -278,7 +278,7 @@ function Profile() {
                                                 autoComplete="new-password"
                                             />
                                         </div>
-                                    </>
+                                    </div>
                                 )}
 
                                 {/* 기타 정보: 편집 모드에서만 별도 필드로 노출 */}
@@ -315,8 +315,6 @@ function Profile() {
                         <div>프로필 정보를 찾을 수 없습니다.</div>
                     )}
                 </div>
-
-                <p className={styles.mutedLink}>계정이 없으신가요? <a onClick={() => navigate("/signup")}>회원가입</a></p>
             </div>
 
             {showDeleteModal && (
