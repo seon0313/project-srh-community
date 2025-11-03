@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Manager.module.css';
 import Topbar from './Topbar';
@@ -6,6 +6,12 @@ import Topbar from './Topbar';
 function Manager() {
     const navigate = useNavigate();
     const [modalOpen, setModalOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        setIsLoggedIn(!!token);
+    }, []);
 
     const actions = [
         {
@@ -19,6 +25,7 @@ function Manager() {
             ),
             description: '새로운 가이드를 등록하고 커뮤니티와 공유합니다.',
             onClick: () => navigate('/guide/write'),
+            requiresAuth: true,
         },
         {
             id: 'write-post',
@@ -31,6 +38,7 @@ function Manager() {
             ),
             description: '일반 게시글을 작성합니다.',
             onClick: () => alert('게시글 쓰기'),
+            requiresAuth: false,
         },
         {
             id: 'register-banner',
@@ -43,6 +51,7 @@ function Manager() {
             ),
             description: '상단 또는 사이드 배너를 등록합니다.',
             onClick: () => alert('배너 등록하기'),
+            requiresAuth: true,
         },
         {
             id: 'view-all-guides',
@@ -55,6 +64,7 @@ function Manager() {
             description: '모든 가이드를 한곳에서 확인합니다.',
             isCTA: true,
             onClick: () => setModalOpen(true),
+            requiresAuth: true,
         },
     ];
 
@@ -63,21 +73,25 @@ function Manager() {
             <Topbar />
             <div className={styles.managerContainer}>
                 <div className={styles.grid}>
-                    {actions.map((action) => (
-                        <button
-                            key={action.id}
-                            className={`${styles.actionButton} ${action.isCTA ? styles.cta : ''}`}
-                            onClick={action.onClick}
-                            aria-label={action.title}
-                            title={action.title}
-                        >
-                            <div className={styles.actionIcon}>{action.icon}</div>
-                            <div className={styles.actionTitle}>{action.title}</div>
-                            {action.description && (
-                                <div className={styles.actionSubtitle}>{action.description}</div>
-                            )}
-                        </button>
-                    ))}
+                    {actions.map((action) => {
+                        const isDisabled = action.requiresAuth && !isLoggedIn;
+                        return (
+                            <button
+                                key={action.id}
+                                className={`${styles.actionButton} ${action.isCTA ? styles.cta : ''} ${isDisabled ? styles.disabled : ''}`}
+                                onClick={isDisabled ? () => alert('로그인이 필요합니다.') : action.onClick}
+                                disabled={isDisabled}
+                                aria-label={action.title}
+                                title={action.title}
+                            >
+                                <div className={styles.actionIcon}>{action.icon}</div>
+                                <div className={styles.actionTitle}>{action.title}</div>
+                                {action.description && (
+                                    <div className={styles.actionSubtitle}>{action.description}</div>
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
