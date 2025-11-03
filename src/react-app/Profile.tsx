@@ -18,6 +18,7 @@ function Profile() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [editing, setEditing] = useState(false);
 
     const loadMe = async () => {
         const token = localStorage.getItem("token");
@@ -48,6 +49,7 @@ function Profile() {
     useEffect(() => { loadMe(); }, []);
 
     const onSave = async () => {
+        if (!editing) return;
         const token = localStorage.getItem("token");
         if (!token) {
             alert("로그인이 필요합니다.");
@@ -72,9 +74,17 @@ function Profile() {
             alert("프로필이 저장되었습니다.");
             setPassword("");
             await loadMe();
+            setEditing(false);
         } finally {
             setSaving(false);
         }
+    };
+
+    const onCancel = () => {
+        if (!me) return;
+        setEmail(me.email || "");
+        setPassword("");
+        setEditing(false);
     };
 
     const onDelete = async () => {
@@ -115,15 +125,15 @@ function Profile() {
                             <div className={styles.grid}>
                                 <label>
                                     <span className={styles.label}>아이디</span>
-                                    <input value={me.id} readOnly className={styles.input} />
+                                    <input value={me.id} readOnly className={`${styles.input} ${styles.readonly}`} />
                                 </label>
                                 <label>
                                     <span className={styles.label}>이메일</span>
-                                    <input value={email} onChange={(e) => setEmail(e.target.value)} className={styles.input} />
+                                    <input value={email} onChange={(e) => setEmail(e.target.value)} className={`${styles.input} ${!editing ? styles.readonly : ''}`} readOnly={!editing} />
                                 </label>
                                 <div>
                                     <span className={styles.label}>비밀번호 변경 (선택)</span>
-                                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="새 비밀번호 (6자 이상)" className={styles.input} />
+                                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="새 비밀번호 (6자 이상)" className={`${styles.input} ${!editing ? styles.readonly : ''}`} readOnly={!editing} />
                                 </div>
                                 <div className={styles.twoCol}>
                                     <div>
@@ -138,8 +148,18 @@ function Profile() {
                             </div>
 
                             <div className={styles.actions}>
-                                <button onClick={onSave} disabled={saving} className={`${styles.btn} ${styles.btnPrimary}`}>{saving ? "저장 중…" : "저장"}</button>
-                                <button onClick={onDelete} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
+                                {!editing ? (
+                                    <>
+                                        <button onClick={() => setEditing(true)} className={`${styles.btn} ${styles.btnPrimary}`}>편집</button>
+                                        <button onClick={onDelete} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button onClick={onSave} disabled={saving} className={`${styles.btn} ${styles.btnPrimary}`}>{saving ? "저장 중…" : "저장"}</button>
+                                        <button onClick={onCancel} disabled={saving} className={`${styles.btn} ${styles.btnSecondary}`}>취소</button>
+                                        <button onClick={onDelete} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
+                                    </>
+                                )}
                             </div>
                         </>
                     ) : (

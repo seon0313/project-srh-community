@@ -46,6 +46,11 @@
   width: 100%;
 }
 
+.readonly {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
 .pill {
   height: 40px;
   border: 1px solid #e5e7eb;
@@ -83,6 +88,56 @@
   color: #fff;
 }
 
+.btnSecondary {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #111827;
+}
+
 .mutedLink {
   margin-top: 16px;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .title {
+    color: #e5e7eb;
+  }
+  .card {
+    background: #0b0b0d;
+    border-color: #27272a;
+    box-shadow: none;
+    color: #e5e7eb;
+  }
+  .label {
+    color: #9ca3af;
+  }
+  .input {
+    background: #0f1115;
+    border-color: #30363d;
+    color: #e5e7eb;
+  }
+  .readonly {
+    background: #111318;
+    color: #9ca3af;
+    border-color: #2a2f36;
+  }
+  .pill {
+    background: #111318;
+    border-color: #2a2f36;
+    color: #e5e7eb;
+  }
+  .btnPrimary {
+    background: #2563eb;
+    border-color: #2563eb;
+  }
+  .btnSecondary {
+    background: #0b0b0d;
+    border-color: #2a2f36;
+    color: #e5e7eb;
+  }
+  .btnDanger {
+    background: #ef4444;
+    border-color: #ef4444;
+  }
 }
