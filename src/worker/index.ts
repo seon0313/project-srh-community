@@ -426,7 +426,7 @@ app.post("/api/notice-posts", (c) => c.json(notice_posts));
 app.get("/api/guides", async (c) => {
   try {
     const { results } = await c.env.DB.prepare(
-      "SELECT id, author_id, title, description, date, step, needtime, thumbnail_url, edited, status FROM guide WHERE status = 1 ORDER BY date DESC"
+      "SELECT id, author_id, title, description, date, step, needtime, thumbnail_url, edited, status FROM guide WHERE status = 0 ORDER BY date DESC"
     ).all();
     return c.json(results);
   } catch (error) {
@@ -494,7 +494,7 @@ app.post("/api/guides", async (c) => {
       needtime || 0,
       thumbnail_url || "",
       0,
-      1 // status: 1 = active
+      0 // status: 0 = active
     ).run();
     
     return c.json({ success: true, id: guideId });
@@ -611,9 +611,9 @@ app.delete("/api/guides", async (c) => {
       return c.json({ error: "삭제 권한이 없습니다." }, 403);
     }
     
-    // Soft delete: status를 0으로 변경
+    // Soft delete: status를 -1로 변경
     await c.env.DB.prepare(
-      "UPDATE guide SET status = 0, edited = ? WHERE id = ?"
+      "UPDATE guide SET status = -1, edited = ? WHERE id = ?"
     ).bind(Date.now(), id).run();
     
     return c.json({ success: true });
@@ -889,7 +889,7 @@ app.post("/api/guide-items", async (c) => {
     
     // parent_id가 유효한 가이드인지 확인
     const { results: parentResults } = await c.env.DB.prepare(
-      "SELECT id FROM guide WHERE id = ? AND status = 1"
+      "SELECT id FROM guide WHERE id = ? AND status = 0"
     ).bind(parent_id).all();
     
     if (!parentResults || parentResults.length === 0) {
@@ -912,7 +912,7 @@ app.post("/api/guide-items", async (c) => {
       needtime || 0,
       thumbnail_url || "",
       0,
-      1 // status: 1 = active
+      0 // status: 0 = active
     ).run();
     
     return c.json({ success: true, id: itemId });
@@ -1029,9 +1029,9 @@ app.delete("/api/guide-items", async (c) => {
       return c.json({ error: "삭제 권한이 없습니다." }, 403);
     }
     
-    // Soft delete: status를 0으로 변경
+    // Soft delete: status를 -1로 변경
     await c.env.DB.prepare(
-      "UPDATE guide_item SET status = 0, edited = ? WHERE id = ?"
+      "UPDATE guide_item SET status = -1, edited = ? WHERE id = ?"
     ).bind(Date.now(), id).run();
     
     return c.json({ success: true });
