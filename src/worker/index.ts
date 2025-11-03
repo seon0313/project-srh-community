@@ -502,6 +502,75 @@ app.post("/api/extend-jwt", async (c) => {
   }
 });
 
+// 현재 사용자 조회/수정/삭제 API
+app.post("/api/me", async (c) => {
+  const { token } = await c.req.json<{ token: string }>();
+  if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
+  try {
+    const payload = await verify(token, c.env.SECRET_KEY);
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
+    }
+    const { results } = await c.env.DB.prepare("SELECT id, email, role, created_at FROM users WHERE id = ?").bind(payload.id).all();
+    if (!results || results.length === 0) return c.json({ error: "사용자를 찾을 수 없습니다." }, 404);
+    return c.json({ success: true, user: results[0] });
+  } catch (e) {
+    return c.json({ error: "유효하지 않은 토큰입니다." }, 401);
+  }
+});
+
+app.put("/api/me", async (c) => {
+  const body = await c.req.json<{ token: string; email?: string; password?: string }>();
+  const { token, email, password } = body || {} as any;
+  if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
+  try {
+    const payload = await verify(token, c.env.SECRET_KEY);
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
+    }
+    // Build dynamic update
+    const updates: string[] = [];
+    const values: any[] = [];
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) return c.json({ error: "올바른 이메일 형식이 아닙니다." }, 400);
+      updates.push("email = ?");
+      values.push(email);
+    }
+    if (password) {
+      if (password.length < 6) return c.json({ error: "비밀번호는 6자 이상이어야 합니다." }, 400);
+      const hashed = await sha256(password + c.env.SECRET_PW_KEY);
+      updates.push("password = ?");
+      values.push(hashed);
+    }
+    if (updates.length === 0) return c.json({ error: "변경할 항목이 없습니다." }, 400);
+    values.push(payload.id);
+    const sql = `UPDATE users SET ${updates.join(", ")} WHERE id = ?`;
+    await c.env.DB.prepare(sql).bind(...values).run();
+    return c.json({ success: true });
+  } catch (e) {
+    return c.json({ error: "프로필 수정 중 오류가 발생했습니다." }, 500);
+  }
+});
+
+app.delete("/api/me", async (c) => {
+  const { token } = await c.req.json<{ token: string }>();
+  if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
+  try {
+    const payload = await verify(token, c.env.SECRET_KEY);
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
+    }
+    await c.env.DB.prepare("DELETE FROM users WHERE id = ?").bind(payload.id).run();
+    return c.json({ success: true });
+  } catch (e) {
+    return c.json({ error: "계정 삭제 중 오류가 발생했습니다." }, 500);
+  }
+});
+
 // 사용자 목록 API
 app.get("/api/users", (c) => {
   // 민감한 정보 제외한 공개 정보만 반환

@@ -1,67 +1,155 @@
 import { useNavigate } from "react-router-dom";
-import styles from "./User.module.css";
 import Topbar from "./Topbar";
 
-import { useRef, useEffect } from "react";
+import { useEffect, useState } from "react";
+import styles from "./Profile.module.css";
+
+type Me = {
+    id: string;
+    email: string;
+    role?: number;
+    created_at?: number;
+};
 
 function Profile() {
     const navigate = useNavigate();
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const cardDivRef = useRef<HTMLDivElement | null>(null);
+    const [me, setMe] = useState<Me | null>(null);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const cardDiv = cardDivRef.current;
-        if (!canvas || !cardDiv) return;
-        const dpr = window.devicePixelRatio || 1;
-
-        function draw() {
-            const cardDiv = cardDivRef.current;
-            const canvas = canvasRef.current;
-            if (!cardDiv || !canvas) return;
-            const rect = cardDiv.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            canvas.style.width = rect.width + "px";
-            canvas.style.height = rect.height + "px";
-            const ctx = canvas.getContext("2d");
-            if (!ctx) return;
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.scale(dpr, dpr);
-            ctx.clearRect(0, 0, rect.width, rect.height);
-            ctx.fillStyle = "#fff";
-            ctx.fillRect(0, 0, rect.width, rect.height);
-            const fontSize = Math.max(20, Math.floor(rect.width * 0.2));
-            ctx.font = `bold ${fontSize}px sans-serif`;
-            ctx.fillStyle = "#222";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("명함", rect.width / 2, rect.height / 2);
+    const loadMe = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("로그인이 필요합니다.");
+            navigate("/login");
+            return;
         }
+        setLoading(true);
+        try {
+            const res = await fetch("/api/me", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                alert(data.error || "프로필 정보를 불러오지 못했습니다.");
+                return;
+            }
+            setMe(data.user);
+            setEmail(data.user.email || "");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        draw();
-        const resizeObserver = new window.ResizeObserver(draw);
-        resizeObserver.observe(cardDiv);
-        return () => resizeObserver.disconnect();
-    }, []);
+    useEffect(() => { loadMe(); }, []);
+
+    const onSave = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("로그인이 필요합니다.");
+            return;
+        }
+        if (!email) {
+            alert("이메일을 입력하세요.");
+            return;
+        }
+        setSaving(true);
+        try {
+            const res = await fetch("/api/me", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token, email, password: password || undefined })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                alert(data.error || "수정 중 오류가 발생했습니다.");
+                return;
+            }
+            alert("프로필이 저장되었습니다.");
+            setPassword("");
+            await loadMe();
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const onDelete = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        if (!confirm("정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
+        setSaving(true);
+        try {
+            const res = await fetch("/api/me", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                alert(data.error || "계정 삭제 중 오류가 발생했습니다.");
+                return;
+            }
+            alert("계정이 삭제되었습니다.");
+            localStorage.removeItem("token");
+            navigate("/");
+        } finally {
+            setSaving(false);
+        }
+    };
 
     return (
         <>
-        <Topbar />
-        <div className={styles.User}>
-            <h1>프로필</h1>
+            <Topbar />
+            <div className={styles.container}>
+                <h1 className={styles.title}>프로필</h1>
 
-            <div className={styles.businessCard} ref={cardDivRef}>
-                <canvas
-                    ref={canvasRef}
-                    style={{ display: "block", width: "100%", height: "100%" }}
-                />
+                <div className={styles.card}>
+                    {loading ? (
+                        <div>불러오는 중…</div>
+                    ) : me ? (
+                        <>
+                            <div className={styles.grid}>
+                                <label>
+                                    <span className={styles.label}>아이디</span>
+                                    <input value={me.id} readOnly className={styles.input} />
+                                </label>
+                                <label>
+                                    <span className={styles.label}>이메일</span>
+                                    <input value={email} onChange={(e) => setEmail(e.target.value)} className={styles.input} />
+                                </label>
+                                <div>
+                                    <span className={styles.label}>비밀번호 변경 (선택)</span>
+                                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="새 비밀번호 (6자 이상)" className={styles.input} />
+                                </div>
+                                <div className={styles.twoCol}>
+                                    <div>
+                                        <span className={styles.label}>권한</span>
+                                        <div className={styles.pill}>{me.role ?? 0}</div>
+                                    </div>
+                                    <div>
+                                        <span className={styles.label}>가입일</span>
+                                        <div className={styles.pill}>{me.created_at ? new Date(me.created_at).toLocaleString() : "-"}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className={styles.actions}>
+                                <button onClick={onSave} disabled={saving} className={`${styles.btn} ${styles.btnPrimary}`}>{saving ? "저장 중…" : "저장"}</button>
+                                <button onClick={onDelete} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
+                            </div>
+                        </>
+                    ) : (
+                        <div>프로필 정보를 찾을 수 없습니다.</div>
+                    )}
+                </div>
+
+                <p className={styles.mutedLink}>계정이 없으신가요? <a onClick={() => navigate("/signup")}>회원가입</a></p>
             </div>
-
-            <p>계정이 없으신가요? <a onClick={() => navigate("/signup")}>회원가입</a></p>
-        </div>
         </>
     );
 }
-
 export default Profile;

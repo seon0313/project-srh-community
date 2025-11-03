@@ -1,0 +1,88 @@
+.container {
+  max-width: 720px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.label {
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+.input {
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 12px;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+}
+
+.pill {
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  background: #f9fafb;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btnPrimary {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+}
+
+.btnDanger {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  color: #fff;
+}
+
+.mutedLink {
+  margin-top: 16px;
+}

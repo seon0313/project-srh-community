@@ -8,6 +8,7 @@ import Login from "./Login.tsx";
 import Signin from "./Signin.tsx";
 import Welcome from "./Welcome.tsx";
 import User from "./User.tsx";
+import Profile from "./Profile.tsx";
 import AI from "./AI.tsx";
 import Posts from "./Posts.tsx";
 import Post from "./Post.tsx";
@@ -69,7 +70,7 @@ function AppWithJwtAuth() {
                 <Route path="/guides" element={<Guides />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/manager" element={<Manager />} />
-                <Route path="/profile" element={<User />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="*" element={<div>Not Found</div>} />
             </Routes>
         </>
