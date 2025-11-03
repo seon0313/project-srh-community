@@ -5,28 +5,28 @@ import { useEffect, useState } from "react";
 function Guide() {
     const navigate = useNavigate();
     const { id } = useParams();
-    const guideId = Number(id);
+    const guideId = id || "";
 
     type Guide = {
-        id: number;
+        id: string;
         title: string;
         description: string;
-        author: string;
-        date: string;
-        steps: number;
+        author_id: string;
+        date: number;
+        step: number;
         needtime: number;
-        thumbnail: string;
+        thumbnail_url: string;
     };
 
     type GuideItem = {
-        id: number;
-        parentId: number;
+        id: string;
+        parent_id: string;
         title: string;
-        author: string;
+        author_id: string;
         content: string;
-        date: string;
+        date: number;
         needtime: number;
-        thumbnail: string;
+        thumbnail_url: string;
     };
 
     const [guide, setGuide] = useState<Guide | null>(null);
@@ -41,15 +41,14 @@ function Guide() {
                 setLoading(true);
                 setError(null);
                 const [gRes, itemsRes] = await Promise.all([
-                    fetch("/api/guides"),
+                    fetch(`/api/guide?id=${guideId}`),
                     fetch(`/api/guide-items?id=${guideId}`),
                 ]);
                 if (!gRes.ok || !itemsRes.ok) throw new Error("네트워크 오류");
-                const guides: Guide[] = await gRes.json();
+                const guideData: Guide = await gRes.json();
                 const allItems: GuideItem[] = await itemsRes.json();
                 if (!active) return;
-                const found = guides.find((g) => g.id === guideId) ?? null;
-                setGuide(found);
+                setGuide(guideData);
                 setItems(allItems);
             } catch (e: any) {
                 if (!active) return;
@@ -58,7 +57,7 @@ function Guide() {
                 if (active) setLoading(false);
             }
         }
-        if (!Number.isNaN(guideId)) {
+        if (guideId) {
             load();
         } else {
             setError("잘못된 가이드 ID입니다.");
@@ -78,18 +77,18 @@ function Guide() {
                     </button>
                     {guide ? (
                         <div className={styles.headerBody}>
-                            <img className={styles.thumb} src={guide.thumbnail} alt={guide.title} />
+                            <img className={styles.thumb} src={guide.thumbnail_url} alt={guide.title} />
                             <div className={styles.headerContent}>
                                 <h1 className={styles.title}>{guide.title}</h1>
                                 <p className={styles.description}>{guide.description}</p>
                                 <div className={styles.meta}>
-                                    <span className={styles.author}>{guide.author}</span>
+                                    <span className={styles.author}>작성자: {guide.author_id}</span>
                                     <span className={styles.dot}>•</span>
-                                    <span className={styles.date}>{guide.date}</span>
+                                    <span className={styles.date}>{new Date(guide.date).toLocaleDateString()}</span>
                                     <span className={styles.dot}>•</span>
                                     <span className={styles.time}>{guide.needtime}분</span>
                                     <span className={styles.dot}>•</span>
-                                    <span className={styles.steps}>{guide.steps}단계</span>
+                                    <span className={styles.steps}>{guide.step}단계</span>
                                 </div>
                             </div>
                         </div>
@@ -121,13 +120,13 @@ function Guide() {
                                     <span className={styles.stepTime}>{it.needtime}분</span>
                                 </div>
                                 <div className={styles.stepBody}>
-                                    <img className={styles.stepThumb} src={it.thumbnail} alt={it.title} />
+                                    <img className={styles.stepThumb} src={it.thumbnail_url} alt={it.title} />
                                     <p className={styles.stepContent}>{it.content}</p>
                                 </div>
                                 <div className={styles.stepMeta}>
-                                    <span>{it.author}</span>
+                                    <span>작성자: {it.author_id}</span>
                                     <span className={styles.dot}>•</span>
-                                    <span>{it.date}</span>
+                                    <span>{new Date(it.date).toLocaleDateString()}</span>
                                 </div>
                             </li>
                         ))}
