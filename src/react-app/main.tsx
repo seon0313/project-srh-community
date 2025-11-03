@@ -66,12 +66,12 @@ function AppWithJwtAuth() {
                 <Route path="/ai" element={<AI />} />
                 <Route path="/posts" element={<Posts />} />
                 <Route path="/post/:id" element={<Post />} />
+                <Route path="/guide/write" element={<GuideWrite />} />
                 <Route path="/guide/view/:id" element={<User />} />
                 <Route path="/guide/:id" element={<Guide />} />
                 <Route path="/guides" element={<Guides />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/manager" element={<Manager />} />
-                <Route path="/guide/write" element={<GuideWrite />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="*" element={<div>Not Found</div>} />
             </Routes>
