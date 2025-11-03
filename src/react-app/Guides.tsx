@@ -6,14 +6,14 @@ function Guides() {
     const navigate = useNavigate();
 
     type Guide = {
-        id: number;
+        id: string;
         title: string;
         description: string;
-        author: string;
-        date: string;
-        steps: number;
+        author_id: string;
+        date: number;
+        step: number;
         needtime: number;
-        thumbnail: string;
+        thumbnail_url: string;
     };
 
     const [guides, setGuides] = useState<Guide[]>([]);
@@ -48,7 +48,7 @@ function Guides() {
     const filteredGuides = guides.filter((g) =>
         g.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         g.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        g.author.toLowerCase().includes(searchTerm.toLowerCase())
+        g.author_id.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -88,21 +88,21 @@ function Guides() {
                             >
                                 <img
                                     className={styles.thumbnail}
-                                    src={guide.thumbnail}
+                                    src={guide.thumbnail_url}
                                     alt={guide.title}
                                 />
                                 <div className={styles.cardBody}>
                                     <h3 className={styles.cardTitle}>{guide.title}</h3>
                                     <p className={styles.cardDescription}>{guide.description}</p>
                                     <div className={styles.cardMeta}>
-                                        <span className={styles.author}>{guide.author}</span>
+                                        <span className={styles.author}>작성자: {guide.author_id}</span>
                                         <span className={styles.dot}>•</span>
                                         <span className={styles.time}>{guide.needtime}분</span>
                                         <span className={styles.dot}>•</span>
-                                        <span className={styles.steps}>{guide.steps}단계</span>
+                                        <span className={styles.steps}>{guide.step}단계</span>
                                     </div>
                                     <div className={styles.cardFooter}>
-                                        <span className={styles.date}>{guide.date}</span>
+                                        <span className={styles.date}>{new Date(guide.date).toLocaleDateString()}</span>
                                         <button className={styles.viewBtn}>자세히 보기 →</button>
                                     </div>
                                 </div>

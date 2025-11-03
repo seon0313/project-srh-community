@@ -20,12 +20,13 @@ function Mainmenu() {
     }[]>([]);
     const [noticePosts, setNoticePosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
     const [guides, setGuides] = useState<{ 
-        id: number; 
+        id: string; 
         title: string; 
         description: string; 
-        author: string; 
+        author_id: string; 
         needtime: number; 
-        thumbnail: string 
+        step: number;
+        thumbnail_url: string 
     }[]>([]);
     const [users, setUsers] = useState<{
         id: number;
@@ -491,7 +492,7 @@ function Mainmenu() {
                                     onClick={() => navigate("/guide/" + guide.id)}
                                 >
                                     <img 
-                                        src={guide.thumbnail} 
+                                        src={guide.thumbnail_url} 
                                         alt={guide.title} 
                                         className={styles.guideThumbnail}
                                     />
@@ -499,8 +500,9 @@ function Mainmenu() {
                                         <h4 className={styles.guideTitle}>{guide.title}</h4>
                                         <p className={styles.guideDescription}>{guide.description}</p>
                                         <div className={styles.guideMeta}>
-                                            <span className={styles.guideAuthor}>{guide.author}</span>
+                                            <span className={styles.guideAuthor}>{guide.author_id}</span>
                                             <span className={styles.guideTime}>{guide.needtime}분</span>
+                                            <span className={styles.guideSteps}>{guide.step}단계</span>
                                         </div>
                                     </div>
                                 </div>
