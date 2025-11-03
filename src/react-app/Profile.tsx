@@ -19,6 +19,11 @@ function Profile() {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [editing, setEditing] = useState(false);
+    // Delete confirmation modal state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [sliderValue, setSliderValue] = useState(0); // 0~100
+    const [sliderDone, setSliderDone] = useState(false);
+    const [confirmText, setConfirmText] = useState("");
 
     const loadMe = async () => {
         const token = localStorage.getItem("token");
@@ -87,10 +92,9 @@ function Profile() {
         setEditing(false);
     };
 
-    const onDelete = async () => {
+    const doDelete = async () => {
         const token = localStorage.getItem("token");
         if (!token) return;
-        if (!confirm("정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
         setSaving(true);
         try {
             const res = await fetch("/api/me", {
@@ -108,6 +112,28 @@ function Profile() {
             navigate("/");
         } finally {
             setSaving(false);
+        }
+    };
+
+    const openDeleteModal = () => {
+        setShowDeleteModal(true);
+        // reset state for fresh start
+        setSliderValue(0);
+        setSliderDone(false);
+        setConfirmText("");
+    };
+
+    const closeDeleteModal = () => {
+        setShowDeleteModal(false);
+    };
+
+    const handleSliderRelease = () => {
+        if (sliderValue >= 95) {
+            setSliderValue(100);
+            setSliderDone(true);
+        } else {
+            setSliderValue(0);
+            setSliderDone(false);
         }
     };
 
@@ -183,13 +209,13 @@ function Profile() {
                                 {!editing ? (
                                     <>
                                         <button onClick={() => setEditing(true)} className={`${styles.btn} ${styles.btnPrimary}`}>편집</button>
-                                        <button onClick={onDelete} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
+                                        <button onClick={openDeleteModal} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
                                     </>
                                 ) : (
                                     <>
                                         <button onClick={onSave} disabled={saving} className={`${styles.btn} ${styles.btnPrimary}`}>{saving ? "저장 중…" : "저장"}</button>
                                         <button onClick={onCancel} disabled={saving} className={`${styles.btn} ${styles.btnSecondary}`}>취소</button>
-                                        <button onClick={onDelete} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
+                                        <button onClick={openDeleteModal} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
                                     </>
                                 )}
                             </div>
@@ -201,6 +227,59 @@ function Profile() {
 
                 <p className={styles.mutedLink}>계정이 없으신가요? <a onClick={() => navigate("/signup")}>회원가입</a></p>
             </div>
+
+            {showDeleteModal && (
+                <div className={styles.modalOverlay} role="dialog" aria-modal="true">
+                    <div className={styles.modal}>
+                        <div className={styles.modalTitle}>계정 삭제 확인</div>
+                        <div className={styles.modalText}>이 작업은 되돌릴 수 없습니다. 아래 2단계를 순서대로 완료해야 삭제할 수 있습니다.</div>
+
+                        {/* Step 1: Slider */}
+                        <div className={styles.modalSection}>
+                            <div className={styles.sliderPrompt}>1단계: 왼쪽에서 오른쪽 끝까지 밀어 삭제에 동의하세요.</div>
+                            <input
+                                className={styles.slider}
+                                type="range"
+                                min={0}
+                                max={100}
+                                step={1}
+                                value={sliderValue}
+                                onChange={(e) => setSliderValue(Number(e.target.value))}
+                                onMouseUp={handleSliderRelease}
+                                onTouchEnd={handleSliderRelease}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-valuenow={sliderValue}
+                            />
+                            {!sliderDone && <div className={styles.dangerNote}>끝까지 밀지 않으면 시작 위치로 돌아갑니다.</div>}
+                            {sliderDone && <div className={styles.modalText}>확인됨 ✓</div>}
+                        </div>
+
+                        {/* Step 2: Exact text input */}
+                        {sliderDone && (
+                            <div className={styles.modalSection}>
+                                <div className={styles.modalText}>2단계: 아래 문구를 정확히 입력하세요.</div>
+                                <div className={styles.modalText}><strong>{me?.id} 계정 삭제</strong></div>
+                                <input
+                                    className={`${styles.input} ${styles.confirmInput}`}
+                                    placeholder={`${me?.id} 계정 삭제`}
+                                    value={confirmText}
+                                    onChange={(e) => setConfirmText(e.target.value)}
+                                />
+                            </div>
+                        )}
+
+                        <div className={styles.modalActions}>
+                            <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={closeDeleteModal}>취소</button>
+                            {sliderDone && confirmText.trim() === `${me?.id} 계정 삭제` && (
+                                <button className={`${styles.btn} ${styles.btnDanger}`} onClick={doDelete} disabled={saving}>
+                                    {saving ? "삭제 중…" : "계정 삭제"}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

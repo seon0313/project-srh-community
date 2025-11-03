@@ -178,6 +178,72 @@
   margin-top: 16px;
 }
 
+/* Delete confirmation modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
+}
+
+.modal {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  padding: 20px;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.modalText {
+  font-size: 14px;
+  color: #374151;
+}
+
+.modalSection {
+  margin-top: 14px;
+}
+
+.sliderPrompt {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.slider {
+  width: 100%;
+  height: 40px;
+}
+
+.confirmInput {
+  margin-top: 8px;
+}
+
+.dangerNote {
+  font-size: 12px;
+  color: #b91c1c;
+  margin-top: 6px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .title {
@@ -242,6 +308,21 @@
   .btnDanger {
     background: #ef4444;
     border-color: #ef4444;
+  }
+
+  .modal {
+    background: #0b0b0d;
+    border-color: #27272a;
+    color: #e5e7eb;
+  }
+  .modalText {
+    color: #9ca3af;
+  }
+  .sliderPrompt {
+    color: #9ca3af;
+  }
+  .dangerNote {
+    color: #f87171;
   }
 }
 
