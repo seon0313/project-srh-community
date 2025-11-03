@@ -30,52 +30,6 @@ const notice_posts = [
   { id: 4, title: "네 번째 공지사항", author: "관리자", date: "2025-10-13" },
 ]
 
-const guide = [
-    { id: 1, title: "김치볶음밥 만들어보자", description: "김치볶음밥에 대한 모든 것", author: "요리왕", date: "2025-10-16", steps: 5, needtime: 15, thumbnail: "/vite.svg" },  
-    { id: 2, title: "Python 기초 완벽 정복", description: "파이썬 기초 문법부터 실전까지", author: "코딩마스터", date: "2025-10-15", steps: 10, needtime: 120, thumbnail: "/vite.svg" },
-    { id: 3, title: "홈 카페 라떼아트 배우기", description: "집에서 카페 수준의 라떼 만들기", author: "바리스타김", date: "2025-10-14", steps: 7, needtime: 30, thumbnail: "/vite.svg" },
-    { id: 4, title: "기타 코드 10분 마스터", description: "기본 코드로 노래 연주하기", author: "음악쟁이", date: "2025-10-13", steps: 8, needtime: 10, thumbnail: "/vite.svg" },
-    { id: 5, title: "Arduino LED 제어 프로젝트", description: "아두이노로 LED 깜빡이기", author: "메이커박", date: "2025-10-12", steps: 6, needtime: 45, thumbnail: "/vite.svg" },
-    { id: 6, title: "셀프 네일아트 기초", description: "집에서 쉽게 따라하는 네일아트", author: "뷰티러버", date: "2025-10-11", steps: 4, needtime: 20, thumbnail: "/vite.svg" },
-    { id: 7, title: "Photoshop 사진 보정", description: "인물 사진 자연스럽게 보정하기", author: "포토그래퍼", date: "2025-10-10", steps: 9, needtime: 60, thumbnail: "/vite.svg" },
-    { id: 8, title: "반려식물 키우기 입문", description: "초보자를 위한 식물 돌보기", author: "그린핑거", date: "2025-10-09", steps: 5, needtime: 10, thumbnail: "/vite.svg" },
-    { id: 9, title: "React 컴포넌트 설계", description: "재사용 가능한 컴포넌트 만들기", author: "프론트개발자", date: "2025-10-08", steps: 12, needtime: 90, thumbnail: "/vite.svg" },
-    { id: 10, title: "홈트 전신 운동 루틴", description: "집에서 30분 전신 운동", author: "헬스트레이너", date: "2025-10-07", steps: 8, needtime: 30, thumbnail: "/vite.svg" },
-    { id: 11, title: "유튜브 썸네일 디자인", description: "클릭률 높이는 썸네일 만들기", author: "유튜버", date: "2025-10-06", steps: 6, needtime: 25, thumbnail: "/vite.svg" },
-    { id: 12, title: "3D 프린터 첫 출력", description: "3D 프린터 설정부터 출력까지", author: "3D프린팅", date: "2025-10-05", steps: 7, needtime: 50, thumbnail: "/vite.svg" },
-];
-
-// 각 가이드에 맞는 단계별 아이템 더미 데이터 생성
-type GuideItem = {
-  id: number;
-  parentId: number;
-  title: string;
-  author: string;
-  content: string;
-  date: string;
-  needtime: number;
-  thumbnail: string;
-};
-
-const guide_items: GuideItem[] = guide.flatMap((g) => {
-  const perStepTime = Math.max(1, Math.round(g.needtime / Math.max(1, g.steps)));
-  const steps = Math.max(1, g.steps);
-  const items: GuideItem[] = [];
-  for (let i = 1; i <= steps; i++) {
-    items.push({
-      id: g.id * 1000 + i, // 간단한 고유 ID 규칙
-      parentId: g.id,
-      title: `${i} - ${g.title} 단계`,
-      author: g.author,
-      content: `${g.title}의 ${i}번째 단계에 대한 설명입니다. 예시 더미 텍스트로 채워집니다.`,
-      date: g.date,
-      needtime: perStepTime,
-      thumbnail: g.thumbnail,
-    });
-  }
-  return items;
-});
-
 // 사용자 명함 정보 타입
 type UserProfile = {
   id: number;
@@ -467,7 +421,207 @@ app.get("/api/post", async (c) => {
   }
 });
 app.post("/api/notice-posts", (c) => c.json(notice_posts));
-app.get("/api/guides", (c) => c.json(guide));
+
+// 가이드 목록 조회 API (DB 기반)
+app.get("/api/guides", async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(
+      "SELECT id, author_id, title, description, date, step, needtime, thumbnail_url, edited, status FROM guide WHERE status = 1 ORDER BY date DESC"
+    ).all();
+    return c.json(results);
+  } catch (error) {
+    console.error("가이드 목록 조회 오류:", error);
+    return c.json({ error: "가이드 목록을 불러올 수 없습니다." }, 500);
+  }
+});
+
+// 특정 가이드 조회 API
+app.get("/api/guide", async (c) => {
+  const guideId = c.req.query("id");
+  if (!guideId) {
+    return c.json({ error: "가이드 ID가 필요합니다." }, 400);
+  }
+  
+  try {
+    const { results } = await c.env.DB.prepare(
+      "SELECT id, author_id, title, description, date, step, needtime, thumbnail_url, edited, status FROM guide WHERE id = ?"
+    ).bind(guideId).all();
+    
+    if (!results || results.length === 0) {
+      return c.json({ error: "가이드를 찾을 수 없습니다." }, 404);
+    }
+    
+    return c.json(results[0]);
+  } catch (error) {
+    console.error("가이드 조회 오류:", error);
+    return c.json({ error: "가이드를 불러올 수 없습니다." }, 500);
+  }
+});
+
+// 가이드 생성 API
+app.post("/api/guides", async (c) => {
+  const { token, title, description, step, needtime, thumbnail_url } = await c.req.json<{
+    token: string;
+    title: string;
+    description?: string;
+    step?: number;
+    needtime?: number;
+    thumbnail_url?: string;
+  }>();
+  
+  if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
+  if (!title) return c.json({ error: "제목이 필요합니다." }, 400);
+  
+  try {
+    const payload = await verify(token, c.env.SECRET_KEY);
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
+    }
+    
+    const guideId = crypto.randomUUID();
+    const now = Date.now();
+    
+    await c.env.DB.prepare(
+      "INSERT INTO guide (id, author_id, title, description, date, step, needtime, thumbnail_url, edited, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(
+      guideId,
+      payload.id,
+      title,
+      description || "",
+      now,
+      step || 0,
+      needtime || 0,
+      thumbnail_url || "",
+      0,
+      1 // status: 1 = active
+    ).run();
+    
+    return c.json({ success: true, id: guideId });
+  } catch (e) {
+    console.error("가이드 생성 오류:", e);
+    return c.json({ error: "가이드 생성 중 오류가 발생했습니다." }, 500);
+  }
+});
+
+// 가이드 수정 API
+app.put("/api/guides", async (c) => {
+  const { token, id, title, description, step, needtime, thumbnail_url } = await c.req.json<{
+    token: string;
+    id: string;
+    title?: string;
+    description?: string;
+    step?: number;
+    needtime?: number;
+    thumbnail_url?: string;
+  }>();
+  
+  if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
+  if (!id) return c.json({ error: "가이드 ID가 필요합니다." }, 400);
+  
+  try {
+    const payload = await verify(token, c.env.SECRET_KEY);
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
+    }
+    
+    // 권한 확인: 작성자 본인이거나 관리자인지 체크
+    const { results: guideResults } = await c.env.DB.prepare(
+      "SELECT author_id FROM guide WHERE id = ?"
+    ).bind(id).all();
+    
+    if (!guideResults || guideResults.length === 0) {
+      return c.json({ error: "가이드를 찾을 수 없습니다." }, 404);
+    }
+    
+    const guide = guideResults[0] as any;
+    if (guide.author_id !== payload.id && payload.role !== 1) {
+      return c.json({ error: "수정 권한이 없습니다." }, 403);
+    }
+    
+    // 동적 업데이트 쿼리 생성
+    const updates: string[] = [];
+    const values: any[] = [];
+    
+    if (title !== undefined) {
+      updates.push("title = ?");
+      values.push(title);
+    }
+    if (description !== undefined) {
+      updates.push("description = ?");
+      values.push(description);
+    }
+    if (step !== undefined) {
+      updates.push("step = ?");
+      values.push(step);
+    }
+    if (needtime !== undefined) {
+      updates.push("needtime = ?");
+      values.push(needtime);
+    }
+    if (thumbnail_url !== undefined) {
+      updates.push("thumbnail_url = ?");
+      values.push(thumbnail_url);
+    }
+    
+    if (updates.length === 0) {
+      return c.json({ error: "변경할 항목이 없습니다." }, 400);
+    }
+    
+    updates.push("edited = ?");
+    values.push(Date.now());
+    values.push(id);
+    
+    const sql = `UPDATE guide SET ${updates.join(", ")} WHERE id = ?`;
+    await c.env.DB.prepare(sql).bind(...values).run();
+    
+    return c.json({ success: true });
+  } catch (e) {
+    console.error("가이드 수정 오류:", e);
+    return c.json({ error: "가이드 수정 중 오류가 발생했습니다." }, 500);
+  }
+});
+
+// 가이드 삭제 API (soft delete)
+app.delete("/api/guides", async (c) => {
+  const { token, id } = await c.req.json<{ token: string; id: string }>();
+  
+  if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
+  if (!id) return c.json({ error: "가이드 ID가 필요합니다." }, 400);
+  
+  try {
+    const payload = await verify(token, c.env.SECRET_KEY);
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
+    }
+    
+    // 권한 확인
+    const { results: guideResults } = await c.env.DB.prepare(
+      "SELECT author_id FROM guide WHERE id = ?"
+    ).bind(id).all();
+    
+    if (!guideResults || guideResults.length === 0) {
+      return c.json({ error: "가이드를 찾을 수 없습니다." }, 404);
+    }
+    
+    const guide = guideResults[0] as any;
+    if (guide.author_id !== payload.id && payload.role !== 1) {
+      return c.json({ error: "삭제 권한이 없습니다." }, 403);
+    }
+    
+    // Soft delete: status를 0으로 변경
+    await c.env.DB.prepare(
+      "UPDATE guide SET status = 0, edited = ? WHERE id = ?"
+    ).bind(Date.now(), id).run();
+    
+    return c.json({ success: true });
+  } catch (e) {
+    console.error("가이드 삭제 오류:", e);
+    return c.json({ error: "가이드 삭제 중 오류가 발생했습니다." }, 500);
+  }
+});
 
 // JWT 연장 API
 app.post("/api/extend-jwt", async (c) => {
@@ -663,15 +817,228 @@ app.get("/api/users/search/:username", (c) => {
   return c.json(publicUser);
 });
 
-// 가이드 아이템 조회 API (parentId로 필터 가능)
-app.get("/api/guide-items", (c) => {
-  const url = new URL(c.req.url);
-  const parentId = url.searchParams.get("id");
-  if (parentId) {
-    const pid = Number(parentId);
-    return c.json(guide_items.filter((it) => it.parentId === pid));
+// 가이드 아이템 목록 조회 API (parent_id로 필터 가능)
+app.get("/api/guide-items", async (c) => {
+  const parentId = c.req.query("id");
+  
+  try {
+    if (parentId) {
+      // 특정 가이드의 아이템만 조회
+      const { results } = await c.env.DB.prepare(
+        "SELECT id, parent_id, author_id, title, description, content, date, needtime, thumbnail_url, edited, status FROM guide_item WHERE parent_id = ? AND status = 0 ORDER BY date ASC"
+      ).bind(parentId).all();
+      return c.json(results);
+    } else {
+      // 모든 활성 가이드 아이템 조회
+      const { results } = await c.env.DB.prepare(
+        "SELECT id, parent_id, author_id, title, description, content, date, needtime, thumbnail_url, edited, status FROM guide_item WHERE status = 0 ORDER BY parent_id, date ASC"
+      ).all();
+      return c.json(results);
+    }
+  } catch (error) {
+    console.error("가이드 아이템 조회 오류:", error);
+    return c.json({ error: "가이드 아이템을 불러올 수 없습니다." }, 500);
   }
-  return c.json(guide_items);
+});
+
+// 특정 가이드 아이템 조회 API
+app.get("/api/guide-item", async (c) => {
+  const itemId = c.req.query("id");
+  if (!itemId) {
+    return c.json({ error: "아이템 ID가 필요합니다." }, 400);
+  }
+  
+  try {
+    const { results } = await c.env.DB.prepare(
+      "SELECT id, parent_id, author_id, title, description, content, date, needtime, thumbnail_url, edited, status FROM guide_item WHERE id = ?"
+    ).bind(itemId).all();
+    
+    if (!results || results.length === 0) {
+      return c.json({ error: "가이드 아이템을 찾을 수 없습니다." }, 404);
+    }
+    
+    return c.json(results[0]);
+  } catch (error) {
+    console.error("가이드 아이템 조회 오류:", error);
+    return c.json({ error: "가이드 아이템을 불러올 수 없습니다." }, 500);
+  }
+});
+
+// 가이드 아이템 생성 API
+app.post("/api/guide-items", async (c) => {
+  const { token, parent_id, title, description, content, needtime, thumbnail_url } = await c.req.json<{
+    token: string;
+    parent_id: string;
+    title: string;
+    description?: string;
+    content?: string;
+    needtime?: number;
+    thumbnail_url?: string;
+  }>();
+  
+  if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
+  if (!parent_id) return c.json({ error: "상위 가이드 ID가 필요합니다." }, 400);
+  if (!title) return c.json({ error: "제목이 필요합니다." }, 400);
+  
+  try {
+    const payload = await verify(token, c.env.SECRET_KEY);
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
+    }
+    
+    // parent_id가 유효한 가이드인지 확인
+    const { results: parentResults } = await c.env.DB.prepare(
+      "SELECT id FROM guide WHERE id = ? AND status = 1"
+    ).bind(parent_id).all();
+    
+    if (!parentResults || parentResults.length === 0) {
+      return c.json({ error: "상위 가이드를 찾을 수 없습니다." }, 404);
+    }
+    
+    const itemId = crypto.randomUUID();
+    const now = Date.now();
+    
+    await c.env.DB.prepare(
+      "INSERT INTO guide_item (id, parent_id, author_id, title, description, content, date, needtime, thumbnail_url, edited, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(
+      itemId,
+      parent_id,
+      payload.id,
+      title,
+      description || "",
+      content || "",
+      now,
+      needtime || 0,
+      thumbnail_url || "",
+      0,
+      1 // status: 1 = active
+    ).run();
+    
+    return c.json({ success: true, id: itemId });
+  } catch (e) {
+    console.error("가이드 아이템 생성 오류:", e);
+    return c.json({ error: "가이드 아이템 생성 중 오류가 발생했습니다." }, 500);
+  }
+});
+
+// 가이드 아이템 수정 API
+app.put("/api/guide-items", async (c) => {
+  const { token, id, title, description, content, needtime, thumbnail_url } = await c.req.json<{
+    token: string;
+    id: string;
+    title?: string;
+    description?: string;
+    content?: string;
+    needtime?: number;
+    thumbnail_url?: string;
+  }>();
+  
+  if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
+  if (!id) return c.json({ error: "아이템 ID가 필요합니다." }, 400);
+  
+  try {
+    const payload = await verify(token, c.env.SECRET_KEY);
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
+    }
+    
+    // 권한 확인: 작성자 본인이거나 관리자인지 체크
+    const { results: itemResults } = await c.env.DB.prepare(
+      "SELECT author_id FROM guide_item WHERE id = ?"
+    ).bind(id).all();
+    
+    if (!itemResults || itemResults.length === 0) {
+      return c.json({ error: "가이드 아이템을 찾을 수 없습니다." }, 404);
+    }
+    
+    const item = itemResults[0] as any;
+    if (item.author_id !== payload.id && payload.role !== 1) {
+      return c.json({ error: "수정 권한이 없습니다." }, 403);
+    }
+    
+    // 동적 업데이트 쿼리 생성
+    const updates: string[] = [];
+    const values: any[] = [];
+    
+    if (title !== undefined) {
+      updates.push("title = ?");
+      values.push(title);
+    }
+    if (description !== undefined) {
+      updates.push("description = ?");
+      values.push(description);
+    }
+    if (content !== undefined) {
+      updates.push("content = ?");
+      values.push(content);
+    }
+    if (needtime !== undefined) {
+      updates.push("needtime = ?");
+      values.push(needtime);
+    }
+    if (thumbnail_url !== undefined) {
+      updates.push("thumbnail_url = ?");
+      values.push(thumbnail_url);
+    }
+    
+    if (updates.length === 0) {
+      return c.json({ error: "변경할 항목이 없습니다." }, 400);
+    }
+    
+    updates.push("edited = ?");
+    values.push(Date.now());
+    values.push(id);
+    
+    const sql = `UPDATE guide_item SET ${updates.join(", ")} WHERE id = ?`;
+    await c.env.DB.prepare(sql).bind(...values).run();
+    
+    return c.json({ success: true });
+  } catch (e) {
+    console.error("가이드 아이템 수정 오류:", e);
+    return c.json({ error: "가이드 아이템 수정 중 오류가 발생했습니다." }, 500);
+  }
+});
+
+// 가이드 아이템 삭제 API (soft delete)
+app.delete("/api/guide-items", async (c) => {
+  const { token, id } = await c.req.json<{ token: string; id: string }>();
+  
+  if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
+  if (!id) return c.json({ error: "아이템 ID가 필요합니다." }, 400);
+  
+  try {
+    const payload = await verify(token, c.env.SECRET_KEY);
+    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    if (!payload.ip || payload.ip !== reqIp) {
+      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
+    }
+    
+    // 권한 확인
+    const { results: itemResults } = await c.env.DB.prepare(
+      "SELECT author_id FROM guide_item WHERE id = ?"
+    ).bind(id).all();
+    
+    if (!itemResults || itemResults.length === 0) {
+      return c.json({ error: "가이드 아이템을 찾을 수 없습니다." }, 404);
+    }
+    
+    const item = itemResults[0] as any;
+    if (item.author_id !== payload.id && payload.role !== 1) {
+      return c.json({ error: "삭제 권한이 없습니다." }, 403);
+    }
+    
+    // Soft delete: status를 0으로 변경
+    await c.env.DB.prepare(
+      "UPDATE guide_item SET status = 0, edited = ? WHERE id = ?"
+    ).bind(Date.now(), id).run();
+    
+    return c.json({ success: true });
+  } catch (e) {
+    console.error("가이드 아이템 삭제 오류:", e);
+    return c.json({ error: "가이드 아이템 삭제 중 오류가 발생했습니다." }, 500);
+  }
 });
 
 // 배너 이미지 생성 API (Lorem Picsum 사용)
