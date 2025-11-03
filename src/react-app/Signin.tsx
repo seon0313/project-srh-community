@@ -11,7 +11,7 @@ function Signin() {
     const [showDetails2, setShowDetails2] = useState(false);
     const navigate = useNavigate();
 
-    function handleSignup() {
+    async function handleSignup() {
         if (!id || !email || !password || !passwordre) {
             alert("모든 항목을 입력해주세요.");
             return;
@@ -29,8 +29,26 @@ function Signin() {
             return;
         }
 
-        alert("회원가입이 완료되었습니다.\n졸업생 및 재학생 인증은 프로필에서 가능합니다.");
-        navigate("/");
+        try {
+            const response = await fetch("/api/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id, email, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                alert("회원가입이 완료되었습니다.\n졸업생 및 재학생 인증은 프로필에서 가능합니다.");
+                navigate("/login");
+            } else {
+                alert(data.error || "회원가입 중 오류가 발생했습니다.");
+            }
+        } catch (error) {
+            alert("회원가입 처리 중 오류가 발생했습니다: " + error);
+        }
     }
 
     // Get input validation classes
