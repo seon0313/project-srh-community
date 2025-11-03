@@ -23,10 +23,10 @@ function Guide() {
         parent_id: string;
         title: string;
         author_id: string;
-        content: string;
         date: number;
         needtime: number;
         thumbnail_url: string;
+        description: string;
     };
 
     const [guide, setGuide] = useState<Guide | null>(null);
@@ -131,7 +131,7 @@ function Guide() {
                                 </div>
                                 <div className={styles.stepBody}>
                                     <img className={styles.stepThumb} src={it.thumbnail_url} alt={it.title} />
-                                    <p className={styles.stepContent}>{it.content}</p>
+                                    <p className={styles.stepContent}>{it.description}</p>
                                 </div>
                                 <div className={styles.stepMeta}>
                                     <span>작성자: {it.author_id}</span>

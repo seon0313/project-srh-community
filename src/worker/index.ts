@@ -820,18 +820,24 @@ app.get("/api/users/search/:username", (c) => {
 // 가이드 아이템 목록 조회 API (parent_id로 필터 가능)
 app.get("/api/guide-items", async (c) => {
   const parentId = c.req.query("id");
+  const includeContent = c.req.query("content") === "true"; // content 포함 여부
+  
+  // content 포함 여부에 따라 SELECT 절 구성
+  const selectFields = includeContent
+    ? "id, parent_id, author_id, title, description, content, date, needtime, thumbnail_url, edited, status"
+    : "id, parent_id, author_id, title, description, date, needtime, thumbnail_url, edited, status";
   
   try {
     if (parentId) {
       // 특정 가이드의 아이템만 조회
       const { results } = await c.env.DB.prepare(
-        "SELECT id, parent_id, author_id, title, description, content, date, needtime, thumbnail_url, edited, status FROM guide_item WHERE parent_id = ? AND status = 0 ORDER BY date ASC"
+        `SELECT ${selectFields} FROM guide_item WHERE parent_id = ? AND status = 0 ORDER BY date ASC`
       ).bind(parentId).all();
       return c.json(results);
     } else {
       // 모든 활성 가이드 아이템 조회
       const { results } = await c.env.DB.prepare(
-        "SELECT id, parent_id, author_id, title, description, content, date, needtime, thumbnail_url, edited, status FROM guide_item WHERE status = 0 ORDER BY parent_id, date ASC"
+        `SELECT ${selectFields} FROM guide_item WHERE status = 0 ORDER BY parent_id, date ASC`
       ).all();
       return c.json(results);
     }
