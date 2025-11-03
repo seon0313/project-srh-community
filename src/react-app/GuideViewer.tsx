@@ -1,6 +1,9 @@
 import styles from "./GuideViewer.module.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 function GuideViewer() {
     const navigate = useNavigate();
@@ -180,10 +183,14 @@ function GuideViewer() {
                 </div>
 
                 <div className={styles.contentSection}>
-                    <div 
-                        className={styles.content}
-                        dangerouslySetInnerHTML={{ __html: item.content || item.description }}
-                    />
+                    <div className={styles.content}>
+                        <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            rehypePlugins={[rehypeRaw]}
+                        >
+                            {item.content || item.description}
+                        </ReactMarkdown>
+                    </div>
                 </div>
             </article>
 
