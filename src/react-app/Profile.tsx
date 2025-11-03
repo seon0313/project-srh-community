@@ -24,6 +24,7 @@ function Profile() {
     const [sliderValue, setSliderValue] = useState(0); // 0~100
     const [sliderDone, setSliderDone] = useState(false);
     const [confirmText, setConfirmText] = useState("");
+    const [isDraggingThumb, setIsDraggingThumb] = useState(false);
 
     const loadMe = async () => {
         const token = localStorage.getItem("token");
@@ -132,9 +133,66 @@ function Profile() {
             setSliderValue(100);
             setSliderDone(true);
         } else {
+            // Step 1 failed: snap back and reset Step 2 input
             setSliderValue(0);
             setSliderDone(false);
+            setConfirmText("");
         }
+    };
+
+    const isNearThumb = (input: HTMLInputElement, clientX: number) => {
+        const rect = input.getBoundingClientRect();
+        const trackLeft = rect.left;
+        const trackWidth = rect.width;
+        const thumbX = trackLeft + (sliderValue / 100) * trackWidth;
+        const tolerance = 16; // px around the thumb considered a valid grab area
+        return Math.abs(clientX - thumbX) <= tolerance;
+    };
+
+    const onRangeMouseDown: React.MouseEventHandler<HTMLInputElement> = (e) => {
+        const target = e.currentTarget;
+        if (!isNearThumb(target, e.clientX)) {
+            // Block track click jumps; only allow drag starting from thumb
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDraggingThumb(false);
+            return;
+        }
+        setIsDraggingThumb(true);
+    };
+
+    const onRangeMouseUp: React.MouseEventHandler<HTMLInputElement> = () => {
+        if (isDraggingThumb) {
+            handleSliderRelease();
+        }
+        setIsDraggingThumb(false);
+    };
+
+    const onRangeChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+        if (!isDraggingThumb) {
+            // Ignore changes not initiated from the thumb drag
+            return;
+        }
+        setSliderValue(Number(e.target.value));
+    };
+
+    const onRangeTouchStart: React.TouchEventHandler<HTMLInputElement> = (e) => {
+        const touch = e.touches[0];
+        const target = e.currentTarget;
+        if (!isNearThumb(target, touch.clientX)) {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDraggingThumb(false);
+            return;
+        }
+        setIsDraggingThumb(true);
+    };
+
+    const onRangeTouchEnd: React.TouchEventHandler<HTMLInputElement> = () => {
+        if (isDraggingThumb) {
+            handleSliderRelease();
+        }
+        setIsDraggingThumb(false);
     };
 
     return (
@@ -244,9 +302,11 @@ function Profile() {
                                 max={100}
                                 step={1}
                                 value={sliderValue}
-                                onChange={(e) => setSliderValue(Number(e.target.value))}
-                                onMouseUp={handleSliderRelease}
-                                onTouchEnd={handleSliderRelease}
+                                    onChange={onRangeChange}
+                                    onMouseDown={onRangeMouseDown}
+                                    onMouseUp={onRangeMouseUp}
+                                    onTouchStart={onRangeTouchStart}
+                                    onTouchEnd={onRangeTouchEnd}
                                 aria-valuemin={0}
                                 aria-valuemax={100}
                                 aria-valuenow={sliderValue}
@@ -260,12 +320,15 @@ function Profile() {
                             <div className={styles.modalSection}>
                                 <div className={styles.modalText}>2단계: 아래 문구를 정확히 입력하세요.</div>
                                 <div className={styles.modalText}><strong>{me?.id} 계정 삭제</strong></div>
-                                <input
-                                    className={`${styles.input} ${styles.confirmInput}`}
-                                    placeholder={`${me?.id} 계정 삭제`}
-                                    value={confirmText}
-                                    onChange={(e) => setConfirmText(e.target.value)}
-                                />
+                                <div className={`${styles.inputWrap} ${styles.confirmInput}`}>
+                                    <input
+                                        className={styles.input}
+                                        value={confirmText}
+                                        onChange={(e) => setConfirmText(e.target.value)}
+                                        aria-label={`${me?.id} 계정 삭제 문구 입력`}
+                                    />
+                                    <span className={styles.ghostPlaceholder}>{me?.id} 계정 삭제</span>
+                                </div>
                             </div>
                         )}
 
