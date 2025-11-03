@@ -40,18 +40,24 @@ function Guide() {
             try {
                 setLoading(true);
                 setError(null);
+                console.log('Loading guide with ID:', guideId);
                 const [gRes, itemsRes] = await Promise.all([
                     fetch(`/api/guide?id=${guideId}`),
                     fetch(`/api/guide-items?id=${guideId}`),
                 ]);
+                console.log('Guide response status:', gRes.status);
+                console.log('Items response status:', itemsRes.status);
                 if (!gRes.ok || !itemsRes.ok) throw new Error("네트워크 오류");
                 const guideData: Guide = await gRes.json();
                 const allItems: GuideItem[] = await itemsRes.json();
+                console.log('Guide data:', guideData);
+                console.log('Items data:', allItems);
                 if (!active) return;
                 setGuide(guideData);
                 setItems(allItems);
             } catch (e: any) {
                 if (!active) return;
+                console.error('Load error:', e);
                 setError(e?.message ?? "알 수 없는 오류");
             } finally {
                 if (active) setLoading(false);
@@ -110,6 +116,10 @@ function Guide() {
                     </div>
                 ) : error ? (
                     <div className={styles.errorZone}>{error}</div>
+                ) : items.length === 0 ? (
+                    <div className={styles.errorZone}>
+                        이 가이드에는 아직 단계가 추가되지 않았습니다.
+                    </div>
                 ) : (
                     <ol className={styles.stepsList}>
                         {items.map((it, idx) => (
