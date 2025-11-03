@@ -423,7 +423,7 @@ app.post("/api/login", async (c) => {
 
 
 // 인증 테스트용 API
-app.get("/api/auth", async (c) => {
+app.post("/api/auth", async (c) => {
   const { token } = await c.req.json<{ token: string }>();
   try {
     const payload = await verify(token, c.env.SECRET_KEY);

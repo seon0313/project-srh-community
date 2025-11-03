@@ -23,7 +23,7 @@ function Login() {
                 return;
             }
             localStorage.setItem("token", data.token);
-            navigate("/app");
+            navigate("/");
         } catch (e) {
             setError("서버 오류가 발생했습니다.");
         }
