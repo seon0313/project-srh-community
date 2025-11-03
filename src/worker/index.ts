@@ -530,20 +530,25 @@ app.put("/api/me", async (c) => {
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
-    // Build dynamic update
+    // Build dynamic update with validated inputs
     const updates: string[] = [];
     const values: any[] = [];
-    if (email) {
+    
+    if (email !== undefined) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) return c.json({ error: "올바른 이메일 형식이 아닙니다." }, 400);
       updates.push("email = ?");
       values.push(email);
     }
     if (nickname !== undefined) {
+      // Validate nickname length (optional: add more validation)
+      if (typeof nickname === 'string' && nickname.length > 16) {
+        return c.json({ error: "닉네임은 16자 이하여야 합니다." }, 400);
+      }
       updates.push("nickname = ?");
       values.push(nickname);
     }
-    if (password) {
+    if (password !== undefined && password !== null && password !== '') {
       if (password.length < 6) return c.json({ error: "비밀번호는 6자 이상이어야 합니다." }, 400);
       const hashed = await sha256(password + c.env.SECRET_PW_KEY);
       updates.push("password = ?");
