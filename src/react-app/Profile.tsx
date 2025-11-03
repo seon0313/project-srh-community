@@ -117,34 +117,68 @@ function Profile() {
             <div className={styles.container}>
                 <h1 className={styles.title}>프로필</h1>
 
-                <div className={styles.card}>
+                <div className={`${styles.card} ${editing ? styles.cardEditing : styles.cardView}`}>
+                    {editing && <div className={styles.modeBadge}>편집 모드</div>}
                     {loading ? (
                         <div>불러오는 중…</div>
                     ) : me ? (
                         <>
-                            <div className={styles.grid}>
-                                <label>
-                                    <span className={styles.label}>아이디</span>
-                                    <input value={me.id} readOnly className={`${styles.input} ${styles.readonly}`} />
-                                </label>
-                                <label>
-                                    <span className={styles.label}>이메일</span>
-                                    <input value={email} onChange={(e) => setEmail(e.target.value)} className={`${styles.input} ${!editing ? styles.readonly : ''}`} readOnly={!editing} />
-                                </label>
+                            {!editing && (
                                 <div>
-                                    <span className={styles.label}>비밀번호 변경 (선택)</span>
-                                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="새 비밀번호 (6자 이상)" className={`${styles.input} ${!editing ? styles.readonly : ''}`} readOnly={!editing} />
-                                </div>
-                                <div className={styles.twoCol}>
-                                    <div>
-                                        <span className={styles.label}>권한</span>
-                                        <div className={styles.pill}>{me.role ?? 0}</div>
+                                    <div className={styles.header}>
+                                        <div className={styles.avatar}>{(me.id?.[0] || '?').toUpperCase()}</div>
+                                        <div>
+                                            <div className={styles.name}>{me.id}</div>
+                                            <div className={styles.subtitle}>{email}</div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span className={styles.label}>가입일</span>
-                                        <div className={styles.pill}>{me.created_at ? new Date(me.created_at).toLocaleString() : "-"}</div>
+                                    <div className={styles.metaRow}>
+                                        <div className={styles.chip}>권한: {me.role ?? 0}</div>
+                                        <div className={styles.chip}>가입일: {me.created_at ? new Date(me.created_at).toLocaleDateString() : '-'}</div>
                                     </div>
+                                    <div className={styles.divider} />
                                 </div>
+                            )}
+                            <div className={styles.grid}>
+                                {/* 아이디: 편집 모드에서만 표시 */}
+                                {editing && (
+                                    <div className={styles.row}>
+                                        <span className={styles.label}>아이디</span>
+                                        <input value={me.id} readOnly className={`${styles.input} ${styles.readonly}`} />
+                                    </div>
+                                )}
+
+                                {/* 이메일 */}
+                                <div className={styles.row}>
+                                    <span className={styles.label}>이메일</span>
+                                    {!editing ? (
+                                        <div className={styles.value}>{email}</div>
+                                    ) : (
+                                        <input value={email} onChange={(e) => setEmail(e.target.value)} className={styles.input} />
+                                    )}
+                                </div>
+
+                                {/* 비밀번호 (편집 모드에서만) */}
+                                {editing && (
+                                    <div className={styles.row}>
+                                        <span className={styles.label}>비밀번호 변경 (선택)</span>
+                                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="새 비밀번호 (6자 이상)" className={styles.input} />
+                                    </div>
+                                )}
+
+                                {/* 기타 정보: 편집 모드에서만 별도 필드로 노출 */}
+                                {editing && (
+                                    <div className={styles.twoCol}>
+                                        <div>
+                                            <span className={styles.label}>권한</span>
+                                            <div className={styles.pill}>{me.role ?? 0}</div>
+                                        </div>
+                                        <div>
+                                            <span className={styles.label}>가입일</span>
+                                            <div className={styles.pill}>{me.created_at ? new Date(me.created_at).toLocaleString() : "-"}</div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className={styles.actions}>
