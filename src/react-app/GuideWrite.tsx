@@ -1,4 +1,7 @@
 import { useState } from "react";
+import MDEditor from "@uiw/react-md-editor";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
 import { useNavigate } from "react-router-dom";
 import Topbar from "./Topbar";
 import styles from "./GuideWrite.module.css";
@@ -371,17 +374,13 @@ function GuideWrite() {
                                 <label htmlFor="itemContent" className={styles.label}>
                                     내용 (마크다운)
                                 </label>
-                                <textarea
-                                    id="itemContent"
-                                    value={currentItem.content}
-                                    onChange={(e) => {
-                                        setCurrentItem({ ...currentItem, content: e.target.value });
-                                        autoResize(e);
-                                    }}
-                                    placeholder="## 제목&#10;&#10;상세 내용을 마크다운으로 작성하세요..."
-                                    className={styles.textareaLarge}
-                                    rows={10}
-                                />
+                                <div data-color-mode="dark">
+                                    <MDEditor
+                                        value={currentItem.content}
+                                        onChange={(val) => setCurrentItem({ ...currentItem, content: val || "" })}
+                                        height={360}
+                                    />
+                                </div>
                             </div>
 
                             <div className={styles.formGroup}>
