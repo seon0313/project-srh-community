@@ -3,7 +3,7 @@ import { sign, verify } from "hono/jwt";
 
 type Env = {
   SECRET_KEY: string;
-  // 여기에 기존 Env의 다른 속성들도 추가하세요 (예: NODE_ENV 등)
+  SECRET_PW_KEY: string;
 };
 
 const app = new Hono<{ Bindings: Env & { AI: any, DB: D1Database } }>();
@@ -342,17 +342,62 @@ const users: UserProfile[] = [
   }
 ];
 
+// sha256 해시 함수 (Cloudflare Workers 호환)
+async function sha256(str: string): Promise<string> {
+  const buf = new TextEncoder().encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// 회원가입 API (app 선언 이후에 위치)
+app.post("/api/signup", async (c) => {
+  const { id, email, password } = await c.req.json<{ id: string; email: string; password: string }>();
+  if (!id || !email || !password) {
+    return c.json({ error: "모든 항목을 입력해주세요." }, 400);
+  }
+  // 이메일 형식 검증
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return c.json({ error: "올바른 이메일 형식을 입력해주세요." }, 400);
+  }
+  if (password.length < 6) {
+    return c.json({ error: "비밀번호는 6자 이상이어야 합니다." }, 400);
+  }
+  try {
+    // 아이디 중복 체크
+    const { results: idResults } = await c.env.DB.prepare("SELECT id FROM users WHERE id = ?").bind(id).all();
+    if (idResults.length > 0) {
+      return c.json({ error: "이미 존재하는 아이디입니다." }, 409);
+    }
+    // 이메일 중복 체크
+    const { results: emailResults } = await c.env.DB.prepare("SELECT email FROM users WHERE email = ?").bind(email).all();
+    if (emailResults.length > 0) {
+      return c.json({ error: "이미 존재하는 이메일입니다." }, 409);
+    }
+    // 비밀번호 해시 (sha256)
+    const hashedPassword = await sha256(password + c.env.SECRET_PW_KEY);
+    // DB 저장
+    await c.env.DB.prepare(
+      "INSERT INTO users (id, email, password, role, created_at, verificati) VALUES (?, ?, ?, ?, ?, ?)"
+    ).bind(id, email, hashedPassword, 0, Date.now(), 0).run();
+    return c.json({ success: true, message: "회원가입이 완료되었습니다." });
+  } catch (error) {
+    return c.json({ error: "회원가입 처리 중 오류가 발생했습니다." }, 500);
+  }
+});
+
 // 로그인 API (DB users 테이블 기반)
 app.post("/api/login", async (c) => {
   const { id, password } = await c.req.json<{ id: string; password: string }>();
   if (!id || !password) {
     return c.json({ error: "아이디와 비밀번호를 입력하세요." }, 400);
   }
+  const hashedPassword = await sha256(password + c.env.SECRET_PW_KEY);
   try {
     // users 테이블에서 id, password 일치하는 사용자 조회 (패스워드 평문 예시)
     const { results } = await c.env.DB.prepare(
       "SELECT * FROM users WHERE id = ? AND password = ?"
-    ).bind(id, password).all();
+    ).bind(id, hashedPassword).all();
     if (results.length === 0) {
       return c.json({ error: "아이디 또는 비밀번호가 올바르지 않습니다." }, 401);
     }
