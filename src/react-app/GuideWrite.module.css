@@ -15,12 +15,12 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-height: calc(100vh - 100px);
+  height: calc(100vh - 100px);
+  position: sticky;
+  top: 80px;
 }
 
 .leftPanelFixed {
-  position: sticky;
-  top: 80px;
   flex-shrink: 0;
 }
 
