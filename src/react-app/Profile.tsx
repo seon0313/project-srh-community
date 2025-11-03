@@ -16,6 +16,7 @@ function Profile() {
     const [me, setMe] = useState<Me | null>(null);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [editing, setEditing] = useState(false);
@@ -65,6 +66,16 @@ function Profile() {
             alert("이메일을 입력하세요.");
             return;
         }
+        if (password) {
+            if (password.length < 6) {
+                alert("비밀번호는 6자 이상이어야 합니다.");
+                return;
+            }
+            if (password !== confirmPassword) {
+                alert("비밀번호가 일치하지 않습니다.");
+                return;
+            }
+        }
         setSaving(true);
         try {
             const res = await fetch("/api/me", {
@@ -79,6 +90,7 @@ function Profile() {
             }
             alert("프로필이 저장되었습니다.");
             setPassword("");
+            setConfirmPassword("");
             await loadMe();
             setEditing(false);
         } finally {
@@ -90,6 +102,7 @@ function Profile() {
         if (!me) return;
         setEmail(me.email || "");
         setPassword("");
+        setConfirmPassword("");
         setEditing(false);
     };
 
@@ -242,10 +255,30 @@ function Profile() {
 
                                 {/* 비밀번호 (편집 모드에서만) */}
                                 {editing && (
-                                    <div className={styles.row}>
-                                        <span className={styles.label}>비밀번호 변경 (선택)</span>
-                                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="새 비밀번호 (6자 이상)" className={styles.input} />
-                                    </div>
+                                    <>
+                                        <div className={styles.row}>
+                                            <span className={styles.label}>비밀번호 변경 (선택)</span>
+                                            <input
+                                                type="password"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                placeholder="새 비밀번호 (6자 이상)"
+                                                className={styles.input}
+                                                autoComplete="new-password"
+                                            />
+                                        </div>
+                                        <div className={styles.row}>
+                                            <span className={styles.label}>비밀번호 확인</span>
+                                            <input
+                                                type="password"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                placeholder="비밀번호를 다시 입력"
+                                                className={styles.input}
+                                                autoComplete="new-password"
+                                            />
+                                        </div>
+                                    </>
                                 )}
 
                                 {/* 기타 정보: 편집 모드에서만 별도 필드로 노출 */}
