@@ -115,8 +115,6 @@ function Profile() {
         <>
             <Topbar />
             <div className={styles.container}>
-                <h1 className={styles.title}>프로필</h1>
-
                 <div className={`${styles.card} ${editing ? styles.cardEditing : styles.cardView}`}>
                     {editing && <div className={styles.modeBadge}>편집 모드</div>}
                     {loading ? (
