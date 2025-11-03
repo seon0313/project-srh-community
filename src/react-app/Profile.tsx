@@ -145,7 +145,7 @@ function Profile() {
         const trackLeft = rect.left;
         const trackWidth = rect.width;
         const thumbX = trackLeft + (sliderValue / 100) * trackWidth;
-        const tolerance = 24; // larger tolerance to match larger thumb for better touch accuracy
+        const tolerance = 36; // increased to match thicker slider and larger thumb
         return Math.abs(clientX - thumbX) <= tolerance;
     };
 
