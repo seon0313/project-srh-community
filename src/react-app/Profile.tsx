@@ -145,7 +145,7 @@ function Profile() {
         const trackLeft = rect.left;
         const trackWidth = rect.width;
         const thumbX = trackLeft + (sliderValue / 100) * trackWidth;
-        const tolerance = 16; // px around the thumb considered a valid grab area
+        const tolerance = 24; // larger tolerance to match larger thumb for better touch accuracy
         return Math.abs(clientX - thumbX) <= tolerance;
     };
 
@@ -307,6 +307,7 @@ function Profile() {
                                     onMouseUp={onRangeMouseUp}
                                     onTouchStart={onRangeTouchStart}
                                     onTouchEnd={onRangeTouchEnd}
+                                style={{ ['--val' as any]: `${sliderValue}%` }}
                                 aria-valuemin={0}
                                 aria-valuemax={100}
                                 aria-valuenow={sliderValue}
