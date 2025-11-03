@@ -28,6 +28,18 @@ function Manager() {
             requiresAuth: true,
         },
         {
+            id: 'manage-guides',
+            title: '작성한 가이드',
+            icon: (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="currentColor" />
+                </svg>
+            ),
+            description: '내가 작성한 가이드를 관리합니다.',
+            onClick: () => alert('작성한 가이드 관리'),
+            requiresAuth: true,
+        },
+        {
             id: 'write-post',
             title: '게시글 쓰기',
             icon: (
@@ -39,6 +51,18 @@ function Manager() {
             description: '일반 게시글을 작성합니다.',
             onClick: () => alert('게시글 쓰기'),
             requiresAuth: false,
+        },
+        {
+            id: 'manage-posts',
+            title: '작성한 게시글',
+            icon: (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="currentColor" />
+                </svg>
+            ),
+            description: '내가 작성한 게시글을 관리합니다.',
+            onClick: () => alert('작성한 게시글 관리'),
+            requiresAuth: true,
         },
         {
             id: 'register-banner',
@@ -54,16 +78,15 @@ function Manager() {
             requiresAuth: true,
         },
         {
-            id: 'view-all-guides',
-            title: '전체 가이드 보기',
+            id: 'manage-banners',
+            title: '배너 관리',
             icon: (
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                    <path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z" fill="currentColor" />
+                    <path d="M3 3h18v8H3V3zm0 10h12v8H3v-8zm14 0h4v8h-4v-8z" fill="currentColor" opacity="0.8" />
                 </svg>
             ),
-            description: '모든 가이드를 한곳에서 확인합니다.',
-            isCTA: true,
-            onClick: () => setModalOpen(true),
+            description: '등록된 배너를 관리합니다.',
+            onClick: () => alert('배너 관리'),
             requiresAuth: true,
         },
     ];
@@ -78,7 +101,7 @@ function Manager() {
                         return (
                             <button
                                 key={action.id}
-                                className={`${styles.actionButton} ${action.isCTA ? styles.cta : ''} ${isDisabled ? styles.disabled : ''}`}
+                                className={`${styles.actionButton} ${isDisabled ? styles.disabled : ''}`}
                                 onClick={isDisabled ? () => alert('로그인이 필요합니다.') : action.onClick}
                                 disabled={isDisabled}
                                 aria-label={action.title}
