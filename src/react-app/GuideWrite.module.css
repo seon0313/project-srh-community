@@ -12,13 +12,22 @@
 }
 
 .leftPanel {
-  position: sticky;
-  top: 80px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   max-height: calc(100vh - 100px);
+}
+
+.leftPanelFixed {
+  position: sticky;
+  top: 80px;
+  flex-shrink: 0;
+}
+
+.leftPanelScrollable {
+  flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .rightPanel {
@@ -65,6 +74,7 @@
 }
 
 .input,
+.inputMultiline,
 .textarea,
 .textareaLarge {
   width: 100%;
@@ -77,25 +87,36 @@
   color: #e5e7eb;
   font-family: inherit;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .input:focus,
+.inputMultiline:focus,
 .textarea:focus,
 .textareaLarge:focus {
   border-color: #2563eb;
 }
 
+.inputMultiline {
+  resize: none;
+  min-height: 60px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
 .textarea {
-  resize: vertical;
+  resize: none;
   min-height: 80px;
+  overflow: hidden;
 }
 
 .textareaLarge {
-  resize: vertical;
+  resize: none;
   min-height: 200px;
   font-family: 'Courier New', monospace;
   font-size: 13px;
   line-height: 1.6;
+  overflow: hidden;
 }
 
 .preview {

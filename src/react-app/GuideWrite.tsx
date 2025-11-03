@@ -31,6 +31,12 @@ function GuideWrite() {
     });
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
+    // textarea 자동 높이 조절
+    const autoResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        e.target.style.height = 'auto';
+        e.target.style.height = e.target.scrollHeight + 'px';
+    };
+
     const addOrUpdateItem = () => {
         if (!currentItem.title.trim()) {
             alert("단계 제목을 입력해주세요.");
@@ -181,9 +187,10 @@ function GuideWrite() {
                 <div className={styles.layoutGrid}>
                     {/* 왼쪽: 가이드 기본 정보 */}
                     <div className={styles.leftPanel}>
-                        <div className={styles.card}>
-                            <h1 className={styles.title}>가이드 기본 정보</h1>
-                            <form onSubmit={handleSubmit}>
+                        <div className={styles.leftPanelFixed}>
+                            <div className={styles.card}>
+                                <h1 className={styles.title}>가이드 기본 정보</h1>
+                                <form onSubmit={handleSubmit}>
                                 <div className={styles.formGroup}>
                                     <label htmlFor="title" className={styles.label}>
                                         제목 <span className={styles.required}>*</span>
@@ -207,10 +214,12 @@ function GuideWrite() {
                                     <textarea
                                         id="description"
                                         value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
+                                        onChange={(e) => {
+                                            setDescription(e.target.value);
+                                            autoResize(e);
+                                        }}
                                         placeholder="가이드에 대한 간단한 설명을 입력하세요"
-                                        className={styles.textarea}
-                                        rows={4}
+                                        className={styles.inputMultiline}
                                         maxLength={500}
                                     />
                                 </div>
@@ -273,12 +282,14 @@ function GuideWrite() {
                                 </div>
                             </form>
                         </div>
+                        </div>
 
                         {/* 추가된 단계 목록 */}
                         {items.length > 0 && (
-                            <div className={styles.card}>
-                                <h2 className={styles.subtitle}>추가된 단계 ({items.length})</h2>
-                                <div className={styles.itemsList}>
+                            <div className={styles.leftPanelScrollable}>
+                                <div className={styles.card}>
+                                    <h2 className={styles.subtitle}>추가된 단계 ({items.length})</h2>
+                                    <div className={styles.itemsList}>
                                     {items.map((item, index) => (
                                         <div key={item.id || index} className={styles.itemCard}>
                                             <div className={styles.itemHeader}>
@@ -313,6 +324,7 @@ function GuideWrite() {
                                     ))}
                                 </div>
                             </div>
+                            </div>
                         )}
                     </div>
 
@@ -345,10 +357,12 @@ function GuideWrite() {
                                 <textarea
                                     id="itemDescription"
                                     value={currentItem.description}
-                                    onChange={(e) => setCurrentItem({ ...currentItem, description: e.target.value })}
+                                    onChange={(e) => {
+                                        setCurrentItem({ ...currentItem, description: e.target.value });
+                                        autoResize(e);
+                                    }}
                                     placeholder="이 단계에 대한 간단한 설명"
-                                    className={styles.textarea}
-                                    rows={3}
+                                    className={styles.inputMultiline}
                                     maxLength={300}
                                 />
                             </div>
@@ -360,7 +374,10 @@ function GuideWrite() {
                                 <textarea
                                     id="itemContent"
                                     value={currentItem.content}
-                                    onChange={(e) => setCurrentItem({ ...currentItem, content: e.target.value })}
+                                    onChange={(e) => {
+                                        setCurrentItem({ ...currentItem, content: e.target.value });
+                                        autoResize(e);
+                                    }}
                                     placeholder="## 제목&#10;&#10;상세 내용을 마크다운으로 작성하세요..."
                                     className={styles.textareaLarge}
                                     rows={10}
