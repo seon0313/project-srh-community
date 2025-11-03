@@ -194,7 +194,7 @@ function Post() {
                 <header className={styles.postHeader}>
                     <h1 className={styles.postTitle}>{post.title}</h1>
                     <div className={styles.postMeta}>
-                        <span className={styles.authorBadge}>by {post.author}</span>
+                        <span className={styles.authorBadge}>{post.author}</span>
                         <span className={styles.dateLabel}>{formatDate(post.upload_time)}</span>
                     </div>
                 </header>
