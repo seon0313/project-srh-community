@@ -106,6 +106,13 @@ function Profile() {
         setEditing(false);
     };
 
+    // 로그아웃: 토큰 삭제 후 로그인 페이지로 이동
+    const onLogout = () => {
+        localStorage.removeItem("token");
+        alert("로그아웃 되었습니다.");
+        navigate("/login");
+    };
+
     const doDelete = async () => {
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -301,12 +308,16 @@ function Profile() {
                                     <>
                                         <button onClick={() => setEditing(true)} className={`${styles.btn} ${styles.btnPrimary}`}>편집</button>
                                         <button onClick={openDeleteModal} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
+                                        <button className={`${styles.btn} ${styles.btnSecondary}`}>인증</button>
+                                        <button onClick={onLogout} className={`${styles.btn} ${styles.btnSecondary}`}>로그아웃</button>
                                     </>
                                 ) : (
                                     <>
                                         <button onClick={onSave} disabled={saving} className={`${styles.btn} ${styles.btnPrimary}`}>{saving ? "저장 중…" : "저장"}</button>
                                         <button onClick={onCancel} disabled={saving} className={`${styles.btn} ${styles.btnSecondary}`}>취소</button>
                                         <button onClick={openDeleteModal} disabled={saving} className={`${styles.btn} ${styles.btnDanger}`}>계정 삭제</button>
+                                        <button className={`${styles.btn} ${styles.btnSecondary}`}>인증</button>
+                                        <button onClick={onLogout} className={`${styles.btn} ${styles.btnSecondary}`}>로그아웃</button>
                                     </>
                                 )}
                             </div>
