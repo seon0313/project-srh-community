@@ -8,23 +8,25 @@
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 16px;
+  color: #e5e7eb;
 }
 
 .card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: #0b0b0d;
+  border: 1px solid #27272a;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
+  color: #e5e7eb;
 }
 
 .cardEditing {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
 }
 
 .cardView {
-  border-color: #e5e7eb;
+  border-color: #27272a;
 }
 
 .grid {
@@ -63,7 +65,7 @@
 }
 
 .subtitle {
-  color: #6b7280;
+  color: #9ca3af;
   font-size: 14px;
 }
 
@@ -78,17 +80,17 @@
   height: 28px;
   padding: 0 10px;
   border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border: 1px solid #2a2f36;
+  background: #111318;
   display: inline-flex;
   align-items: center;
   font-size: 12px;
-  color: #374151;
+  color: #e5e7eb;
 }
 
 .divider {
   height: 1px;
-  background: #f1f5f9;
+  background: #1f2937;
   margin: 12px 0 8px;
 }
 
@@ -99,7 +101,7 @@
 }
 
 .label {
-  color: #6b7280;
+  color: #9ca3af;
   font-size: 13px;
   margin-bottom: 6px;
   display: inline-block;
@@ -107,39 +109,43 @@
 
 .input {
   height: 40px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #30363d;
   border-radius: 10px;
   padding: 0 12px;
   outline: none;
   font-size: 14px;
   width: 100%;
+  background: #0f1115;
+  color: #e5e7eb;
 }
 
 .readonly {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: #111318;
+  color: #9ca3af;
+  border-color: #2a2f36;
 }
 
 .pill {
   height: 40px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #2a2f36;
   border-radius: 999px;
   padding: 0 12px;
   display: flex;
   align-items: center;
   font-size: 14px;
-  background: #f9fafb;
+  background: #111318;
+  color: #e5e7eb;
 }
 
 .value {
   height: 40px;
-  border: 1px dashed #d1d5db;
+  border: 1px dashed #2a2f36;
   border-radius: 10px;
   padding: 0 12px;
   display: flex;
   align-items: center;
-  color: #111827;
-  background: #fafafa;
+  color: #e5e7eb;
+  background: #0f1115;
 }
 
 .actions {
@@ -157,21 +163,21 @@
 }
 
 .btnPrimary {
-  background: #111827;
-  border-color: #111827;
+  background: #2563eb;
+  border-color: #2563eb;
   color: #fff;
 }
 
 .btnDanger {
-  background: #b91c1c;
-  border-color: #b91c1c;
+  background: #ef4444;
+  border-color: #ef4444;
   color: #fff;
 }
 
 .btnSecondary {
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  color: #111827;
+  background: #0b0b0d;
+  border: 1px solid #2a2f36;
+  color: #e5e7eb;
 }
 
 .mutedLink {
@@ -193,11 +199,12 @@
 .modal {
   width: 100%;
   max-width: 460px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: #0b0b0d;
+  border: 1px solid #27272a;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.15);
   padding: 20px;
+  color: #e5e7eb;
 }
 
 .modalTitle {
@@ -208,7 +215,7 @@
 
 .modalText {
   font-size: 14px;
-  color: #374151;
+  color: #9ca3af;
 }
 
 .modalSection {
@@ -217,7 +224,7 @@
 
 .sliderPrompt {
   font-size: 13px;
-  color: #6b7280;
+  color: #9ca3af;
   margin-bottom: 6px;
 }
 
@@ -232,9 +239,9 @@
 /* WebKit/Blink (Chrome, Edge, Safari) */
 .slider::-webkit-slider-runnable-track {
   height: 16px; /* thicker track for precise control */
-  background: linear-gradient(to right, #2563eb var(--val, 0%), #e5e7eb var(--val, 0%));
+  background: linear-gradient(to right, #3b82f6 var(--val, 0%), #30363d var(--val, 0%));
   border-radius: 999px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #2a2f36;
 }
 
 .slider::-webkit-slider-thumb {
@@ -242,8 +249,8 @@
   width: 34px; /* larger thumb for touch */
   height: 34px;
   border-radius: 999px;
-  background: #ffffff;
-  border: 3px solid #2563eb;
+  background: #0b0b0d;
+  border: 3px solid #3b82f6;
   margin-top: calc((16px - 34px) / 2); /* center thumb on track */
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   cursor: grab;
@@ -256,15 +263,15 @@
 /* Firefox */
 .slider::-moz-range-track {
   height: 16px;
-  background: #e5e7eb;
-  border: 1px solid #d1d5db;
+  background: #30363d;
+  border: 1px solid #2a2f36;
   border-radius: 999px;
 }
 
 .slider::-moz-range-progress {
   height: 16px;
-  background: #2563eb;
-  border: 1px solid #2563eb;
+  background: #3b82f6;
+  border: 1px solid #3b82f6;
   border-radius: 999px;
 }
 
@@ -272,8 +279,8 @@
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  background: #ffffff;
-  border: 3px solid #2563eb;
+  background: #0b0b0d;
+  border: 3px solid #3b82f6;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   cursor: grab;
 }
@@ -307,12 +314,12 @@
   pointer-events: none;
   font-size: 12px;
   color: #9ca3af;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .dangerNote {
   font-size: 12px;
-  color: #b91c1c;
+  color: #f87171;
   margin-top: 6px;
 }
 
@@ -324,125 +331,15 @@
   margin-top: 16px;
 }
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .title {
-    color: #e5e7eb;
-  }
-  .card {
-    background: #0b0b0d;
-    border-color: #27272a;
-    box-shadow: none;
-    color: #e5e7eb;
-  }
-  .cardEditing {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
-  }
-  .cardView {
-    border-color: #27272a;
-  }
-  .label {
-    color: #9ca3af;
-  }
-  .input {
-    background: #0f1115;
-    border-color: #30363d;
-    color: #e5e7eb;
-  }
-  .readonly {
-    background: #111318;
-    color: #9ca3af;
-    border-color: #2a2f36;
-  }
-  .pill {
-    background: #111318;
-    border-color: #2a2f36;
-    color: #e5e7eb;
-  }
-  .value {
-    background: #0f1115;
-    border-color: #2a2f36;
-    color: #e5e7eb;
-  }
-  .subtitle {
-    color: #9ca3af;
-  }
-  .chip {
-    background: #111318;
-    border-color: #2a2f36;
-    color: #e5e7eb;
-  }
-  .divider {
-    background: #1f2937;
-  }
-  .btnPrimary {
-    background: #2563eb;
-    border-color: #2563eb;
-  }
-  .btnSecondary {
-    background: #0b0b0d;
-    border-color: #2a2f36;
-    color: #e5e7eb;
-  }
-  .btnDanger {
-    background: #ef4444;
-    border-color: #ef4444;
-  }
-
-  /* Dark mode slider */
-  .slider::-webkit-slider-runnable-track {
-    background: linear-gradient(to right, #3b82f6 var(--val, 0%), #30363d var(--val, 0%));
-    border-color: #2a2f36;
-  }
-  .slider::-webkit-slider-thumb {
-    background: #0b0b0d;
-    border-color: #3b82f6;
-  }
-  .slider::-moz-range-track {
-    background: #30363d;
-    border-color: #2a2f36;
-  }
-  .slider::-moz-range-progress {
-    background: #3b82f6;
-    border-color: #3b82f6;
-  }
-
-  .modal {
-    background: #0b0b0d;
-    border-color: #27272a;
-    color: #e5e7eb;
-  }
-  .modalText {
-    color: #9ca3af;
-  }
-  .sliderPrompt {
-    color: #9ca3af;
-  }
-  .dangerNote {
-    color: #f87171;
-  }
-  .ghostPlaceholder {
-    color: #9ca3af;
-    opacity: 0.6;
-  }
-}
+/* Dark-only site: removed light scheme and media queries */
 
 .modeBadge {
   display: inline-flex;
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 12px;
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+  background: rgba(37, 99, 235, 0.15);
+  color: #93c5fd;
+  border: 1px solid rgba(37, 99, 235, 0.35);
   margin-bottom: 12px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .modeBadge {
-    background: rgba(37, 99, 235, 0.15);
-    border-color: rgba(37, 99, 235, 0.35);
-    color: #93c5fd;
-  }
 }

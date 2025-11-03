@@ -22,7 +22,7 @@
     line-height: 1.5;
     font-weight: 400;
 
-    color-scheme: light dark;
+    color-scheme: dark; /* force dark-only */
     color: rgba(255, 255, 255, 0.87);
     background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
 
@@ -97,18 +97,7 @@ button:focus-visible {
     outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-    :root {
-        color: #213547;
-        background-color: #ffffff;
-    }
-    a:hover {
-        color: #747bff;
-    }
-    button {
-        background-color: #f9f9f9;
-    }
-}
+/* Removed light mode styles: dark-only site */
 
 .Login {
     padding-left: calc(50% - 150px);
