@@ -512,7 +512,7 @@ app.post("/api/me", async (c) => {
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
-    const { results } = await c.env.DB.prepare("SELECT id, email, role, created_at FROM users WHERE id = ?").bind(payload.id).all();
+    const { results } = await c.env.DB.prepare("SELECT id, email, nickname, role, created_at FROM users WHERE id = ?").bind(payload.id).all();
     if (!results || results.length === 0) return c.json({ error: "사용자를 찾을 수 없습니다." }, 404);
     return c.json({ success: true, user: results[0] });
   } catch (e) {
@@ -521,8 +521,8 @@ app.post("/api/me", async (c) => {
 });
 
 app.put("/api/me", async (c) => {
-  const body = await c.req.json<{ token: string; email?: string; password?: string }>();
-  const { token, email, password } = body || {} as any;
+  const body = await c.req.json<{ token: string; email?: string; nickname?: string; password?: string }>();
+  const { token, email, nickname, password } = body || {} as any;
   if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
@@ -538,6 +538,10 @@ app.put("/api/me", async (c) => {
       if (!emailRegex.test(email)) return c.json({ error: "올바른 이메일 형식이 아닙니다." }, 400);
       updates.push("email = ?");
       values.push(email);
+    }
+    if (nickname !== undefined) {
+      updates.push("nickname = ?");
+      values.push(nickname);
     }
     if (password) {
       if (password.length < 6) return c.json({ error: "비밀번호는 6자 이상이어야 합니다." }, 400);

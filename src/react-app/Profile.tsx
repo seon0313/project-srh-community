@@ -7,6 +7,7 @@ import styles from "./Profile.module.css";
 type Me = {
     id: string;
     email: string;
+    nickname?: string;
     role?: number;
     created_at?: number;
 };
@@ -15,6 +16,7 @@ function Profile() {
     const navigate = useNavigate();
     const [me, setMe] = useState<Me | null>(null);
     const [email, setEmail] = useState("");
+    const [nickname, setNickname] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -48,6 +50,7 @@ function Profile() {
             }
             setMe(data.user);
             setEmail(data.user.email || "");
+            setNickname(data.user.nickname || "");
         } finally {
             setLoading(false);
         }
@@ -81,7 +84,7 @@ function Profile() {
             const res = await fetch("/api/me", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token, email, password: password || undefined })
+                body: JSON.stringify({ token, email, nickname, password: password || undefined })
             });
             const data = await res.json();
             if (!res.ok || !data.success) {
@@ -101,6 +104,7 @@ function Profile() {
     const onCancel = () => {
         if (!me) return;
         setEmail(me.email || "");
+        setNickname(me.nickname || "");
         setPassword("");
         setConfirmPassword("");
         setEditing(false);
@@ -242,11 +246,17 @@ function Profile() {
                                 </div>
                             )}
                             <div className={styles.grid}>
-                                {/* 아이디: 편집 모드에서만 표시 */}
+                                {/* 아이디 & 닉네임: 편집 모드에서만 표시 */}
                                 {editing && (
-                                    <div className={styles.row}>
-                                        <span className={styles.label}>아이디</span>
-                                        <input value={me.id} readOnly className={`${styles.input} ${styles.readonly}`} />
+                                    <div className={styles.twoCol}>
+                                        <div className={styles.row}>
+                                            <span className={styles.label}>아이디</span>
+                                            <input value={me.id} readOnly className={`${styles.input} ${styles.readonly}`} />
+                                        </div>
+                                        <div className={styles.row}>
+                                            <span className={styles.label}>닉네임</span>
+                                            <input value={nickname} onChange={(e) => setNickname(e.target.value)} className={styles.input} placeholder="닉네임 입력" />
+                                        </div>
                                     </div>
                                 )}
 
