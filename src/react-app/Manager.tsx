@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './Manager.module.css';
 import Topbar from './Topbar';
 
 function Manager() {
+    const navigate = useNavigate();
     const [modalOpen, setModalOpen] = useState(false);
 
     const actions = [
@@ -16,7 +18,7 @@ function Manager() {
                 </svg>
             ),
             description: '새로운 가이드를 등록하고 커뮤니티와 공유합니다.',
-            onClick: () => alert('가이드 글쓰기'),
+            onClick: () => navigate('/guide/write'),
         },
         {
             id: 'write-post',

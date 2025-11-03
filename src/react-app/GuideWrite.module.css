@@ -1,0 +1,153 @@
+.container {
+  max-width: 800px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.card {
+  background: #0b0b0d;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  color: #e5e7eb;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 24px;
+  color: #e5e7eb;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  color: #9ca3af;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 12px;
+  outline: none;
+  font-size: 14px;
+  background: #0f1115;
+  color: #e5e7eb;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: #2563eb;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.preview {
+  margin-top: 12px;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 400px;
+}
+
+.previewImage {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  justify-content: flex-end;
+}
+
+.btn {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btnPrimary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnSecondary {
+  background: #0b0b0d;
+  border: 1px solid #2a2f36;
+  color: #e5e7eb;
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.btnSecondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 24px 16px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

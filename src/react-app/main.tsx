@@ -17,6 +17,7 @@ import Guides from "./Guides.tsx";
 import Chat from "./Chat.tsx";
 import ScrollToTop from "./ScrollToTop.tsx";
 import Manager from "./Manager.tsx";
+import GuideWrite from "./GuideWrite.tsx";
 
 // 커스텀 훅: 페이지 이동 시마다 JWT 인증
 function useJwtAuthOnRouteChange() {
@@ -70,6 +71,7 @@ function AppWithJwtAuth() {
                 <Route path="/guides" element={<Guides />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/manager" element={<Manager />} />
+                <Route path="/guide/write" element={<GuideWrite />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="*" element={<div>Not Found</div>} />
             </Routes>
