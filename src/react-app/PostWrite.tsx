@@ -13,7 +13,7 @@ function PostWrite() {
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [content, setContent] = useState<string>("## 새 게시글\n여기에 내용을 입력하세요.");
   const [postType, setPostType] = useState<string>("public"); // public | student | parent
-  const [category, setCategory] = useState<string>("nomal"); // nomal | notice | question | private
+  const [category, setCategory] = useState<string>("normal"); // normal | notice | question
   const [saving, setSaving] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
@@ -271,10 +271,9 @@ function PostWrite() {
               <div>
                 <label htmlFor="category" className={styles.label}>카테고리</label>
                 <select id="category" className={styles.input} value={category} onChange={(e) => setCategory(e.target.value)}>
-                  <option value="nomal">nomal</option>
+                  <option value="normal">normal</option>
                   <option value="notice">notice</option>
                   <option value="question">question</option>
-                  <option value="private">private</option>
                 </select>
               </div>
             </div>

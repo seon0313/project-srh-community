@@ -450,11 +450,10 @@ app.get("/api/posts", async (c) => {
     let sql = "SELECT * FROM post WHERE state = 0"; // state 0 = 정상 게시글만
     const params: any[] = [];
     
-    // type 필터링 (general=게스트, student=학생, parent=부모)
-    if (typeParam !== "all") {
-      sql += " AND type = ?";
-      params.push(typeParam);
-    }
+
+    sql += " AND type = ?";
+    params.push(typeParam);
+
     
     // category 필터링 (all=전체, normal=일반, notice=공지, question=질문)
     if (categoryParam !== "all") {
