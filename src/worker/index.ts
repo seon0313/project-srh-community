@@ -450,10 +450,11 @@ app.get("/api/posts", async (c) => {
     let sql = "SELECT * FROM post WHERE state = 0"; // state 0 = 정상 게시글만
     const params: any[] = [];
     
-
-    sql += " AND type = ?";
-    params.push(typeParam);
-
+    // type 필터링
+    if (typeParam !== "all") {
+      sql += " AND type = ?";
+      params.push(typeParam);
+    }
     
     // category 필터링 (all=전체, normal=일반, notice=공지, question=질문)
     if (categoryParam !== "all") {
@@ -462,6 +463,7 @@ app.get("/api/posts", async (c) => {
     }
     
     sql += " ORDER BY upload_time DESC";
+    
     const stmt = c.env.DB.prepare(sql);
     const { results } = params.length > 0 ? await stmt.bind(...params).all() : await stmt.all();
     
@@ -596,7 +598,7 @@ app.post("/api/posts", async (c) => {
       body.content || "",
       now,
       0,
-      0, // state: 0(정상)
+      '0', // state: 0(정상)
       tagsStr,
       reqIp,
     ];
