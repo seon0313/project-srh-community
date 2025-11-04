@@ -64,8 +64,8 @@ function Posts() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState("all");
     
-    // URL 파라미터에서 type과 category 가져오기 (기본값: 게스트, 전체)
-    const [selectedType, setSelectedType] = useState(searchParams.get("type") || "general");
+    // URL 파라미터에서 type과 category 가져오기 (기본값: public, all)
+    const [selectedType, setSelectedType] = useState(searchParams.get("type") || "public");
     const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
 
     // type과 category가 변경될 때마다 게시글 불러오기
@@ -146,7 +146,7 @@ function Posts() {
 
                 <div className={style.stageContainer}>
                     <button 
-                        className={`${style.categoryButton} ${selectedType === "general" ? style.active : ""}`} 
+                        className={`${style.categoryButton} ${selectedType === "public" ? style.active : ""}`} 
                         onClick={() => handleTypeChange("public")}
                     >
                         게스트

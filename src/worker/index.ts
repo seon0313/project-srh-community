@@ -449,7 +449,7 @@ app.post("/api/auth", async (c) => {
 
 // 게시글 목록 API (type과 category 필터링 지원)
 app.get("/api/posts", async (c) => {
-  const typeParam = c.req.query("type") || "general"; // 기본값: general (게스트)
+  const typeParam = c.req.query("type") || "public"; // 기본값: public (게스트)
   const categoryParam = c.req.query("category") || "all"; // 기본값: all (전체)
   
   try {
@@ -508,7 +508,7 @@ app.post("/api/posts", async (c) => {
   //   upload_time real, edited integer, state text, tags text, ip text
   // )
 
-  const TYPE_SET = new Set(["general", "student", "parent"]); // 게스트, 학생, 부모
+  const TYPE_SET = new Set(["public", "student", "parent"]); // 게스트, 학생, 부모
   const CATEGORY_SET = new Set(["normal", "notice", "question"]); // 일반, 공지, 질문
 
   type Body = {
@@ -528,9 +528,9 @@ app.post("/api/posts", async (c) => {
   if (!title || !title.trim()) return c.json({ error: "제목이 필요합니다." }, 400);
 
   // Validate enums with defaults
-  const typeVal = (body.type || "general").toLowerCase();
+  const typeVal = (body.type || "public").toLowerCase();
   const categoryVal = (body.category || "normal").toLowerCase();
-  if (!TYPE_SET.has(typeVal)) return c.json({ error: "type 값이 올바르지 않습니다. (general, student, parent)" }, 400);
+  if (!TYPE_SET.has(typeVal)) return c.json({ error: "type 값이 올바르지 않습니다. (public, student, parent)" }, 400);
   if (!CATEGORY_SET.has(categoryVal)) return c.json({ error: "category 값이 올바르지 않습니다. (normal, notice, question)" }, 400);
 
   const reqIp = getClientIPv4(c);
