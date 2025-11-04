@@ -564,7 +564,8 @@ app.post("/api/posts", async (c) => {
         ? body.tags
         : "";
 
-    // 명시적으로 스키마에 맞춰 INSERT (ip 포함)
+
+    // state: 0(정상), -1(삭제됨)
     const sql = `INSERT INTO post (id, type, category, author, author_id, thumbnail_url, title, content, upload_time, edited, state, tags, ip)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const params = [
@@ -578,7 +579,7 @@ app.post("/api/posts", async (c) => {
       body.content || "",
       now,
       0,
-      "active",
+      0, // state: 0(정상)
       tagsStr,
       reqIp,
     ];
