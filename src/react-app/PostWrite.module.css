@@ -65,6 +65,12 @@
   border: 1px solid #2a2a2a;
   border-radius: 10px;
   padding: 12px;
+  text-align: left;
+}
+
+/* Ensure markdown preview text is left-aligned */
+.previewBox * {
+  text-align: left;
 }
 
 .actions {

@@ -12,6 +12,8 @@ function PostWrite() {
   const [tags, setTags] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [content, setContent] = useState<string>("## 새 게시글\n여기에 내용을 입력하세요.");
+  const [postType, setPostType] = useState<string>("public"); // public | student | parent
+  const [category, setCategory] = useState<string>("nomal"); // nomal | notice | question | private
   const [saving, setSaving] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
@@ -185,6 +187,8 @@ function PostWrite() {
           token,
           title: title.trim(),
           content, // markdown 본문
+          type: postType,
+          category,
           tags: parsedTags,
           thumbnail_url: thumbnailUrl || "",
         }),
@@ -257,6 +261,26 @@ function PostWrite() {
                 placeholder="게시글 제목을 입력하세요"
                 maxLength={200}
               />
+            </div>
+
+            <div className={`${styles.formGroup} ${styles.row}`}>
+              <div>
+                <label htmlFor="postType" className={styles.label}>게시글 타입</label>
+                <select id="postType" className={styles.input} value={postType} onChange={(e) => setPostType(e.target.value)}>
+                  <option value="public">public</option>
+                  <option value="student">student</option>
+                  <option value="parent">parent</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="category" className={styles.label}>카테고리</label>
+                <select id="category" className={styles.input} value={category} onChange={(e) => setCategory(e.target.value)}>
+                  <option value="nomal">nomal</option>
+                  <option value="notice">notice</option>
+                  <option value="question">question</option>
+                  <option value="private">private</option>
+                </select>
+              </div>
             </div>
 
             <div className={`${styles.formGroup} ${styles.row}`}>

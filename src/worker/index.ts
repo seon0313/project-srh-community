@@ -424,16 +424,24 @@ app.post("/api/notice-posts", (c) => c.json(notice_posts));
 
 // 게시글 생성 API (JWT 검증 + D1 컬럼 자동 매핑)
 app.post("/api/posts", async (c) => {
+  // Schema:
+  // CREATE TABLE post (
+  //   id text, type text, category text, author text, author_id text,
+  //   thumbnail_url text, title text, content text DEFAULT 0,
+  //   upload_time real, edited integer, state text, tags text
+  // )
+
+  const TYPE_SET = new Set(["public", "student", "parent"]);
+  const CATEGORY_SET = new Set(["nomal", "notice", "question", "private"]); // 'nomal' per schema
+
   type Body = {
     token: string;
     title: string;
-    content?: string; // markdown 본문
-    content_md?: string; // alias
-    content_html?: string; // 제공 시 그대로 저장
+    content?: string; // markdown
     tags?: string[] | string;
     thumbnail_url?: string;
-    category?: string;
-    type?: string;
+    category?: string; // must be in CATEGORY_SET
+    type?: string; // must be in TYPE_SET
   };
 
   const body = await c.req.json<Body>().catch(() => null);
@@ -443,6 +451,12 @@ app.post("/api/posts", async (c) => {
   if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
   if (!title || !title.trim()) return c.json({ error: "제목이 필요합니다." }, 400);
 
+  // Validate enums
+  const typeVal = (body.type || "public").toLowerCase();
+  const categoryVal = (body.category || "nomal").toLowerCase();
+  if (!TYPE_SET.has(typeVal)) return c.json({ error: "type 값이 올바르지 않습니다." }, 400);
+  if (!CATEGORY_SET.has(categoryVal)) return c.json({ error: "category 값이 올바르지 않습니다." }, 400);
+
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
     const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
@@ -450,7 +464,7 @@ app.post("/api/posts", async (c) => {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
 
-    // 현재 사용자 정보 (닉네임 등) 가져오기 (없으면 id 사용)
+    // 작성자명 결정 (닉네임 우선)
     let authorName = (payload as any).username || (payload as any).id || "unknown";
     try {
       const me = await c.env.DB.prepare("SELECT nickname FROM users WHERE id = ?").bind((payload as any).id).all();
@@ -461,65 +475,32 @@ app.post("/api/posts", async (c) => {
 
     const postId = (crypto as any).randomUUID ? crypto.randomUUID() : `${Date.now()}`;
     const now = Date.now();
+    const tagsStr = Array.isArray(body.tags)
+      ? body.tags.join(",")
+      : typeof body.tags === "string"
+        ? body.tags
+        : "";
 
-    // post 테이블 컬럼 확인 후 존재하는 컬럼에만 매핑
-    let columns: string[] = [];
-    try {
-      const { results: cols } = await c.env.DB.prepare("PRAGMA table_info(post);").all();
-      columns = Array.isArray(cols) ? cols.map((r: any) => r.name).filter(Boolean) : [];
-    } catch (e) {
-      // PRAGMA 미지원 시 빈 배열로 두고 아래서 보수적으로 시도
-      columns = [];
-    }
-    const has = (name: string) => columns.includes(name);
+    // 명시적으로 스키마에 맞춰 INSERT
+    const sql = `INSERT INTO post (id, type, category, author, author_id, thumbnail_url, title, content, upload_time, edited, state, tags)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const params = [
+      postId,
+      typeVal,
+      categoryVal,
+      authorName,
+      (payload as any).id,
+      body.thumbnail_url || "",
+      title.trim(),
+      body.content || "",
+      now,
+      0,
+      "active",
+      tagsStr,
+    ];
+    await c.env.DB.prepare(sql).bind(...params).run();
 
-    // 요청 본문에서 본문 우선순위: content_html > content_md > content
-    const contentMd = body.content_md ?? body.content ?? "";
-    const contentHtml = body.content_html ?? "";
-    const tagsVal = Array.isArray(body.tags) ? body.tags : (typeof body.tags === "string" ? body.tags.split(",").map(s => s.trim()).filter(Boolean) : []);
-
-    // 가용 컬럼에 맞춰 데이터 구성
-    const data: Record<string, any> = {};
-    if (has("id")) data.id = postId;
-    if (has("title")) data.title = title.trim();
-    if (has("author_id")) data.author_id = (payload as any).id;
-    if (has("author")) data.author = authorName;
-    if (has("thumbnail_url")) data.thumbnail_url = body.thumbnail_url || "";
-    if (has("date")) data.date = now;
-    if (has("upload_time")) data.upload_time = now;
-    if (has("edited")) data.edited = 0;
-    if (has("status")) data.status = 0;
-    if (has("category") && body.category) data.category = body.category;
-    if (has("type") && body.type) data.type = body.type;
-    // 본문은 가능한 컬럼에 저장
-    if (has("content_html") && contentHtml) data.content_html = contentHtml;
-    if (has("content_md")) data.content_md = contentMd;
-    else if (has("content")) data.content = contentHtml || contentMd; // 하나만 있을 경우 content에 저장
-    // 태그
-    if (has("tags_json")) data.tags_json = JSON.stringify(tagsVal);
-    else if (has("tags")) data.tags = Array.isArray(tagsVal) ? tagsVal.join(",") : String(tagsVal || "");
-
-    // 만약 PRAGMA가 실패해 columns가 빈 배열이면 보수적으로 시도할 수 있는 기본 세트 사용
-    if (columns.length === 0) {
-      Object.assign(data, {
-        id: postId,
-        title: title.trim(),
-        author: authorName,
-        date: now,
-        thumbnail_url: body.thumbnail_url || "",
-        content: contentMd,
-      });
-    }
-
-    const keys = Object.keys(data);
-    if (keys.length === 0) {
-      return c.json({ error: "post 테이블 스키마를 확인할 수 없거나 매핑 가능한 컬럼이 없습니다." }, 500);
-    }
-    const placeholders = keys.map(() => "?").join(", ");
-    const sql = `INSERT INTO post (${keys.join(", ")}) VALUES (${placeholders})`;
-    await c.env.DB.prepare(sql).bind(...keys.map(k => data[k])).run();
-
-    return c.json({ success: true, id: has("id") ? postId : undefined });
+    return c.json({ success: true, id: postId });
   } catch (e) {
     console.error("게시글 생성 오류:", e);
     return c.json({ error: "게시글 생성 중 오류가 발생했습니다." }, 500);
