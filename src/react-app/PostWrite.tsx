@@ -156,6 +156,12 @@ function PostWrite() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
     if (!title.trim()) {
       alert("제목을 입력해주세요.");
       return;
@@ -167,18 +173,36 @@ function PostWrite() {
 
     setSaving(true);
     try {
-      // 백엔드 게시글 생성 API가 준비되면 여기에서 POST 호출합니다.
-      // 예) await fetch("/api/posts", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ title, content, tags: parsedTags, thumbnail_url: thumbnailUrl, token }) })
+      // 게시글 생성 API 호출
       const parsedTags = tags
         .split(",")
         .map((t) => t.trim())
         .filter((t) => t.length > 0);
-      console.log("[Draft Save]", { title, content, tags: parsedTags, thumbnailUrl });
-  // 성공적으로 게시 완료 시 임시저장 제거 (현재는 임시 로직)
-  clearDraftLocalStorage();
-  clearDraftCookies(); // 과거 쿠키 임시저장도 함께 정리
-  alert("게시글이 임시로 저장되었습니다. (백엔드 연동 필요)\n임시저장(LocalStorage/쿠키) 데이터는 삭제되었습니다.");
-      navigate("/posts");
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token,
+          title: title.trim(),
+          content, // markdown 본문
+          tags: parsedTags,
+          thumbnail_url: thumbnailUrl || "",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "게시글 생성 실패");
+      }
+
+      // 성공적으로 게시 완료 시 임시저장 제거
+      clearDraftLocalStorage();
+      clearDraftCookies(); // 과거 쿠키 임시저장도 함께 정리
+      const newId = data.id;
+      if (newId) {
+        navigate(`/post/${newId}`);
+      } else {
+        navigate("/posts");
+      }
     } catch (err) {
       console.error(err);
       alert("저장 중 오류가 발생했습니다.");

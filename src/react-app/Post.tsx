@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styles from "./Post.module.css";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Topbar from "./Topbar";
 
 type PostType = {
@@ -203,7 +205,9 @@ function Post() {
                     {post.thumbnail_url && (
                         <img src={post.thumbnail_url} alt={post.title} className={styles.postThumbnail} />
                     )}
-                    <div className={styles.postContent} dangerouslySetInnerHTML={{ __html: post.content }} />
+                    <div className={styles.postContent}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+                    </div>
                 </div>
             </div>
 
