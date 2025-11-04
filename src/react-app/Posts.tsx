@@ -32,11 +32,18 @@ import style from "./Posts.module.css";
 import { useNavigate } from "react-router-dom";
 import Topbar from "./Topbar";
 
+type PostListItem = {
+    id: number;
+    title: string;
+    author: string;
+    upload_time: string | number;
+};
+
 function Posts() {
     const navigate = useNavigate();
-    const [posts, setPosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
-    const [noticePosts, setNoticePosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
-    const [filteredPosts, setFilteredPosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
+    const [posts, setPosts] = useState<PostListItem[]>([]);
+    const [noticePosts, setNoticePosts] = useState<PostListItem[]>([]);
+    const [filteredPosts, setFilteredPosts] = useState<PostListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState("all");
@@ -45,6 +52,7 @@ function Posts() {
         fetch("/api/posts")
             .then(res => res.json())
             .then(data => {
+                console.log('posts API:', data);
                 setPosts(data);
                 setFilteredPosts(data);
                 setLoading(false);
@@ -52,8 +60,10 @@ function Posts() {
             .catch(() => setLoading(false));
         fetch("/api/notice-posts", { method: "POST" })
             .then(res => res.json())
-            .then(data => setNoticePosts(data));
-            
+            .then(data => {
+                console.log('noticePosts API:', data);
+                setNoticePosts(data);
+            });
     }, []);
 
     const handleSearch = () => {
@@ -150,7 +160,7 @@ function Posts() {
                                                     }
                                                     onClick={() => navigate(`/post/${post.id}`)}
                                                 >
-                                                    <strong>{formatDate(post.date)}</strong>
+                                                    <strong>{formatDate(post.upload_time)}</strong>
                                                 </td>
                                             </tr>
                                         );
@@ -181,7 +191,7 @@ function Posts() {
                                                 className={style.upload_time}
                                                 onClick={() => navigate(`/post/${post.id}`)}
                                             >
-                                                <strong>{formatDate(post.date)}</strong>
+                                                <strong>{formatDate(post.upload_time)}</strong>
                                             </td>
                                         </tr>
                                     ))}
