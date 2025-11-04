@@ -23,6 +23,12 @@
       }
     ]
   },
+  "migrations": [
+    {
+      "tag": "v1-presence",
+      "new_classes": ["PresenceHub"]
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
