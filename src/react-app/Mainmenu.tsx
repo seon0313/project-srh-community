@@ -203,14 +203,18 @@ function Mainmenu() {
     const [isFriendsOpen, setFriendsOpen] = useState(false);
 
     useEffect(() => {
-        fetch("/api/notice-posts", { method: "POST" })
+        // 공지글 조회 (type=public, category=notice)
+        fetch("/api/posts?type=public&category=notice")
             .then(res => res.json())
             .then(data => setNoticePosts(data));
 
-        fetch("/api/posts")
+        // 일반 게시글 조회 (type=public, category=all에서 공지 제외)
+        fetch("/api/posts?type=public&category=all")
             .then(res => res.json())
             .then(data => {
-                setPosts(data);
+                // 공지글 제외
+                const regularPosts = data.filter((post: any) => post.category !== "notice");
+                setPosts(regularPosts);
                 setLoading(false);
             })
             .catch(() => setLoading(false));

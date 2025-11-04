@@ -344,8 +344,9 @@
 }
 
 .postDate {
-    width: 100px;
+    width: auto;
     text-align: center;
+    white-space: nowrap;
 }
 
 .moreButtonContainer {

@@ -23,12 +23,6 @@ const posts = [
   { id: 11, title: "열한 번째 게시글", author: "송민지", date: "2025-10-06" },
   { id: 12, title: "열두 번째 게시글", author: "오준혁", date: "2025-10-05" },
 ];
-const notice_posts = [
-  { id: 1, title: "첫 번째 공지사항", author: "관리자", date: "2025-10-16" },
-  { id: 2, title: "두 번째 공지사항", author: "관리자", date: "2025-10-15" },
-  { id: 3, title: "세 번째 공지사항", author: "관리자", date: "2025-10-14" },
-  { id: 4, title: "네 번째 공지사항", author: "관리자", date: "2025-10-13" },
-]
  
 // 사용자 명함 정보 타입
 type UserProfile = {
@@ -497,7 +491,6 @@ app.get("/api/post", async (c) => {
     return c.json({ error: errorMessage }, 500);
   }
 });
-app.post("/api/notice-posts", (c) => c.json(notice_posts));
 
 // 게시글 생성 API (JWT 검증 + D1 컬럼 자동 매핑)
 app.post("/api/posts", async (c) => {
