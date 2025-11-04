@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -22,6 +22,9 @@ function GuideWrite() {
     const [thumbnailUrl, setThumbnailUrl] = useState("");
     const [items, setItems] = useState<GuideItemType[]>([]);
     const [saving, setSaving] = useState(false);
+    const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+    const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+    const LS_GUIDE_DRAFT_KEY = "guide_draft";
 
     // 현재 편집 중인 아이템
     const [currentItem, setCurrentItem] = useState<GuideItemType>({
@@ -39,6 +42,92 @@ function GuideWrite() {
         e.target.style.height = 'auto';
         e.target.style.height = e.target.scrollHeight + 'px';
     };
+
+    // LocalStorage helpers for draft
+    const clearDraftLocalStorage = () => {
+        try { localStorage.removeItem(LS_GUIDE_DRAFT_KEY); } catch {}
+    };
+    const saveDraftToLocalStorage = (silent = true) => {
+        try {
+            const payload = {
+                v: 1,
+                title,
+                description,
+                thumbnailUrl,
+                items,
+                currentItem,
+                editingIndex,
+                ts: Date.now(),
+            };
+            localStorage.setItem(LS_GUIDE_DRAFT_KEY, JSON.stringify(payload));
+            if (!silent) alert("임시저장 완료 (LocalStorage)");
+        } catch (e) {
+            console.error("saveDraftToLocalStorage error", e);
+            if (!silent) alert("임시저장 중 오류가 발생했습니다.");
+        }
+    };
+    const loadDraftFromLocalStorage = () => {
+        try {
+            const raw = localStorage.getItem(LS_GUIDE_DRAFT_KEY);
+            if (!raw) return false;
+            const meta = JSON.parse(raw) as {
+                v: number;
+                title: string;
+                description: string;
+                thumbnailUrl: string;
+                items: GuideItemType[];
+                currentItem: GuideItemType;
+                editingIndex: number | null;
+                ts?: number;
+            };
+            setTitle(meta.title || "");
+            setDescription(meta.description || "");
+            setThumbnailUrl(meta.thumbnailUrl || "");
+            setItems(Array.isArray(meta.items) ? meta.items : []);
+            if (meta.currentItem && typeof meta.currentItem === 'object') {
+                setCurrentItem({
+                    id: meta.currentItem.id || "",
+                    title: meta.currentItem.title || "",
+                    description: meta.currentItem.description || "",
+                    content: meta.currentItem.content || "",
+                    needtime: Number(meta.currentItem.needtime) || 0,
+                    thumbnail_url: meta.currentItem.thumbnail_url || "",
+                });
+            }
+            setEditingIndex(meta.editingIndex ?? null);
+            if (meta.ts) setLastSavedAt(meta.ts);
+            return true;
+        } catch (e) {
+            console.error("loadDraftFromLocalStorage error", e);
+            return false;
+        }
+    };
+
+    // Load draft on mount (LocalStorage preferred)
+    useEffect(() => {
+        const restored = loadDraftFromLocalStorage();
+        if (restored) {
+            setAutoSaveStatus("saved");
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Autosave with debounce
+    useEffect(() => {
+        const hasAny = title.trim() || description.trim() || thumbnailUrl.trim() || items.length > 0 || currentItem.title.trim() || currentItem.description.trim() || currentItem.content.trim();
+        if (!hasAny) return;
+        setAutoSaveStatus("saving");
+        const t = setTimeout(() => {
+            try {
+                saveDraftToLocalStorage(true);
+                setAutoSaveStatus("saved");
+                setLastSavedAt(Date.now());
+            } catch (e) {
+                setAutoSaveStatus("error");
+            }
+        }, 1200);
+        return () => clearTimeout(t);
+    }, [title, description, thumbnailUrl, items, currentItem]);
 
     const addOrUpdateItem = () => {
         if (!currentItem.title.trim()) {
@@ -174,6 +263,8 @@ function GuideWrite() {
             }
 
             alert("가이드가 성공적으로 생성되었습니다!");
+            // 성공 시 초안 제거
+            clearDraftLocalStorage();
             navigate("/guides");
         } catch (error) {
             console.error("가이드 생성 오류:", error);
@@ -194,6 +285,13 @@ function GuideWrite() {
                             <div className={styles.card}>
                                 <h1 className={styles.title}>가이드 기본 정보</h1>
                                 <form onSubmit={handleSubmit}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                    <small style={{ color: '#9aa0a6' }}>
+                                        {autoSaveStatus === "saving" && "자동저장 중…"}
+                                        {autoSaveStatus === "saved" && lastSavedAt && `자동저장됨 ${new Date(lastSavedAt).toLocaleTimeString()}`}
+                                        {autoSaveStatus === "error" && "자동저장 오류"}
+                                    </small>
+                                </div>
                                 <div className={styles.formGroup}>
                                     <label htmlFor="title" className={styles.label}>
                                         제목 <span className={styles.required}>*</span>
@@ -274,6 +372,22 @@ function GuideWrite() {
                                         disabled={saving}
                                     >
                                         취소
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => saveDraftToLocalStorage(false)}
+                                        className={`${styles.btn}`}
+                                        disabled={saving}
+                                    >
+                                        임시저장
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { clearDraftLocalStorage(); setAutoSaveStatus('idle'); setLastSavedAt(null); }}
+                                        className={`${styles.btn}`}
+                                        disabled={saving}
+                                    >
+                                        초안삭제
                                     </button>
                                     <button
                                         type="submit"
