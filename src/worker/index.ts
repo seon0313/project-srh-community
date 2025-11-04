@@ -85,8 +85,6 @@ export class PresenceHub implements DurableObject {
       const pair = new WebSocketPair();
       const ws = pair[1];
       const client = pair[0];
-      ws.accept();
-
       const userId = String(payload.id ?? "");
       const username = String(payload.username ?? "");
       if (!userId) {
