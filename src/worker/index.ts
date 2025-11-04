@@ -450,12 +450,14 @@ app.post("/api/auth", async (c) => {
 // 게시글 목록 API
 app.get("/api/posts", async (c) => {
   try {
-    const { results } = await c.env.DB.prepare("SELECT * FROM post").all();
-    console.log("쿼리 결과:", results);
+    // 최신 업로드 순으로 정렬
+    const { results } = await c.env.DB.prepare("SELECT * FROM post ORDER BY upload_time DESC").all();
     return c.json(results);
   } catch (error) {
     console.error("게시글 가져오기 오류:", error);
-    return c.json(posts);
+    // 폴백: 더미 데이터도 날짜 역순으로 정렬하여 반환
+    const sorted = [...posts].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    return c.json(sorted);
   }
 });
 app.get("/api/post", async (c) => {
