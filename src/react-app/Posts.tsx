@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 // 날짜를 상황별로 포맷: 오늘이면 HH:mm, 올해면 mm.dd, 그 외는 yy.mm.dd
 function formatDate(d: number | string) {
@@ -54,30 +55,49 @@ type PostListItem = {
 
 function Posts() {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    
     const [posts, setPosts] = useState<PostListItem[]>([]);
     const [noticePosts, setNoticePosts] = useState<PostListItem[]>([]);
     const [filteredPosts, setFilteredPosts] = useState<PostListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState("all");
+    
+    // URL 파라미터에서 type과 category 가져오기 (기본값: 게스트, 전체)
+    const [selectedType, setSelectedType] = useState(searchParams.get("type") || "general");
+    const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
 
+    // type과 category가 변경될 때마다 게시글 불러오기
     useEffect(() => {
-        fetch("/api/posts")
+        setLoading(true);
+        const params = new URLSearchParams();
+        params.append("type", selectedType);
+        params.append("category", selectedCategory);
+        
+        fetch(`/api/posts?${params.toString()}`)
             .then(res => res.json())
             .then(data => {
                 console.log('posts API:', data);
-                setPosts(data);
-                setFilteredPosts(data);
+                
+                // category가 "all"이면 공지글과 일반글 분리
+                if (selectedCategory === "all") {
+                    const notices = data.filter((post: PostListItem & { category?: string }) => post.category === "notice");
+                    const regulars = data.filter((post: PostListItem & { category?: string }) => post.category !== "notice");
+                    setNoticePosts(notices);
+                    setPosts(regulars);
+                    setFilteredPosts(regulars);
+                } else {
+                    // 특정 category 선택 시 공지글 영역 비우기
+                    setNoticePosts([]);
+                    setPosts(data);
+                    setFilteredPosts(data);
+                }
+                
                 setLoading(false);
             })
             .catch(() => setLoading(false));
-        fetch("/api/notice-posts", { method: "POST" })
-            .then(res => res.json())
-            .then(data => {
-                console.log('noticePosts API:', data);
-                setNoticePosts(data);
-            });
-    }, []);
+    }, [selectedType, selectedCategory]);
 
     const handleSearch = () => {
         let filtered = posts;
@@ -108,6 +128,16 @@ function Posts() {
         // Handle the click event for the 글쓰기 button
         navigate("/manager"); // Navigate to the write post page
     };
+    
+    const handleTypeChange = (type: string) => {
+        setSelectedType(type);
+        setSearchParams({ type, category: selectedCategory });
+    };
+    
+    const handleCategoryChange = (category: string) => {
+        setSelectedCategory(category);
+        setSearchParams({ type: selectedType, category });
+    };
 
     return (
         <>
@@ -115,17 +145,51 @@ function Posts() {
                 <Topbar />
 
                 <div className={style.stageContainer}>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=all")}>재학생</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=notice")}>학부모</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=general")}>게스트</button>
+                    <button 
+                        className={`${style.categoryButton} ${selectedType === "general" ? style.active : ""}`} 
+                        onClick={() => handleTypeChange("general")}
+                    >
+                        게스트
+                    </button>
+                    <button 
+                        className={`${style.categoryButton} ${selectedType === "student" ? style.active : ""}`} 
+                        onClick={() => handleTypeChange("student")}
+                    >
+                        학생
+                    </button>
+                    <button 
+                        className={`${style.categoryButton} ${selectedType === "parent" ? style.active : ""}`} 
+                        onClick={() => handleTypeChange("parent")}
+                    >
+                        학부모
+                    </button>
                 </div>
 
                 <div className={style.categoryContainer}>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=all")}>전체</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=notice")}>일반</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=general")}>공지</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=question")}>질문</button>
-                    <button className={style.categoryButton} onClick={() => navigate("/posts?category=discussion")}>익명</button>
+                    <button 
+                        className={`${style.categoryButton} ${selectedCategory === "all" ? style.active : ""}`} 
+                        onClick={() => handleCategoryChange("all")}
+                    >
+                        전체
+                    </button>
+                    <button 
+                        className={`${style.categoryButton} ${selectedCategory === "normal" ? style.active : ""}`} 
+                        onClick={() => handleCategoryChange("normal")}
+                    >
+                        일반
+                    </button>
+                    <button 
+                        className={`${style.categoryButton} ${selectedCategory === "notice" ? style.active : ""}`} 
+                        onClick={() => handleCategoryChange("notice")}
+                    >
+                        공지
+                    </button>
+                    <button 
+                        className={`${style.categoryButton} ${selectedCategory === "question" ? style.active : ""}`} 
+                        onClick={() => handleCategoryChange("question")}
+                    >
+                        질문
+                    </button>
                 </div>
                 
                 <div className={style.postContainer}>

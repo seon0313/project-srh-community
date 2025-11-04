@@ -447,11 +447,31 @@ app.post("/api/auth", async (c) => {
   }
 });
 
-// 게시글 목록 API
+// 게시글 목록 API (type과 category 필터링 지원)
 app.get("/api/posts", async (c) => {
+  const typeParam = c.req.query("type") || "general"; // 기본값: general (게스트)
+  const categoryParam = c.req.query("category") || "all"; // 기본값: all (전체)
+  
   try {
-    // 최신 업로드 순으로 정렬
-    const { results } = await c.env.DB.prepare("SELECT * FROM post ORDER BY upload_time DESC").all();
+    let sql = "SELECT * FROM post WHERE state = 0"; // state 0 = 정상 게시글만
+    const params: any[] = [];
+    
+    // type 필터링 (general=게스트, student=학생, parent=부모)
+    if (typeParam !== "all") {
+      sql += " AND type = ?";
+      params.push(typeParam);
+    }
+    
+    // category 필터링 (all=전체, normal=일반, notice=공지, question=질문)
+    if (categoryParam !== "all") {
+      sql += " AND category = ?";
+      params.push(categoryParam);
+    }
+    
+    sql += " ORDER BY upload_time DESC";
+    
+    const stmt = c.env.DB.prepare(sql);
+    const { results } = params.length > 0 ? await stmt.bind(...params).all() : await stmt.all();
     return c.json(results);
   } catch (error) {
     console.error("게시글 가져오기 오류:", error);
@@ -488,8 +508,8 @@ app.post("/api/posts", async (c) => {
   //   upload_time real, edited integer, state text, tags text, ip text
   // )
 
-  const TYPE_SET = new Set(["public", "student", "parent"]);
-  const CATEGORY_SET = new Set(["nomal", "notice", "question", "private"]); // 'nomal' per schema
+  const TYPE_SET = new Set(["general", "student", "parent"]); // 게스트, 학생, 부모
+  const CATEGORY_SET = new Set(["normal", "notice", "question"]); // 일반, 공지, 질문
 
   type Body = {
     token?: string; // optional (익명 업로드 허용)
@@ -508,10 +528,10 @@ app.post("/api/posts", async (c) => {
   if (!title || !title.trim()) return c.json({ error: "제목이 필요합니다." }, 400);
 
   // Validate enums with defaults
-  const typeVal = (body.type || "public").toLowerCase();
-  const categoryVal = (body.category || "nomal").toLowerCase();
-  if (!TYPE_SET.has(typeVal)) return c.json({ error: "type 값이 올바르지 않습니다." }, 400);
-  if (!CATEGORY_SET.has(categoryVal)) return c.json({ error: "category 값이 올바르지 않습니다." }, 400);
+  const typeVal = (body.type || "general").toLowerCase();
+  const categoryVal = (body.category || "normal").toLowerCase();
+  if (!TYPE_SET.has(typeVal)) return c.json({ error: "type 값이 올바르지 않습니다. (general, student, parent)" }, 400);
+  if (!CATEGORY_SET.has(categoryVal)) return c.json({ error: "category 값이 올바르지 않습니다. (normal, notice, question)" }, 400);
 
   const reqIp = getClientIPv4(c);
   const maskIp = (ip: string) => {
