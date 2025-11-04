@@ -337,10 +337,11 @@
     text-align: left;
     padding-left: 10px;
 }
-.postDate
-.postAuthor {
-    width: 100px;
-    text-align: center;
+
+.postAuthor,
+.postDate {
+    width: 80px;
+    font-size: 13px;
 }
 
 .moreButtonContainer {
