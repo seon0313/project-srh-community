@@ -20,6 +20,7 @@ import Manager from "./Manager.tsx";
 import GuideWrite from "./GuideWrite.tsx";
 import GuideViewer from "./GuideViewer.tsx";
 import PostWrite from "./PostWrite.tsx";
+import { PresenceProvider } from "./utils/presence";
 
 // 커스텀 훅: 페이지 이동 시마다 JWT 인증
 function useJwtAuthOnRouteChange() {
@@ -42,6 +43,7 @@ function useJwtAuthOnRouteChange() {
                 const data = await response.json();
                 if (data.success && data.token) {
                     localStorage.setItem("token", data.token); // JWT만 저장
+                    window.dispatchEvent(new Event("token-change"));
                 } else {
                     // 실패 시 기존 동작
                 }
@@ -85,7 +87,9 @@ function AppWithJwtAuth() {
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
         <BrowserRouter>
-            <AppWithJwtAuth />
+            <PresenceProvider>
+                <AppWithJwtAuth />
+            </PresenceProvider>
         </BrowserRouter>
     </StrictMode>
 );

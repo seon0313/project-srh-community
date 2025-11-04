@@ -1,4 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 export type PresenceUser = {
   id: string;
@@ -14,7 +24,11 @@ export function usePresence(token?: string) {
   const heartbeatRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      setConnected(false);
+      setUsers({});
+      return;
+    }
     const proto = window.location.protocol === "https:" ? "wss" : "ws";
     const url = `${proto}://${window.location.host}/api/presence/ws?token=${encodeURIComponent(token)}`;
     const ws = new WebSocket(url);
@@ -86,14 +100,77 @@ export function usePresence(token?: string) {
     return cleanup;
   }, [token]);
 
-  const setStatus = (status: PresenceUser["status"]) => {
+  const setStatus = useCallback((status: PresenceUser["status"]) => {
     const ws = wsRef.current;
     if (!ws || ws.readyState !== WebSocket.OPEN) return;
     if (!status || status === "offline") return;
     try { ws.send(JSON.stringify({ type: "status", status })); } catch {}
-  };
+  }, []);
 
   const onlineList = useMemo(() => Object.values(users), [users]);
 
   return { connected, users, onlineList, setStatus } as const;
+}
+
+type PresenceContextValue = ReturnType<typeof usePresence> & { token?: string };
+
+const PresenceContext = createContext<PresenceContextValue | undefined>(undefined);
+
+const getStoredToken = () => {
+  if (typeof window === "undefined") return undefined;
+  const value = localStorage.getItem("token");
+  return value ?? undefined;
+};
+
+export function PresenceProvider({ children }: { children: ReactNode }) {
+  const [token, setToken] = useState<string | undefined>(() => getStoredToken());
+
+  useEffect(() => {
+    const syncToken = () => {
+      setToken(prev => {
+        const next = getStoredToken();
+        return prev === next ? prev : next;
+      });
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key && event.key !== "token") return;
+      syncToken();
+    };
+
+    const handleFocus = () => {
+      syncToken();
+    };
+
+    const handleTokenChange = () => {
+      syncToken();
+    };
+
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("token-change", handleTokenChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("token-change", handleTokenChange);
+    };
+  }, []);
+
+  const { connected, users, onlineList, setStatus } = usePresence(token);
+
+  const value = useMemo(
+    () => ({ connected, users, onlineList, setStatus, token }),
+    [connected, users, onlineList, setStatus, token]
+  );
+
+  return createElement(PresenceContext.Provider, { value }, children);
+}
+
+export function usePresenceContext() {
+  const context = useContext(PresenceContext);
+  if (!context) {
+    throw new Error("usePresenceContext must be used within a PresenceProvider");
+  }
+  return context;
 }

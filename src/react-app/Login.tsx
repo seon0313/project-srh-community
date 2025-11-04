@@ -23,6 +23,7 @@ function Login() {
                 return;
             }
             localStorage.setItem("token", data.token);
+            window.dispatchEvent(new Event("token-change"));
             navigate("/");
         } catch (e) {
             setError("서버 오류가 발생했습니다.");

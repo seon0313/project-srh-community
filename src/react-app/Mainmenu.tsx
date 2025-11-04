@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Topbar from "./Topbar";
 import { onImgError, onImgLoad, getSafeImageSrc } from "./utils/imageFallback";
-import { usePresence } from "./utils/presence";
+import { usePresenceContext } from "./utils/presence";
 
 type FeedPost = {
 	id: string;
@@ -59,11 +59,7 @@ function Mainmenu() {
 	const pausedMonitorRef = useRef<number | null>(null);
 	const scrollOnceRef = useRef<() => void>(() => {});
 
-	const token = useMemo(
-		() => (typeof window !== "undefined" ? localStorage.getItem("token") ?? undefined : undefined),
-		[]
-	);
-	const { onlineList } = usePresence(token);
+	const { onlineList } = usePresenceContext();
 
 	const visibleFriends = useMemo(() => onlineList.slice(0, 8), [onlineList]);
 

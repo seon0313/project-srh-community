@@ -113,6 +113,7 @@ function Profile() {
     // 로그아웃: 토큰 삭제 후 로그인 페이지로 이동
     const onLogout = () => {
         localStorage.removeItem("token");
+        window.dispatchEvent(new Event("token-change"));
         alert("로그아웃 되었습니다.");
         navigate("/login");
     };
@@ -134,6 +135,7 @@ function Profile() {
             }
             alert("계정이 삭제되었습니다.");
             localStorage.removeItem("token");
+            window.dispatchEvent(new Event("token-change"));
             navigate("/");
         } finally {
             setSaving(false);
