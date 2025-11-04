@@ -1,6 +1,7 @@
 import styles from "./Guides.module.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { onImgError } from "./utils/imageFallback";
 
 function Guides() {
     const navigate = useNavigate();
@@ -90,6 +91,7 @@ function Guides() {
                                     className={styles.thumbnail}
                                     src={guide.thumbnail_url}
                                     alt={guide.title}
+                                    onError={onImgError}
                                 />
                                 <div className={styles.cardBody}>
                                     <h3 className={styles.cardTitle}>{guide.title}</h3>

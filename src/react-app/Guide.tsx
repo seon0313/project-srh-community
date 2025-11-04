@@ -1,6 +1,7 @@
 import styles from "./Guide.module.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { onImgError } from "./utils/imageFallback";
 
 function Guide() {
     const navigate = useNavigate();
@@ -83,7 +84,7 @@ function Guide() {
                     </button>
                     {guide ? (
                         <div className={styles.headerBody}>
-                            <img className={styles.thumb} src={guide.thumbnail_url} alt={guide.title} />
+                            <img className={styles.thumb} src={guide.thumbnail_url} alt={guide.title} onError={onImgError} />
                             <div className={styles.headerContent}>
                                 <h1 className={styles.title}>{guide.title}</h1>
                                 <p className={styles.description}>{guide.description}</p>
@@ -130,7 +131,7 @@ function Guide() {
                                     <span className={styles.stepTime}>{it.needtime}분</span>
                                 </div>
                                 <div className={styles.stepBody}>
-                                    <img className={styles.stepThumb} src={it.thumbnail_url} alt={it.title} />
+                                    <img className={styles.stepThumb} src={it.thumbnail_url} alt={it.title} onError={onImgError} />
                                     <p className={styles.stepContent}>{it.description}</p>
                                 </div>
                                 <div className={styles.stepMeta}>

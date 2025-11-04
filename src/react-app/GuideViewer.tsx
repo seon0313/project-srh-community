@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import type { Components } from "react-markdown";
+import { onImgError } from "./utils/imageFallback";
 
 function GuideViewer() {
     const navigate = useNavigate();
@@ -127,6 +129,13 @@ function GuideViewer() {
         );
     }
 
+    const markdownComponents: Components = {
+        img: ({ node, ...props }) => (
+            // Ensure all markdown images also use a fallback on error
+            <img {...props} onError={onImgError} />
+        ),
+    };
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
@@ -166,6 +175,7 @@ function GuideViewer() {
                         className={styles.thumbnail} 
                         src={item.thumbnail_url} 
                         alt={item.title}
+                        onError={onImgError}
                     />
                     <div className={styles.headerContent}>
                         <h1 className={styles.title}>{item.title}</h1>
@@ -187,6 +197,7 @@ function GuideViewer() {
                         <ReactMarkdown 
                             remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw]}
+                            components={markdownComponents}
                         >
                             {item.content || item.description}
                         </ReactMarkdown>
