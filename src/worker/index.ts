@@ -29,7 +29,7 @@ const notice_posts = [
   { id: 3, title: "세 번째 공지사항", author: "관리자", date: "2025-10-14" },
   { id: 4, title: "네 번째 공지사항", author: "관리자", date: "2025-10-13" },
 ]
-
+ 
 // 사용자 명함 정보 타입
 type UserProfile = {
   id: number;
@@ -303,6 +303,61 @@ async function sha256(str: string): Promise<string> {
   return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// IP 추출 유틸리티 (우선 IPv4, 없으면 IPv6)
+const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/;
+const IPV4_ANYWHERE = /(\d{1,3}(?:\.\d{1,3}){3})/;
+
+function extractIPv4FromValue(value?: string | null): string | null {
+  if (!value) return null;
+  // x-forwarded-for: pick first candidate then validate/search
+  const parts = value.split(',').map(v => v.trim()).filter(Boolean);
+  for (const part of parts.length ? parts : [value.trim()]) {
+    // 1) exact IPv4
+    if (IPV4_REGEX.test(part)) return part;
+    // 2) IPv4-mapped IPv6 ::ffff:a.b.c.d
+    const mapped = /::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i.exec(part);
+    if (mapped && IPV4_REGEX.test(mapped[1])) return mapped[1];
+    // 3) any IPv4-looking substring (last resort)
+    const any = IPV4_ANYWHERE.exec(part);
+    if (any && IPV4_REGEX.test(any[1])) return any[1];
+  }
+  return null;
+}
+
+// 느슨한 IPv6 검출: 콤마로 분리된 토큰 중 콜론을 포함하고 허용 문자만 포함하면 IPv6로 간주
+const IPV6_TOKEN = /^[0-9a-fA-F:]+$/;
+function extractIPv6FromValue(value?: string | null): string | null {
+  if (!value) return null;
+  const parts = value.split(',').map(v => v.trim()).filter(Boolean);
+  for (const part of parts.length ? parts : [value.trim()]) {
+    // strip brackets if any (rare in headers)
+    const p = part.replace(/^\[/, '').replace(/\]$/, '');
+    if (p.includes(':') && IPV6_TOKEN.test(p)) return p;
+  }
+  // best-effort substring search (very loose)
+  const m = /([0-9a-fA-F:]{2,})/.exec(value);
+  if (m && m[1].includes(':')) return m[1];
+  return null;
+}
+
+function getClientIPv4(c: any): string {
+  const candidates = [
+    c.req.header("cf-connecting-ip"),
+    c.req.header("x-forwarded-for"),
+    c.req.header("x-real-ip"),
+  ];
+  for (const h of candidates) {
+    const v4 = extractIPv4FromValue(h);
+    if (v4) return v4;
+  }
+  // IPv4가 없으면 IPv6 시도
+  for (const h of candidates) {
+    const v6 = extractIPv6FromValue(h);
+    if (v6) return v6;
+  }
+  return "unknown";
+}
+
 // 회원가입 API (app 선언 이후에 위치)
 app.post("/api/signup", async (c) => {
   const { id, email, password } = await c.req.json<{ id: string; email: string; password: string }>();
@@ -358,8 +413,8 @@ app.post("/api/login", async (c) => {
     // JWT 발급 (비밀번호 제외)
     const user = results[0];
     delete user.password;
-    // 클라이언트 IP 추출 (Cloudflare 환경에서는 cf-connecting-ip 헤더 사용)
-    const ip = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    // 클라이언트 IPv4 추출 (가능한 경우)
+    const ip = getClientIPv4(c);
     const token = await sign(
       { id: user.id,
         username: user.username,
@@ -382,7 +437,7 @@ app.post("/api/auth", async (c) => {
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
     // 현재 요청의 IP 추출
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
@@ -456,7 +511,7 @@ app.post("/api/posts", async (c) => {
   if (!TYPE_SET.has(typeVal)) return c.json({ error: "type 값이 올바르지 않습니다." }, 400);
   if (!CATEGORY_SET.has(categoryVal)) return c.json({ error: "category 값이 올바르지 않습니다." }, 400);
 
-  const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
   const maskIp = (ip: string) => {
     if (!ip || ip === "unknown") return "unknown";
     if (ip.includes(".")) {
@@ -586,7 +641,7 @@ app.post("/api/guides", async (c) => {
   
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
@@ -633,7 +688,7 @@ app.put("/api/guides", async (c) => {
   
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
@@ -704,7 +759,7 @@ app.delete("/api/guides", async (c) => {
   
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
@@ -749,7 +804,7 @@ app.post("/api/extend-jwt", async (c) => {
       return c.json({ error: "유효하지 않은 JWT입니다." }, 401);
     }
     // IP 교차검증
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 JWT입니다" }, 401);
     }
@@ -774,7 +829,7 @@ app.post("/api/me", async (c) => {
   if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
@@ -792,7 +847,7 @@ app.put("/api/me", async (c) => {
   if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
@@ -835,7 +890,7 @@ app.delete("/api/me", async (c) => {
   if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
@@ -1000,7 +1055,7 @@ app.post("/api/guide-items", async (c) => {
   
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
@@ -1057,7 +1112,7 @@ app.put("/api/guide-items", async (c) => {
   
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
@@ -1128,7 +1183,7 @@ app.delete("/api/guide-items", async (c) => {
   
   try {
     const payload = await verify(token, c.env.SECRET_KEY);
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const reqIp = getClientIPv4(c);
     if (!payload.ip || payload.ip !== reqIp) {
       return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
     }
