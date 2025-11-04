@@ -47,39 +47,61 @@ export function usePresence(token?: string) {
     ws.onmessage = (evt) => {
       try {
         const data = JSON.parse(evt.data);
-        if (data?.type !== "presence") return;
-        if (data.action === "snapshot" && Array.isArray(data.users)) {
+        const action: string | undefined = data?.action;
+
+        if (action === "snapshot" && Array.isArray(data.users)) {
           const map: Record<string, PresenceUser> = {};
-          for (const u of data.users) {
-            map[u.id] = u;
+          for (const rawUser of data.users) {
+            if (!rawUser?.id) continue;
+            map[rawUser.id] = {
+              id: rawUser.id,
+              username: rawUser.username,
+              status: rawUser.status ?? "online",
+              lastSeen: rawUser.lastSeen ?? Date.now(),
+            };
           }
           setUsers(map);
-        } else if (data.action === "online" && data.user?.id) {
-          setUsers(prev => ({
-            ...prev,
-            [data.user.id]: {
-              id: data.user.id,
-              username: data.user.username,
-              status: "online",
-              lastSeen: Date.now()
-            }
-          }));
-        } else if (data.action === "offline" && data.user?.id) {
-          setUsers(prev => {
-            const copy = { ...prev };
-            delete copy[data.user.id];
-            return copy;
-          });
-        } else if (data.action === "status" && data.user?.id) {
-          setUsers(prev => ({
-            ...prev,
-            [data.user.id]: {
-              ...(prev[data.user.id] || { id: data.user.id }),
-              status: data.user.status ?? "online",
-              lastSeen: data.user.lastSeen ?? Date.now(),
-              username: prev[data.user.id]?.username
-            }
-          }));
+          return;
+        }
+
+        if (!data?.user?.id) return;
+        const userId: string = data.user.id;
+
+        switch (action) {
+          case "online": {
+            setUsers(prev => ({
+              ...prev,
+              [userId]: {
+                id: userId,
+                username: data.user.username ?? prev[userId]?.username,
+                status: "online",
+                lastSeen: Date.now(),
+              },
+            }));
+            break;
+          }
+          case "offline": {
+            setUsers(prev => {
+              const copy = { ...prev };
+              delete copy[userId];
+              return copy;
+            });
+            break;
+          }
+          case "status": {
+            setUsers(prev => ({
+              ...prev,
+              [userId]: {
+                ...(prev[userId] || { id: userId }),
+                username: data.user.username ?? prev[userId]?.username,
+                status: data.user.status ?? prev[userId]?.status ?? "online",
+                lastSeen: data.user.lastSeen ?? Date.now(),
+              },
+            }));
+            break;
+          }
+          default:
+            break;
         }
       } catch {}
     };
