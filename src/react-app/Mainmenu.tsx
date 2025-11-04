@@ -1,8 +1,9 @@
 import styles from "./Mainmenu.module.css";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Topbar from "./Topbar";
 import { onImgError, onImgLoad, getSafeImageSrc } from "./utils/imageFallback";
+import { usePresence } from "./utils/presence";
 
 function Mainmenu() {
     const navigate = useNavigate();
@@ -158,6 +159,40 @@ function Mainmenu() {
     const [usersLoading, setUsersLoading] = useState(true);
     const [bannersLoading, setBannersLoading] = useState(true);
     const [isFriendsOpen, setFriendsOpen] = useState(false);
+    const token = useMemo(() => (typeof window !== "undefined" ? localStorage.getItem("token") ?? undefined : undefined), []);
+    const { onlineList } = usePresence(token);
+
+    const mergedUsers = useMemo(() => {
+        // Map presence by id and username for best-effort match
+        const byId = new Map<string, true>();
+        const byName = new Map<string, true>();
+        for (const u of onlineList) {
+            if (u.id) byId.set(String(u.id), true);
+            if (u.username) byName.set(String(u.username), true);
+        }
+        const withPresence = users.map(u => ({
+            ...u,
+            isOnline: Boolean(byId.get(String(u.username)) || byId.get(String(u.id)) || byName.get(String(u.username)))
+        }));
+        // Determine extras (online users not present in dummy list)
+        const knownUsernames = new Set(withPresence.map(u => String(u.username)));
+        const extras = onlineList
+            .filter(u => (u.username ? !knownUsernames.has(String(u.username)) : !knownUsernames.has(String(u.id))))
+            .map((u, idx) => ({
+                id: -1000 - idx, // synthetic negative id
+                username: String(u.username || u.id || "user"),
+                displayName: String(u.username || u.id || "user"),
+                company: "",
+                position: "",
+                bio: "",
+                avatar: "/vite.svg",
+                isOnline: true,
+                badges: [] as string[],
+            }));
+        // online first; include extras online at the very top
+        const sorted = withPresence.sort((a, b) => Number(b.isOnline) - Number(a.isOnline));
+        return [...extras, ...sorted];
+    }, [users, onlineList]);
 
     useEffect(() => {
         fetch("/api/notice-posts", { method: "POST" })
@@ -433,10 +468,10 @@ function Mainmenu() {
                 id="friends-drawer"
                 className={`${styles.friendsDrawer} ${isFriendsOpen ? styles.open : ""}`}
                 role="dialog"
-                aria-label="또봇고 프렌즈"
+                aria-label="로봇고 프렌즈"
             >
                 <div className={styles.friendsDrawerHeader}>
-                    <strong>또봇고 프렌즈</strong>
+                    <strong>로봇고 프렌즈</strong>
                     <button type="button" className={styles.closeButton} onClick={() => setFriendsOpen(false)} aria-label="닫기">×</button>
                 </div>
                 <div className={styles.friendsDrawerBody}>
@@ -444,7 +479,7 @@ function Mainmenu() {
                         <div className={styles.loadingSpinner}></div>
                     ) : (
                         <div className={styles.businessCardList}>
-                            {users.slice(0, 8).map((user, index) => (
+                            {mergedUsers.slice(0, 8).map((user, index) => (
                                 <div 
                                     key={user.id} 
                                     className={styles.businessCard}
@@ -619,7 +654,7 @@ function Mainmenu() {
                         </div>
                     ) : (
                         <div className={styles.businessCardList}>
-                            {users.slice(0, 6).map((user, index) => (
+                            {mergedUsers.slice(0, 6).map((user, index) => (
                                 <div 
                                     key={user.id} 
                                     className={styles.businessCard}

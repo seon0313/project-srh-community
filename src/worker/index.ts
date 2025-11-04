@@ -6,7 +6,155 @@ type Env = {
   SECRET_PW_KEY: string;
 };
 
-const app = new Hono<{ Bindings: Env & { AI: any, DB: D1Database } }>();
+type Bindings = Env & {
+  AI: any;
+  DB: D1Database;
+  PRESENCE: DurableObjectNamespace;
+};
+
+const app = new Hono<{ Bindings: Bindings }>();
+/**
+ * Presence Durable Object: manages WebSocket connections and online user list
+ */
+type PresenceStatus = "online" | "idle" | "dnd" | "offline";
+type PresenceUser = {
+  id: string;
+  username?: string;
+  status: PresenceStatus;
+  lastSeen: number; // epoch ms
+};
+
+export class PresenceHub implements DurableObject {
+  private state: DurableObjectState;
+  private env: Bindings;
+  private conns = new Map<string, WebSocket>(); // userId -> ws
+  private users = new Map<string, PresenceUser>(); // userId -> data
+  private sweepTimer: number | null = null;
+
+  constructor(state: DurableObjectState, env: Bindings) {
+    this.state = state;
+    this.env = env;
+  }
+
+  private broadcast(payload: any) {
+    const msg = JSON.stringify(payload);
+    for (const ws of this.conns.values()) {
+      try { ws.send(msg); } catch {}
+    }
+  }
+
+  private scheduleSweep() {
+    if (this.sweepTimer) return;
+    // Sweep stale users every 60s (no heartbeat for > 70s => offline)
+    this.sweepTimer = setInterval(() => {
+      const now = Date.now();
+      const stale: string[] = [];
+      for (const [uid, u] of this.users.entries()) {
+        if (now - u.lastSeen > 70_000) stale.push(uid);
+      }
+      for (const uid of stale) {
+        const ws = this.conns.get(uid);
+        try { ws?.close(1001, "stale"); } catch {}
+        this.conns.delete(uid);
+        const prev = this.users.get(uid);
+        if (prev) {
+          this.users.set(uid, { ...prev, status: "offline", lastSeen: now });
+          this.broadcast({ type: "presence", action: "offline", user: { id: uid } });
+          this.users.delete(uid);
+        }
+      }
+    }, 60_000) as unknown as number;
+  }
+
+  async fetch(request: Request) {
+    const url = new URL(request.url);
+    if (url.pathname.endsWith("/ws")) {
+      const token = url.searchParams.get("token") || "";
+      let payload: any;
+      try {
+        payload = await verify(token, this.env.SECRET_KEY);
+      } catch {
+        return new Response("Unauthorized", { status: 401 });
+      }
+      // Optional IP pinning similar to HTTP APIs
+      const ipHeader = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || "";
+      if (payload?.ip && ipHeader && !String(ipHeader).includes(String(payload.ip))) {
+        return new Response("Forbidden", { status: 403 });
+      }
+      // Upgrade to WebSocket
+      const pair = new WebSocketPair();
+      const ws = pair[1];
+      const client = pair[0];
+      ws.accept();
+
+      const userId = String(payload.id ?? "");
+      const username = String(payload.username ?? "");
+      if (!userId) {
+        ws.close(1008, "Missing userId");
+        return new Response(null, { status: 101, webSocket: client });
+      }
+
+      // If already connected, close previous
+      const prev = this.conns.get(userId);
+      if (prev) {
+        try { prev.close(1012, "reconnect"); } catch {}
+        this.conns.delete(userId);
+      }
+
+      this.conns.set(userId, ws);
+      const now = Date.now();
+      this.users.set(userId, { id: userId, username, status: "online", lastSeen: now });
+      this.scheduleSweep();
+
+      // Send initial snapshot to the new client only
+      const snapshot = Array.from(this.users.values()).map(u => ({ id: u.id, username: u.username, status: u.status, lastSeen: u.lastSeen }));
+      try { ws.send(JSON.stringify({ type: "presence", action: "snapshot", users: snapshot })); } catch {}
+      // Broadcast this user's online
+      this.broadcast({ type: "presence", action: "online", user: { id: userId, username } });
+
+      const onMessage = (evt: MessageEvent) => {
+        try {
+          const data = typeof evt.data === "string" ? JSON.parse(evt.data) : null;
+          const now = Date.now();
+          if (!this.users.has(userId)) this.users.set(userId, { id: userId, username, status: "online", lastSeen: now });
+          const u = this.users.get(userId)!;
+          if (data && data.type === "heartbeat") {
+            u.lastSeen = now;
+          } else if (data && data.type === "status" && (data.status === "online" || data.status === "idle" || data.status === "dnd")) {
+            u.status = data.status;
+            u.lastSeen = now;
+            this.broadcast({ type: "presence", action: "status", user: { id: userId, status: u.status, lastSeen: now } });
+          }
+        } catch {}
+      };
+
+      const onClose = () => {
+        const existed = this.conns.get(userId) === ws;
+        this.conns.delete(userId);
+        const now = Date.now();
+        const u = this.users.get(userId);
+        if (existed && u) {
+          this.users.delete(userId);
+          this.broadcast({ type: "presence", action: "offline", user: { id: userId, lastSeen: now } });
+        }
+      };
+
+      ws.addEventListener("message", onMessage);
+      ws.addEventListener("close", onClose);
+      ws.addEventListener("error", onClose);
+      // Ensure accepted inside DO
+      this.state.acceptWebSocket(ws);
+      return new Response(null, { status: 101, webSocket: client });
+    }
+
+    if (url.pathname.endsWith("/list")) {
+      const users = Array.from(this.users.values()).map(u => ({ id: u.id, username: u.username, status: u.status, lastSeen: u.lastSeen }));
+      return Response.json({ users });
+    }
+
+    return new Response("Not found", { status: 404 });
+  }
+}
 
 // 게시글 목록 예시 데이터
 const posts = [
@@ -1269,6 +1417,23 @@ app.get("/api/tables", async (c) => {
     console.error("Error fetching tables:", error);
     return c.json({ error: "Failed to fetch tables." }, 500);
   }
+});
+
+// Presence routes
+app.get("/api/presence/ws", async (c) => {
+  const id = c.env.PRESENCE.idFromName("global");
+  const stub = c.env.PRESENCE.get(id);
+  // forward original request to DO (keeps search params like token)
+  return await stub.fetch(c.req.raw);
+});
+
+app.get("/api/presence/online", async (c) => {
+  const id = c.env.PRESENCE.idFromName("global");
+  const stub = c.env.PRESENCE.get(id);
+  const url = new URL(c.req.url);
+  const listUrl = new URL("/list", url.origin);
+  const res = await stub.fetch(new Request(listUrl.toString()));
+  return res;
 });
 
 export default app;

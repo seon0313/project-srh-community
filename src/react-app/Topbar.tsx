@@ -1,12 +1,15 @@
 import styles from "./Mainmenu.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePresence } from "./utils/presence";
 
 function Topbar() {
     const navigate = useNavigate();
     const location = useLocation();
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | undefined>(undefined);
+    const token = useMemo(() => (typeof window !== "undefined" ? localStorage.getItem("token") ?? undefined : undefined), [location.pathname]);
+    const { onlineList } = usePresence(isLoggedIn ? token : undefined);
 
     async function checkLogin() {
         const jwtToken = localStorage.getItem("token");
@@ -54,6 +57,12 @@ function Topbar() {
                         </td>
                         <td onClick={() => navigate("/ai")}>
                             <a>AI Chat</a>
+                        </td>
+                        <td>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                <span title="온라인 유저" style={{ display: "inline-block", width: 10, height: 10, borderRadius: 999, background: onlineList.length > 0 ? "#22c55e" : "#9ca3af" }} />
+                                <small style={{ color: "#6b7280" }}>{onlineList.length}</small>
+                            </div>
                         </td>
                         <td onClick={() => navigate(isLoggedIn ? "/profile" : "/login")}>
                             <a>{isLoggedIn ? "프로필" : "로그인"}</a>
