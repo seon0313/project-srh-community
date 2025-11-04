@@ -26,7 +26,7 @@
   "migrations": [
     {
       "tag": "v1-presence",
-      "new_classes": ["PresenceHub"]
+      "new_sqlite_classes": ["PresenceHub"]
     }
   ],
   "d1_databases": [
