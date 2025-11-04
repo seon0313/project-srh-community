@@ -67,6 +67,33 @@ function Mainmenu() {
 
 	const visibleFriends = useMemo(() => onlineList.slice(0, 8), [onlineList]);
 
+	const friendsListMarkup = visibleFriends.length === 0 ? (
+		<div className={styles.emptyFriends}>온라인 유저가 없습니다.</div>
+	) : (
+		<div className={styles.businessCardList}>
+			{visibleFriends.map((user, index) => (
+				<div
+					key={user.id}
+					className={styles.businessCard}
+					style={{ "--item-index": index } as CSSProperties}
+					onClick={() => navigate(`/user/${user.username || user.id}`)}
+				>
+					<div className={styles.cardHeader}>
+						<img src="/vite.svg" alt={user.username || user.id} className={styles.cardAvatar} />
+						<div className={styles.cardInfo}>
+							<h4 className={styles.cardName}>{user.username || user.id}</h4>
+						</div>
+						<div
+							className={`${styles.onlineStatus} ${
+								user.status === "online" ? styles.online : styles.offline
+							}`}
+						></div>
+					</div>
+				</div>
+			))}
+		</div>
+	);
+
 	const formatDate = (value: number | string) => {
 		const date = new Date(value);
 		if (Number.isNaN(date.getTime())) return String(value);
@@ -427,34 +454,7 @@ function Mainmenu() {
 						×
 					</button>
 				</div>
-				<div className={styles.friendsDrawerBody}>
-					{visibleFriends.length === 0 ? (
-						<div className={styles.emptyFriends}>온라인 유저가 없습니다.</div>
-					) : (
-						<div className={styles.businessCardList}>
-							{visibleFriends.map((user, index) => (
-								<div
-									key={user.id}
-									className={styles.businessCard}
-									style={{ "--item-index": index } as CSSProperties}
-									onClick={() => navigate(`/user/${user.username || user.id}`)}
-								>
-									<div className={styles.cardHeader}>
-										<img src="/vite.svg" alt={user.username || user.id} className={styles.cardAvatar} />
-										<div className={styles.cardInfo}>
-											<h4 className={styles.cardName}>{user.username || user.id}</h4>
-										</div>
-										<div
-											className={`${styles.onlineStatus} ${
-												user.status === "online" ? styles.online : styles.offline
-											}`}
-										></div>
-									</div>
-								</div>
-							))}
-						</div>
-					)}
-				</div>
+				<div className={styles.friendsDrawerBody}>{friendsListMarkup}</div>
 			</aside>
 
 			<div className={styles.main}>
@@ -567,6 +567,19 @@ function Mainmenu() {
 							</tr>
 						</tbody>
 					</table>
+				</div>
+				<div className={`${styles.mainItem} ${styles.friendsPanel}`}>
+					<div className={styles.friendsDrawerHeader}>
+						<strong>로봇고 프렌즈</strong>
+						<span className={styles.friendsCount}>
+							{onlineList.length > 0
+								? onlineList.length > 99
+									? "99+명 온라인"
+									: `${onlineList.length}명 온라인`
+								: "현재 접속자 없음"}
+						</span>
+					</div>
+					<div className={styles.friendsDrawerBody}>{friendsListMarkup}</div>
 				</div>
 			</div>
 		</div>
