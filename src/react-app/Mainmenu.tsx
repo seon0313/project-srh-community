@@ -5,13 +5,46 @@ import { useEffect, useState, useRef } from "react";
 import Topbar from "./Topbar";
 import { onImgError, onImgLoad, getSafeImageSrc } from "./utils/imageFallback";
 
-// 날짜를 yy.mm.dd 형식으로 변환하는 함수
+// 날짜를 상황별로 포맷: 오늘이면 HH:mm, 올해면 mm.dd, 그 외는 yy.mm.dd
 function formatDate(d: number | string) {
-    const date = new Date(typeof d === "string" ? parseFloat(d) : d);
-    const y = date.getFullYear().toString().slice(-2);
+    if (!d) return '-';
+    let date: Date;
+    if (typeof d === 'number') {
+        if (d > 1e12) date = new Date(d);
+        else date = new Date(d * 1000);
+    } else if (typeof d === 'string') {
+        if (/^\d+$/.test(d)) {
+            const num = Number(d);
+            if (d.length === 13) date = new Date(num);
+            else if (d.length === 10) date = new Date(num * 1000);
+            else return '-';
+        } else {
+            date = new Date(d);
+        }
+    } else {
+        return '-';
+    }
+    if (isNaN(date.getTime())) return '-';
+    const now = new Date();
+    const y = date.getFullYear();
     const m = (date.getMonth() + 1).toString().padStart(2, "0");
     const day = date.getDate().toString().padStart(2, "0");
-    return `${y}.${m}.${day}`;
+    const hour = date.getHours().toString().padStart(2, "0");
+    const min = date.getMinutes().toString().padStart(2, "0");
+    // 오늘이면 HH:mm
+    if (
+        y === now.getFullYear() &&
+        date.getMonth() === now.getMonth() &&
+        date.getDate() === now.getDate()
+    ) {
+        return `${hour}:${min}`;
+    }
+    // 올해면 mm.dd
+    if (y === now.getFullYear()) {
+        return `${m}.${day}`;
+    }
+    // 그 외는 yy.mm.dd
+    return `${y.toString().slice(-2)}.${m}.${day}`;
 }
 
 function Mainmenu() {
