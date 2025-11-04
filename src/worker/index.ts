@@ -462,9 +462,14 @@ app.get("/api/posts", async (c) => {
     }
     
     sql += " ORDER BY upload_time DESC";
-    
     const stmt = c.env.DB.prepare(sql);
     const { results } = params.length > 0 ? await stmt.bind(...params).all() : await stmt.all();
+    
+    // 캐시 방지 헤더 추가
+    c.header("Cache-Control", "no-store, no-cache, must-revalidate");
+    c.header("Pragma", "no-cache");
+    c.header("Expires", "0");
+    
     return c.json(results);
   } catch (error) {
     console.error("게시글 가져오기 오류:", error);
