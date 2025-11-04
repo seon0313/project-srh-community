@@ -1,693 +1,576 @@
 import styles from "./Mainmenu.module.css";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Topbar from "./Topbar";
 import { onImgError, onImgLoad, getSafeImageSrc } from "./utils/imageFallback";
 import { usePresence } from "./utils/presence";
 
+type FeedPost = {
+	id: string;
+	type: string;
+	category: string;
+	author: string;
+	author_id: string;
+	thumbnail_url: string;
+	title: string;
+	content: string;
+	upload_time: number | string;
+	edited: number;
+	state: string;
+};
+
+type NoticePost = {
+	id: number | string;
+	title: string;
+	author: string;
+	date: string;
+};
+
+type Guide = {
+	id: string;
+	title: string;
+	description: string;
+	author_id: string;
+	needtime: number;
+	step: number;
+	thumbnail_url: string;
+};
+
+const AUTO_SCROLL_INTERVAL = 1200;
+
 function Mainmenu() {
-    const navigate = useNavigate();
-    const [posts, setPosts] = useState<{
-        id: string; 
-        type: string; 
-        category: string; 
-        author: string; 
-        author_id: string; 
-        thumbnail_url: string; 
-        title: string; 
-        content: string; 
-        upload_time: number; 
-        edited: number; 
-        state: string; 
-    }[]>([]);
-    const [noticePosts, setNoticePosts] = useState<{ id: number; title: string; author: string; date: string }[]>([]);
-    const [guides, setGuides] = useState<{ 
-        id: string; 
-        title: string; 
-        description: string; 
-        author_id: string; 
-        needtime: number; 
-        step: number;
-        thumbnail_url: string 
-    }[]>([]);
-    const [users, setUsers] = useState<{
-        id: number;
-        username: string;
-        displayName: string;
-        company?: string;
-        position?: string;
-        bio?: string;
-        avatar: string;
-        isOnline: boolean;
-        badges: string[];
-    }[]>([]);
-    const [banners, setBanners] = useState<string[]>([]);
-    const [loadedBanners, setLoadedBanners] = useState<Record<string, boolean>>({});
-    const sliderRef = useRef<HTMLDivElement | null>(null);
-    const pausedRef = useRef(false);
-    const intervalRef = useRef<number | null>(null);
-    const offsetRef = useRef<number>(0);
-    const initializedRef = useRef(false);
-    const isAnimatingRef = useRef(false);
-    const pausedMonitorRef = useRef<number | null>(null);
-    const scrollOnceRef = useRef<() => void>(() => {});
+	const navigate = useNavigate();
+	const [posts, setPosts] = useState<FeedPost[]>([]);
+	const [noticePosts, setNoticePosts] = useState<NoticePost[]>([]);
+	const [guides, setGuides] = useState<Guide[]>([]);
+	const [banners, setBanners] = useState<string[]>([]);
+	const [loadedBanners, setLoadedBanners] = useState<Record<string, boolean>>({});
+	const [loading, setLoading] = useState(true);
+	const [guidesLoading, setGuidesLoading] = useState(true);
+	const [bannersLoading, setBannersLoading] = useState(true);
+	const [isFriendsOpen, setFriendsOpen] = useState(false);
 
-    const startPausedMonitor = () => {
-        if (pausedMonitorRef.current != null) return;
-        const loop = () => {
-            const slider = sliderRef.current;
-            if (!slider) return;
-            const container = slider.parentElement as HTMLElement | null;
-            const firstEl = slider.firstElementChild as HTMLElement | null;
-            if (container && firstEl) {
-                // don't mutate DOM while a centering animation is in progress
-                if (isAnimatingRef.current) {
-                    pausedMonitorRef.current = window.requestAnimationFrame(loop);
-                    return;
-                }
-                const containerRect = container.getBoundingClientRect();
-                const firstRect = firstEl.getBoundingClientRect();
-                // if first element is fully out to the left, append it
-                if (firstRect.right <= containerRect.left + 1) {
-                    // compute gap and slideStep
-                    let gap = 0;
-                    if (slider.children.length > 1) {
-                        const second = slider.children[1] as HTMLElement;
-                        gap = second.offsetLeft - (firstEl.offsetLeft + firstEl.offsetWidth);
-                        if (!isFinite(gap) || gap < 0) gap = 0;
-                    }
-                    const slideStep = firstEl.offsetWidth + gap;
-                    // append and adjust offset
-                    slider.appendChild(firstEl);
-                    offsetRef.current = offsetRef.current + slideStep;
-                    slider.style.transition = 'none';
-                    void slider.offsetHeight;
-                    slider.style.transform = `translateX(${offsetRef.current}px)`;
-                    // rotate state to keep React in sync
-                    setBanners(prev => {
-                        if (prev.length === 0) return prev;
-                        const [first, ...rest] = prev;
-                        return [...rest, first];
-                    });
-                }
-            }
+	const sliderRef = useRef<HTMLDivElement | null>(null);
+	const pausedRef = useRef(false);
+	const intervalRef = useRef<number | null>(null);
+	const offsetRef = useRef(0);
+	const initializedRef = useRef(false);
+	const isAnimatingRef = useRef(false);
+	const pausedMonitorRef = useRef<number | null>(null);
+	const scrollOnceRef = useRef<() => void>(() => {});
 
-            pausedMonitorRef.current = window.requestAnimationFrame(loop);
-        };
-        pausedMonitorRef.current = window.requestAnimationFrame(loop);
-    };
+	const token = useMemo(
+		() => (typeof window !== "undefined" ? localStorage.getItem("token") ?? undefined : undefined),
+		[]
+	);
+	const { onlineList } = usePresence(token);
 
-    const stopPausedMonitor = () => {
-        if (pausedMonitorRef.current != null) {
-            window.cancelAnimationFrame(pausedMonitorRef.current);
-            pausedMonitorRef.current = null;
-        }
-    };
+	const visibleFriends = useMemo(() => onlineList.slice(0, 8), [onlineList]);
 
-    const AUTO_SCROLL_INTERVAL = 1200; // ms
+	const formatDate = (value: number | string) => {
+		const date = new Date(value);
+		if (Number.isNaN(date.getTime())) return String(value);
+		return date.toLocaleDateString();
+	};
 
-    const startAutoScroll = () => {
-        // clear any existing interval
-        if (intervalRef.current != null) {
-            window.clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-        // ensure paused flag is false and paused-monitor is stopped
-        pausedRef.current = false;
-        stopPausedMonitor();
-        intervalRef.current = window.setInterval(() => {
-            try { scrollOnceRef.current(); } catch (e) { /* ignore */ }
-        }, AUTO_SCROLL_INTERVAL);
-    };
+	const startPausedMonitor = () => {
+		if (pausedMonitorRef.current != null) return;
+		const loop = () => {
+			const slider = sliderRef.current;
+			if (!slider) return;
+			const container = slider.parentElement as HTMLElement | null;
+			const firstEl = slider.firstElementChild as HTMLElement | null;
+			if (container && firstEl) {
+				if (isAnimatingRef.current) {
+					pausedMonitorRef.current = window.requestAnimationFrame(loop);
+					return;
+				}
+				const containerRect = container.getBoundingClientRect();
+				const firstRect = firstEl.getBoundingClientRect();
+				if (firstRect.right <= containerRect.left + 1) {
+					let gap = 0;
+					if (slider.children.length > 1) {
+						const second = slider.children[1] as HTMLElement;
+						gap = second.offsetLeft - (firstEl.offsetLeft + firstEl.offsetWidth);
+						if (!Number.isFinite(gap) || gap < 0) gap = 0;
+					}
+					const slideStep = firstEl.offsetWidth + gap;
+					slider.appendChild(firstEl);
+					offsetRef.current += slideStep;
+					slider.style.transition = "none";
+					void slider.offsetHeight;
+					slider.style.transform = `translateX(${offsetRef.current}px)`;
+					setBanners(prev => {
+						if (prev.length === 0) return prev;
+						const [first, ...rest] = prev;
+						return [...rest, first];
+					});
+				}
+			}
 
-    const stopAutoScroll = () => {
-        if (intervalRef.current != null) {
-            window.clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-    };
+			pausedMonitorRef.current = window.requestAnimationFrame(loop);
+		};
+		pausedMonitorRef.current = window.requestAnimationFrame(loop);
+	};
 
-    // Center a slide by index with animation; accepts optional onComplete callback
-    const centerChildAtIndex = (index: number, onComplete?: () => void) => {
-        const slider = sliderRef.current;
-        if (!slider) return;
-        const child = slider.children[index] as HTMLElement | undefined;
-        if (!child) return;
-        const container = slider.parentElement as HTMLElement;
-        if (!container) return;
+	const stopPausedMonitor = () => {
+		if (pausedMonitorRef.current != null) {
+			window.cancelAnimationFrame(pausedMonitorRef.current);
+			pausedMonitorRef.current = null;
+		}
+	};
 
-    const slideWidth = child.offsetWidth;
-    const childOffsetLeft = child.offsetLeft; // relative to slider
-    const newOffset = (container.clientWidth - slideWidth) / 2 - childOffsetLeft;
+	const startAutoScroll = () => {
+		if (intervalRef.current != null) {
+			window.clearInterval(intervalRef.current);
+			intervalRef.current = null;
+		}
+		pausedRef.current = false;
+		stopPausedMonitor();
+		intervalRef.current = window.setInterval(() => {
+			try {
+				scrollOnceRef.current();
+			} catch {
+				// ignore
+			}
+		}, AUTO_SCROLL_INTERVAL);
+	};
 
-        // Animate to the new offset
-    slider.style.transition = 'transform 500ms cubic-bezier(0.4,0,0.2,1)';
-        offsetRef.current = newOffset;
-        isAnimatingRef.current = true;
-        slider.style.transform = `translateX(${newOffset}px)`;
+	const stopAutoScroll = () => {
+		if (intervalRef.current != null) {
+			window.clearInterval(intervalRef.current);
+			intervalRef.current = null;
+		}
+	};
 
-        const onEnd = () => {
-            slider.removeEventListener('transitionend', onEnd);
-            // keep isAnimating false so interval can continue
-            isAnimatingRef.current = false;
-            if (onComplete) onComplete();
-        };
-        slider.addEventListener('transitionend', onEnd);
-    };
-    const [loading, setLoading] = useState(true);
-    const [guidesLoading, setGuidesLoading] = useState(true);
-    const [usersLoading, setUsersLoading] = useState(true);
-    const [bannersLoading, setBannersLoading] = useState(true);
-    const [isFriendsOpen, setFriendsOpen] = useState(false);
-    const token = useMemo(() => (typeof window !== "undefined" ? localStorage.getItem("token") ?? undefined : undefined), []);
-    const { onlineList } = usePresence(token);
+	const centerChildAtIndex = (index: number, onComplete?: () => void) => {
+		const slider = sliderRef.current;
+		if (!slider) return;
+		const child = slider.children[index] as HTMLElement | undefined;
+		if (!child) return;
+		const container = slider.parentElement as HTMLElement;
+		if (!container) return;
 
-    const mergedUsers = useMemo(() => {
-        // Map presence by id and username for best-effort match
-        const byId = new Map<string, true>();
-        const byName = new Map<string, true>();
-        for (const u of onlineList) {
-            if (u.id) byId.set(String(u.id), true);
-            if (u.username) byName.set(String(u.username), true);
-        }
-        const withPresence = users.map(u => ({
-            ...u,
-            isOnline: Boolean(byId.get(String(u.username)) || byId.get(String(u.id)) || byName.get(String(u.username)))
-        }));
-        // Determine extras (online users not present in dummy list)
-        const knownUsernames = new Set(withPresence.map(u => String(u.username)));
-        const extras = onlineList
-            .filter(u => (u.username ? !knownUsernames.has(String(u.username)) : !knownUsernames.has(String(u.id))))
-            .map((u, idx) => ({
-                id: -1000 - idx, // synthetic negative id
-                username: String(u.username || u.id || "user"),
-                displayName: String(u.username || u.id || "user"),
-                company: "",
-                position: "",
-                bio: "",
-                avatar: "/vite.svg",
-                isOnline: true,
-                badges: [] as string[],
-            }));
-        // online first; include extras online at the very top
-        const sorted = withPresence.sort((a, b) => Number(b.isOnline) - Number(a.isOnline));
-        return [...extras, ...sorted];
-    }, [users, onlineList]);
+		const slideWidth = child.offsetWidth;
+		const childOffsetLeft = child.offsetLeft;
+		const newOffset = (container.clientWidth - slideWidth) / 2 - childOffsetLeft;
 
-    useEffect(() => {
-        fetch("/api/notice-posts", { method: "POST" })
-            .then(res => res.json())
-            .then(data => setNoticePosts(data));
+		slider.style.transition = "transform 500ms cubic-bezier(0.4,0,0.2,1)";
+		offsetRef.current = newOffset;
+		isAnimatingRef.current = true;
+		slider.style.transform = `translateX(${newOffset}px)`;
 
-        fetch("/api/posts")
-            .then(res => res.json())
-            .then(data => {
-                setPosts(data);
-                setLoading(false);
-            })
-            .catch(() => setLoading(false));
+		const onEnd = () => {
+			slider.removeEventListener("transitionend", onEnd);
+			isAnimatingRef.current = false;
+			if (onComplete) onComplete();
+		};
+		slider.addEventListener("transitionend", onEnd);
+	};
 
-        fetch("/api/guides")
-            .then(res => res.json())
-            .then(data => {
-                setGuides(data);
-                setGuidesLoading(false);
-            })
-            .catch(() => setGuidesLoading(false));
+	useEffect(() => {
+		fetch("/api/notice-posts", { method: "POST" })
+			.then(res => res.json())
+			.then((data: NoticePost[]) => setNoticePosts(data))
+			.catch(() => setNoticePosts([]));
 
-        fetch("/api/users")
-            .then(res => res.json())
-            .then(data => {
-                setUsers(data);
-                setUsersLoading(false);
-            })
-            .catch(() => setUsersLoading(false));
+		fetch("/api/posts")
+			.then(res => res.json())
+			.then((data: FeedPost[]) => {
+				setPosts(data);
+				setLoading(false);
+			})
+			.catch(() => setLoading(false));
 
-        fetch("/api/banners?count=10")
-            .then(res => res.json())
-            .then(data => {
-                setBanners(data.banners);
-                setBannersLoading(false);
-            })
-            .catch(() => setBannersLoading(false));
-    }, []);
+		fetch("/api/guides")
+			.then(res => res.json())
+			.then((data: Guide[]) => {
+				setGuides(data);
+				setGuidesLoading(false);
+			})
+			.catch(() => setGuidesLoading(false));
 
-    // 배너 슬라이드 로직 (JS로 한 개씩 스크롤, 화면 밖으로 나간 아이템은 배열 맨 뒤로 이동)
-    useEffect(() => {
-        if (banners.length === 0) return;
+		fetch("/api/banners?count=10")
+			.then(res => res.json())
+			.then((data: { banners?: string[] }) => {
+				setBanners(data.banners ?? []);
+				setBannersLoading(false);
+			})
+			.catch(() => setBannersLoading(false));
+	}, []);
 
-    // isAnimatingRef used so other handlers (hover centering) can coordinate animation state
-    isAnimatingRef.current = isAnimatingRef.current || false;
+	useEffect(() => {
+		if (banners.length === 0) return;
 
-        // 초기 중앙 정렬 (컴포넌트가 처음 셋업될 때만 수행)
-            if (!initializedRef.current) {
-            const sliderEl = sliderRef.current!;
-            const firstChildInit = sliderEl.children[0] as HTMLElement | undefined;
-            let centerOffset = 0;
-            if (firstChildInit) {
-                const slideWidth = firstChildInit.offsetWidth;
-                const container = sliderEl.parentElement as HTMLElement;
-                centerOffset = (container.clientWidth - slideWidth) / 2;
-                sliderEl.style.transition = 'none';
-                sliderEl.style.transform = `translateX(${centerOffset}px)`;
-            }
-            offsetRef.current = centerOffset;
-            initializedRef.current = true;
-        }
+		isAnimatingRef.current = isAnimatingRef.current || false;
 
-        const handleResize = () => {
-            const slider = sliderRef.current;
-            if (!slider) return;
-            const container = slider.parentElement as HTMLElement;
-            if (!container) return;
+		if (!initializedRef.current) {
+			const sliderEl = sliderRef.current;
+			if (sliderEl) {
+				const firstChild = sliderEl.children[0] as HTMLElement | undefined;
+				let centerOffset = 0;
+				if (firstChild) {
+					const slideWidth = firstChild.offsetWidth;
+					const container = sliderEl.parentElement as HTMLElement;
+					centerOffset = (container.clientWidth - slideWidth) / 2;
+					sliderEl.style.transition = "none";
+					sliderEl.style.transform = `translateX(${centerOffset}px)`;
+				}
+				offsetRef.current = centerOffset;
+				initializedRef.current = true;
+			}
+		}
 
-            // Determine which child is visually closest to the container center
-            const containerRect = container.getBoundingClientRect();
-            const containerCenterX = containerRect.left + container.clientWidth / 2;
+		const handleResize = () => {
+			const slider = sliderRef.current;
+			if (!slider) return;
+			const container = slider.parentElement as HTMLElement;
+			if (!container) return;
 
-            let closestChild: HTMLElement | null = null;
-            let closestDist = Infinity;
-            for (let i = 0; i < slider.children.length; i++) {
-                const child = slider.children[i] as HTMLElement;
-                const rect = child.getBoundingClientRect();
-                const childCenter = rect.left + rect.width / 2;
-                const dist = Math.abs(childCenter - containerCenterX);
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closestChild = child;
-                }
-            }
+			const containerRect = container.getBoundingClientRect();
+			const containerCenterX = containerRect.left + container.clientWidth / 2;
 
-            if (!closestChild) return;
+			let closestChild: HTMLElement | null = null;
+			let closestDist = Infinity;
+			for (let i = 0; i < slider.children.length; i++) {
+				const child = slider.children[i] as HTMLElement;
+				const rect = child.getBoundingClientRect();
+				const childCenter = rect.left + rect.width / 2;
+				const dist = Math.abs(childCenter - containerCenterX);
+				if (dist < closestDist) {
+					closestDist = dist;
+					closestChild = child;
+				}
+			}
 
-            // Compute the new offset so that the closestChild stays centered
-            const slideWidth = closestChild.offsetWidth;
-            const childOffsetLeft = closestChild.offsetLeft; // relative to slider
-            const newOffset = (container.clientWidth - slideWidth) / 2 - childOffsetLeft;
+			if (!closestChild) return;
 
-            offsetRef.current = newOffset;
-            slider.style.transition = 'none';
-            // Apply transform immediately and force reflow to avoid visual jumps
-            slider.style.transform = `translateX(${newOffset}px)`;
-            void slider.offsetHeight;
-        };
-        window.addEventListener('resize', handleResize);
+			const slideWidth = closestChild.offsetWidth;
+			const childOffsetLeft = closestChild.offsetLeft;
+			const newOffset = (container.clientWidth - slideWidth) / 2 - childOffsetLeft;
 
-    const scrollOnce = () => {
-            if (pausedRef.current) return; // 일시정지 상태면 동작 금지
-            if (!sliderRef.current || isAnimatingRef.current) return;
-            const slider = sliderRef.current;
-            const firstChild = slider.children[0] as HTMLElement | undefined;
-            if (!firstChild) return;
+			offsetRef.current = newOffset;
+			slider.style.transition = "none";
+			slider.style.transform = `translateX(${newOffset}px)`;
+			void slider.offsetHeight;
+		};
 
-            // compute gap between first two children (if present) because CSS gap is used
-            let gap = 0;
-            if (slider.children.length > 1) {
-                const second = slider.children[1] as HTMLElement;
-                gap = second.offsetLeft - (firstChild.offsetLeft + firstChild.offsetWidth);
-                if (!isFinite(gap) || gap < 0) gap = 0;
-            }
+		window.addEventListener("resize", handleResize);
 
-            const slideWidth = firstChild.offsetWidth; // 픽셀 단위로 이동 (content width)
-            const slideStep = slideWidth + gap; // include gap so transform matches visual movement
-            isAnimatingRef.current = true;
+		const scrollOnce = () => {
+			if (pausedRef.current) return;
+			if (!sliderRef.current || isAnimatingRef.current) return;
+			const slider = sliderRef.current;
+			const firstChild = slider.children[0] as HTMLElement | undefined;
+			if (!firstChild) return;
 
-            // 애니메이션으로 왼쪽으로 한 칸 이동 (현재 offset에서 slideWidth만큼 왼쪽)
-            slider.style.transition = 'transform 700ms cubic-bezier(0.4,0,0.2,1)';
-            offsetRef.current = offsetRef.current - slideStep;
-            slider.style.transform = `translateX(${offsetRef.current}px)`;
+			let gap = 0;
+			if (slider.children.length > 1) {
+				const second = slider.children[1] as HTMLElement;
+				gap = second.offsetLeft - (firstChild.offsetLeft + firstChild.offsetWidth);
+				if (!Number.isFinite(gap) || gap < 0) gap = 0;
+			}
 
-            const onTransitionEnd = () => {
-                slider.removeEventListener('transitionend', onTransitionEnd);
-                // DOM 순서 변경은 요소가 완전히 컨테이너 밖으로 나간 경우에만 수행
-                const container = slider.parentElement as HTMLElement;
-                const firstEl = slider.firstElementChild as HTMLElement | null;
-                const containerRect = container.getBoundingClientRect();
-                const firstRect = firstEl ? firstEl.getBoundingClientRect() : null;
-                const fullyOut = firstRect ? (firstRect.right <= containerRect.left + 1) : false;
+			const slideWidth = firstChild.offsetWidth;
+			const slideStep = slideWidth + gap;
+			isAnimatingRef.current = true;
 
-                if (fullyOut && firstEl) {
-                    // 요소가 완전히 나갔을 때만 끝으로 옮기고 offset을 복원
-                    slider.appendChild(firstEl);
-                    // offset을 한 칸 오른쪽으로 되돌려 중앙 기준 유지 (include gap)
-                    offsetRef.current = offsetRef.current + slideStep;
+			slider.style.transition = "transform 700ms cubic-bezier(0.4,0,0.2,1)";
+			offsetRef.current -= slideStep;
+			slider.style.transform = `translateX(${offsetRef.current}px)`;
 
-                    // transition 제거하고 즉시 위치 복원
-                    slider.style.transition = 'none';
-                    void slider.offsetHeight;
-                    slider.style.transform = `translateX(${offsetRef.current}px)`;
+			const onTransitionEnd = () => {
+				slider.removeEventListener("transitionend", onTransitionEnd);
+				const container = slider.parentElement as HTMLElement;
+				const firstEl = slider.firstElementChild as HTMLElement | null;
+				const containerRect = container.getBoundingClientRect();
+				const firstRect = firstEl ? firstEl.getBoundingClientRect() : null;
+				const fullyOut = firstRect ? firstRect.right <= containerRect.left + 1 : false;
 
-                    // 상태도 배열 회전으로 동기화 (다음 프레임에 수행)
-                    requestAnimationFrame(() => {
-                        setBanners(prev => {
-                            if (prev.length === 0) return prev;
-                            const [first, ...rest] = prev;
-                            return [...rest, first];
-                        });
-                        requestAnimationFrame(() => { isAnimatingRef.current = false; });
-                    });
-                } else {
-                    // 아직 완전히 나가지 않았으면 단순히 애니메이션 플래그 해제 (다음 간격에 다시 이동)
-                    slider.style.transition = 'none';
-                    void slider.offsetHeight;
-                    slider.style.transform = `translateX(${offsetRef.current}px)`;
-                    requestAnimationFrame(() => { isAnimatingRef.current = false; });
-                }
-            };
+				if (fullyOut && firstEl) {
+					slider.appendChild(firstEl);
+					offsetRef.current += slideStep;
+					slider.style.transition = "none";
+					void slider.offsetHeight;
+					slider.style.transform = `translateX(${offsetRef.current}px)`;
 
-            slider.addEventListener('transitionend', onTransitionEnd);
-        };
+					requestAnimationFrame(() => {
+						setBanners(prev => {
+							if (prev.length === 0) return prev;
+							const [first, ...rest] = prev;
+							return [...rest, first];
+						});
+						requestAnimationFrame(() => {
+							isAnimatingRef.current = false;
+						});
+					});
+				} else {
+					slider.style.transition = "none";
+					void slider.offsetHeight;
+					slider.style.transform = `translateX(${offsetRef.current}px)`;
+					requestAnimationFrame(() => {
+						isAnimatingRef.current = false;
+					});
+				}
+			};
 
-    // expose scrollOnce so handlers outside the effect can trigger a single step
-    scrollOnceRef.current = scrollOnce;
+			slider.addEventListener("transitionend", onTransitionEnd);
+		};
 
-        // start auto-scroll interval (resetting the timer)
-        startAutoScroll();
-        return () => {
-            // stop auto-scroll interval and listeners
-            stopAutoScroll();
-            window.removeEventListener('resize', handleResize);
-            // stop paused monitor if running
-            stopPausedMonitor();
-        };
-    }, [banners]);
+		scrollOnceRef.current = scrollOnce;
+		startAutoScroll();
 
-    return (
-        <div className={styles.Mainmenu}>
-            <Topbar />
+		return () => {
+			stopAutoScroll();
+			window.removeEventListener("resize", handleResize);
+			stopPausedMonitor();
+		};
+	}, [banners]);
 
-            {/* 배너 슬라이더 */}
-            {!bannersLoading && banners.length > 0 ? (
-                <div className={styles.bannerContainer} tabIndex={0}>
-                    <div className={styles.bannerSlider} ref={sliderRef}>
-                        {banners.map((banner, index) => (
-                            <div key={banner} className={styles.bannerItem}>
-                                <img
-                                    key={banner}
-                                    src={banner}
-                                    className={styles.bannerImage}
-                                    tabIndex={0}
-                                    onMouseEnter={() => {
-                                            // pause auto-scroll while hovering and allow scaled image to overflow
-                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                            if (container) container.style.overflow = 'visible';
-                                            pausedRef.current = true;
-                                            stopAutoScroll();
-                                            startPausedMonitor();
-                                        }}
-                                        onMouseLeave={() => {
-                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                            if (container) container.style.overflow = '';
-                                            // restart auto-scroll interval from zero when hover ends
-                                            startAutoScroll();
-                                        }}
-                                        onFocus={() => {
-                                            // on keyboard focus, behave similarly to click: pause+center
-                                            pausedRef.current = true;
-                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                            if (container) container.style.overflow = 'visible';
-                                            centerChildAtIndex(index, () => startPausedMonitor());
-                                        }}
-                                        onBlur={() => {
-                                            const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                            if (container) container.style.overflow = '';
-                                            // restart auto-scroll interval from zero when keyboard blur occurs
-                                            startAutoScroll();
-                                        }}
-                                        onClick={(e) => {
-                                            const img = e.currentTarget as HTMLImageElement;
-                                            // if this image is not focused, focus it and center
-                                            if (document.activeElement !== img) {
-                                                img.focus();
-                                                pausedRef.current = true;
-                                                stopAutoScroll();
-                                                const container = sliderRef.current?.parentElement as HTMLElement | null;
-                                                if (container) container.style.overflow = 'visible';
-                                                centerChildAtIndex(index, () => startPausedMonitor());
-                                            }
-                                        }}
-                                    onLoad={() => setLoadedBanners(prev => ({ ...prev, [banner]: true }))}
-                                    onError={() => setLoadedBanners(prev => ({ ...prev, [banner]: true }))}
-                                />
-                                {!loadedBanners[banner] && (
-                                    <div className={styles.bannerSpinnerOverlay}>
-                                        <div className={styles.loadingSpinner}></div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            ) : (
-                // Show loading placeholder while banners are loading
-                <div className={styles.bannerContainer}>
-                    <div className={styles.bannerLoading}>
-                        <div className={styles.loadingSpinner}></div>
-                    </div>
-                </div>
-            )}
+	return (
+		<div className={styles.Mainmenu}>
+			<Topbar />
 
-            {/* 모바일 전용 프렌즈 토글 버튼 */}
-            <button
-                type="button"
-                className={styles.friendsToggleButton}
-                aria-controls="friends-drawer"
-                aria-expanded={isFriendsOpen}
-                onClick={() => setFriendsOpen((v) => !v)}
-            >
-                프렌즈 열기
-            </button>
+			{!bannersLoading && banners.length > 0 ? (
+				<div className={styles.bannerContainer} tabIndex={0}>
+					<div className={styles.bannerSlider} ref={sliderRef}>
+						{banners.map((banner, index) => (
+							<div key={banner} className={styles.bannerItem}>
+								<img
+									src={banner}
+									className={styles.bannerImage}
+									tabIndex={0}
+									onMouseEnter={() => {
+										const container = sliderRef.current?.parentElement as HTMLElement | null;
+										if (container) container.style.overflow = "visible";
+										pausedRef.current = true;
+										stopAutoScroll();
+										startPausedMonitor();
+									}}
+									onMouseLeave={() => {
+										const container = sliderRef.current?.parentElement as HTMLElement | null;
+										if (container) container.style.overflow = "";
+										startAutoScroll();
+									}}
+									onFocus={() => {
+										pausedRef.current = true;
+										const container = sliderRef.current?.parentElement as HTMLElement | null;
+										if (container) container.style.overflow = "visible";
+										centerChildAtIndex(index, () => startPausedMonitor());
+									}}
+									onBlur={() => {
+										const container = sliderRef.current?.parentElement as HTMLElement | null;
+										if (container) container.style.overflow = "";
+										startAutoScroll();
+									}}
+									onClick={event => {
+										const img = event.currentTarget;
+										if (document.activeElement !== img) {
+											img.focus();
+											pausedRef.current = true;
+											stopAutoScroll();
+											const container = sliderRef.current?.parentElement as HTMLElement | null;
+											if (container) container.style.overflow = "visible";
+											centerChildAtIndex(index, () => startPausedMonitor());
+										}
+									}}
+									onLoad={() => setLoadedBanners(prev => ({ ...prev, [banner]: true }))}
+									onError={() => setLoadedBanners(prev => ({ ...prev, [banner]: true }))}
+								/>
+								{!loadedBanners[banner] && (
+									<div className={styles.bannerSpinnerOverlay}>
+										<div className={styles.loadingSpinner}></div>
+									</div>
+								)}
+							</div>
+						))}
+					</div>
+				</div>
+			) : (
+				<div className={styles.bannerContainer}>
+					<div className={styles.bannerLoading}>
+						<div className={styles.loadingSpinner}></div>
+					</div>
+				</div>
+			)}
 
-            {/* 프렌즈 슬라이드 드로어 및 오버레이 */}
-            <div
-                className={`${styles.drawerOverlay} ${isFriendsOpen ? styles.open : ""}`}
-                onClick={() => setFriendsOpen(false)}
-                aria-hidden={!isFriendsOpen}
-            />
-            <aside
-                id="friends-drawer"
-                className={`${styles.friendsDrawer} ${isFriendsOpen ? styles.open : ""}`}
-                role="dialog"
-                aria-label="로봇고 프렌즈"
-            >
-                <div className={styles.friendsDrawerHeader}>
-                    <strong>로봇고 프렌즈</strong>
-                    <button type="button" className={styles.closeButton} onClick={() => setFriendsOpen(false)} aria-label="닫기">×</button>
-                </div>
-                <div className={styles.friendsDrawerBody}>
-                    {usersLoading ? (
-                        <div className={styles.loadingSpinner}></div>
-                    ) : (
-                        <div className={styles.businessCardList}>
-                            {mergedUsers.slice(0, 8).map((user, index) => (
-                                <div 
-                                    key={user.id} 
-                                    className={styles.businessCard}
-                                    style={{ '--item-index': index } as React.CSSProperties}
-                                    onClick={() => navigate("/user/" + user.username)}
-                                >
-                                    <div className={styles.cardHeader}>
-                                        <img 
-                                            src={user.avatar} 
-                                            alt={user.displayName} 
-                                            className={styles.cardAvatar}
-                                        />
-                                        <div className={styles.cardInfo}>
-                                            <h4 className={styles.cardName}>{user.displayName}</h4>
-                                            <p className={styles.cardPosition}>{user.position}</p>
-                                            <p className={styles.cardCompany}>{user.company}</p>
-                                        </div>
-                                        <div className={`${styles.onlineStatus} ${user.isOnline ? styles.online : styles.offline}`}></div>
-                                    </div>
-                                    <div className={styles.cardBadges}>
-                                        {user.badges.slice(0, 2).map((badge, i) => (
-                                            <span key={i} className={styles.badge}>{badge}</span>
-                                        ))}
-                                    </div>
-                                    <p className={styles.cardBio}>{user.bio?.slice(0, 60)}...</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </aside>
+			<button
+				type="button"
+				className={styles.friendsToggleButton}
+				aria-controls="friends-drawer"
+				aria-expanded={isFriendsOpen}
+				onClick={() => setFriendsOpen(value => !value)}
+			>
+				프렌즈 열기
+			</button>
 
-            <div className={styles.main}>
-                <div className={`${styles.mainItem} ${styles.infoPanel}`}>
-                    {guidesLoading ? (
-                        <div className={styles.guideLoadingSpace}>
-                            <div className={styles.loadingSpinner}></div>
-                        </div>
-                    ) : (
-                        <div className={styles.guideList}>
-                            {guides.slice(0, 5).map((guide, index) => (
-                                <div
-                                    key={guide.id}
-                                    className={styles.guideItem}
-                                    style={{ '--item-index': index } as React.CSSProperties}
-                                    onClick={() => navigate("/guide/" + guide.id)}
-                                >
-                                    <img 
-                                        src={getSafeImageSrc(guide.thumbnail_url)}
-                                        alt={guide.title} 
-                                        className={styles.guideThumbnail}
-                                        onError={onImgError}
-                                        onLoad={onImgLoad}
-                                    />
-                                    <div className={styles.guideContent}>
-                                        <h4 className={styles.guideTitle}>{guide.title}</h4>
-                                        <p className={styles.guideDescription}>{guide.description}</p>
-                                        <div className={styles.guideMeta}>
-                                            <span className={styles.guideAuthor}>{guide.author_id}</span>
-                                            <span className={styles.guideTime}>{guide.needtime}분</span>
-                                            <span className={styles.guideSteps}>{guide.step}단계</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                            <div className={styles.moreButtonContainer}>
-                                <div className={styles.moreButton} onClick={() => navigate("/guides")}>
-                                    <p>더보기</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-                <div className={`${styles.mainItem} ${styles.contentPanel}`}>
-                    <table className={styles.posttable}>
-                        <tbody>
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={3} className={styles.loadingSpace}>
-                                        <div className={styles.loadingSpinner}></div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                <>
-                                    {/* 공지글 먼저 출력 */}
-                                    {noticePosts.map((post, index) => {
-                                        const isFirst = index === 0;
-                                        const isLast = index === noticePosts.length - 1;
-                                        const noticeClass = styles.postitem + " " + styles.noticePost;
-                                        return (
-                                            <tr
-                                                key={"notice-" + post.id}
-                                                className={noticeClass}
-                                                style={{ '--item-index': index } as React.CSSProperties}
-                                            >
-                                                <td
-                                                    className={
-                                                        styles.postTitle +
-                                                        (isFirst ? " " + styles.noticeTdTopLeft : "") +
-                                                        (isLast ? " " + styles.noticeTdBottomLeft : "")
-                                                    }
-                                                    onClick={() => navigate("/post/" + post.id)}
-                                                >
-                                                    <strong>{post.title}</strong>
-                                                </td>
-                                                <td
-                                                    className={styles.postAuthor}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate("/user/" + post.author);
-                                                    }}
-                                                >
-                                                    <strong>{post.author}</strong>
-                                                </td>
-                                                <td
-                                                    className={
-                                                        styles.postDate +
-                                                        (isFirst ? " " + styles.noticeTdTopRight : "") +
-                                                        (isLast ? " " + styles.noticeTdBottomRight : "")
-                                                    }
-                                                    onClick={() => navigate("/post/" + post.id)}
-                                                >
-                                                    <strong>{post.date}</strong>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                    {/* 일반 게시글 */}
-                                    {posts.map((post, index) => (
-                                        <tr
-                                            key={post.id}
-                                            className={styles.postitem}
-                                            style={{ '--item-index': (noticePosts.length + index) } as React.CSSProperties}
-                                        >
-                                            <td
-                                                className={styles.postTitle}
-                                                onClick={() => navigate("/post/" + post.id)}
-                                            >
-                                                <strong>{post.title}</strong>
-                                            </td>
-                                            <td
-                                                className={styles.postAuthor}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    navigate("/user/" + post.author);
-                                                }}
-                                            >
-                                                <strong>{post.author}</strong>
-                                            </td>
-                                            <td
-                                                className={styles.postDate}
-                                                onClick={() => navigate("/post/" + post.id)}
-                                            >
-                                                <strong>{post.upload_time}</strong>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </>
-                            )}
-                            <tr className={styles.moreButtonContainer}>
-                                <td colSpan={3} className={styles.moreButton} onClick={() => navigate("/posts")}>
-                                    <p>더보기</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div className={`${styles.mainItem} ${styles.friendsPanel}`}>
-                    {usersLoading ? (
-                        <div className={styles.guideLoadingSpace}>
-                            <div className={styles.loadingSpinner}></div>
-                        </div>
-                    ) : (
-                        <div className={styles.businessCardList}>
-                            {mergedUsers.slice(0, 6).map((user, index) => (
-                                <div 
-                                    key={user.id} 
-                                    className={styles.businessCard}
-                                    style={{ '--item-index': index } as React.CSSProperties}
-                                    onClick={() => navigate("/user/" + user.username)}
-                                >
-                                    <div className={styles.cardHeader}>
-                                        <img 
-                                            src={user.avatar} 
-                                            alt={user.displayName} 
-                                            className={styles.cardAvatar}
-                                        />
-                                        <div className={styles.cardInfo}>
-                                            <h4 className={styles.cardName}>{user.displayName}</h4>
-                                            <p className={styles.cardPosition}>{user.position}</p>
-                                            <p className={styles.cardCompany}>{user.company}</p>
-                                        </div>
-                                        <div className={`${styles.onlineStatus} ${user.isOnline ? styles.online : styles.offline}`}></div>
-                                    </div>
-                                    <div className={styles.cardBadges}>
-                                        {user.badges.slice(0, 2).map((badge, i) => (
-                                            <span key={i} className={styles.badge}>{badge}</span>
-                                        ))}
-                                    </div>
-                                    <p className={styles.cardBio}>{user.bio?.slice(0, 60)}...</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
+			<div
+				className={`${styles.drawerOverlay} ${isFriendsOpen ? styles.open : ""}`}
+				onClick={() => setFriendsOpen(false)}
+				aria-hidden={!isFriendsOpen}
+			/>
+
+			<aside
+				id="friends-drawer"
+				className={`${styles.friendsDrawer} ${isFriendsOpen ? styles.open : ""}`}
+				role="dialog"
+				aria-label="로봇고 프렌즈"
+			>
+				<div className={styles.friendsDrawerHeader}>
+					<strong>로봇고 프렌즈</strong>
+					<button
+						type="button"
+						className={styles.closeButton}
+						onClick={() => setFriendsOpen(false)}
+						aria-label="닫기"
+					>
+						×
+					</button>
+				</div>
+				<div className={styles.friendsDrawerBody}>
+					{visibleFriends.length === 0 ? (
+						<div className={styles.emptyFriends}>온라인 유저가 없습니다.</div>
+					) : (
+						<div className={styles.businessCardList}>
+							{visibleFriends.map((user, index) => (
+								<div
+									key={user.id}
+									className={styles.businessCard}
+									style={{ "--item-index": index } as CSSProperties}
+									onClick={() => navigate(`/user/${user.username || user.id}`)}
+								>
+									<div className={styles.cardHeader}>
+										<img src="/vite.svg" alt={user.username || user.id} className={styles.cardAvatar} />
+										<div className={styles.cardInfo}>
+											<h4 className={styles.cardName}>{user.username || user.id}</h4>
+										</div>
+										<div
+											className={`${styles.onlineStatus} ${
+												user.status === "online" ? styles.online : styles.offline
+											}`}
+										></div>
+									</div>
+								</div>
+							))}
+						</div>
+					)}
+				</div>
+			</aside>
+
+			<div className={styles.main}>
+				<div className={`${styles.mainItem} ${styles.infoPanel}`}>
+					{guidesLoading ? (
+						<div className={styles.guideLoadingSpace}>
+							<div className={styles.loadingSpinner}></div>
+						</div>
+					) : (
+						<div className={styles.guideList}>
+							{guides.slice(0, 5).map((guide, index) => (
+								<div
+									key={guide.id}
+									className={styles.guideItem}
+									style={{ "--item-index": index } as CSSProperties}
+									onClick={() => navigate(`/guide/${guide.id}`)}
+								>
+									<img
+										src={getSafeImageSrc(guide.thumbnail_url)}
+										alt={guide.title}
+										className={styles.guideThumbnail}
+										onError={onImgError}
+										onLoad={onImgLoad}
+									/>
+									<div className={styles.guideContent}>
+										<h4 className={styles.guideTitle}>{guide.title}</h4>
+										<p className={styles.guideDescription}>{guide.description}</p>
+										<div className={styles.guideMeta}>
+											<span className={styles.guideAuthor}>{guide.author_id}</span>
+											<span className={styles.guideTime}>{guide.needtime}분</span>
+											<span className={styles.guideSteps}>{guide.step}단계</span>
+										</div>
+									</div>
+								</div>
+							))}
+							<div className={styles.moreButtonContainer}>
+								<div className={styles.moreButton} onClick={() => navigate("/guides")}>
+									<p>더보기</p>
+								</div>
+							</div>
+						</div>
+					)}
+				</div>
+
+				<div className={`${styles.mainItem} ${styles.contentPanel}`}>
+					<table className={styles.posttable}>
+						<tbody>
+							{loading ? (
+								<tr>
+									<td colSpan={3} className={styles.loadingSpace}>
+										<div className={styles.loadingSpinner}></div>
+									</td>
+								</tr>
+							) : (
+								<>
+									{noticePosts.map((notice, index) => (
+										<tr
+											key={`notice-${notice.id}`}
+											className={`${styles.postitem} ${styles.noticePost}`}
+											style={{ "--item-index": index } as CSSProperties}
+											onClick={() => navigate(`/post/${notice.id}`)}
+										>
+											<td className={styles.postTitle}>
+												<strong>{notice.title}</strong>
+											</td>
+											<td
+												className={styles.postAuthor}
+												onClick={event => {
+													event.stopPropagation();
+													navigate(`/user/${notice.author}`);
+												}}
+											>
+												<strong>{notice.author}</strong>
+											</td>
+											<td className={styles.postDate}>
+												<strong>{notice.date}</strong>
+											</td>
+										</tr>
+									))}
+									{posts.map((post, index) => (
+										<tr
+											key={post.id}
+											className={styles.postitem}
+											style={{ "--item-index": noticePosts.length + index } as CSSProperties}
+											onClick={() => navigate(`/post/${post.id}`)}
+										>
+											<td className={styles.postTitle}>
+												<strong>{post.title}</strong>
+											</td>
+											<td
+												className={styles.postAuthor}
+												onClick={event => {
+													event.stopPropagation();
+													navigate(`/user/${post.author}`);
+												}}
+											>
+												<strong>{post.author}</strong>
+											</td>
+											<td className={styles.postDate}>
+												<strong>{formatDate(post.upload_time)}</strong>
+											</td>
+										</tr>
+									))}
+								</>
+							)}
+							<tr className={styles.moreButtonContainer}>
+								<td colSpan={3} className={styles.moreButton} onClick={() => navigate("/posts")}>
+									<p>더보기</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	);
 }
 
 export default Mainmenu;
