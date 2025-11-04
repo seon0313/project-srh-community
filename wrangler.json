@@ -22,5 +22,11 @@
       "database_id": "6ce759da-2e85-4965-9b50-658df09f12d0",
       "preview_database_id": "6ce759da-2e85-4965-9b50-658df09f12d0"
     }
+  ],
+  "migrations": [
+    {
+      "tag": "v2",
+      "deleted_classes": ["PresenceHub"]
+    }
   ]
 }
