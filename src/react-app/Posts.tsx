@@ -1,8 +1,28 @@
 import { useEffect, useState } from "react";
 
-// 날짜를 yy.mm.dd 형식으로 변환하는 함수
+// 날짜를 yy.mm.dd 형식으로 변환하는 함수 (ISO, timestamp, 숫자형 문자열 모두 지원)
 function formatDate(d: number | string) {
-    const date = new Date(typeof d === "string" ? parseFloat(d) : d);
+    if (!d) return '-';
+    let date: Date;
+    if (typeof d === 'number') {
+        // 13자리(밀리초) 또는 10자리(초) 타임스탬프 구분
+        if (d > 1e12) date = new Date(d);
+        else date = new Date(d * 1000);
+    } else if (typeof d === 'string') {
+        // ISO 문자열 또는 숫자형 문자열 구분
+        if (/^\d+$/.test(d)) {
+            const num = Number(d);
+            if (d.length === 13) date = new Date(num);
+            else if (d.length === 10) date = new Date(num * 1000);
+            else return '-';
+        } else {
+            // ISO8601 등
+            date = new Date(d);
+        }
+    } else {
+        return '-';
+    }
+    if (isNaN(date.getTime())) return '-';
     const y = date.getFullYear().toString().slice(-2);
     const m = (date.getMonth() + 1).toString().padStart(2, "0");
     const day = date.getDate().toString().padStart(2, "0");
