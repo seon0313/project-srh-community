@@ -147,7 +147,7 @@ function Posts() {
                 <div className={style.stageContainer}>
                     <button 
                         className={`${style.categoryButton} ${selectedType === "general" ? style.active : ""}`} 
-                        onClick={() => handleTypeChange("general")}
+                        onClick={() => handleTypeChange("public")}
                     >
                         게스트
                     </button>
