@@ -49,7 +49,7 @@ function Manager() {
                 </svg>
             ),
             description: '일반 게시글을 작성합니다.',
-            onClick: () => alert('게시글 쓰기'),
+            onClick: () => navigate('/manager/post/write'),
             requiresAuth: false,
         },
         {

@@ -1,0 +1,101 @@
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.card {
+  background: #121212;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.label {
+  font-size: 14px;
+  color: #cfcfcf;
+}
+
+.required {
+  color: #ff8a80;
+}
+
+.input,
+.inputMultiline {
+  width: 100%;
+  background: #0f0f0f;
+  border: 1px solid #2a2a2a;
+  color: #eaeaea;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.inputMultiline {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.previewBox {
+  background: #0f0f0f;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #2a2a2a;
+  background: #161616;
+  color: #eaeaea;
+  cursor: pointer;
+}
+
+.btnPrimary {
+  background: #2563eb;
+  border-color: #1e40af;
+}
+
+.btnSecondary {
+  background: #0f0f0f;
+}
+
+.spacer {
+  height: 8px;
+}
+
+@media (max-width: 860px) {
+  .row { grid-template-columns: 1fr; }
+}
