@@ -2,6 +2,7 @@ import styles from "./Mainmenu.module.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import Topbar from "./Topbar";
+import { onImgError, onImgLoad, getSafeImageSrc } from "./utils/imageFallback";
 
 function Mainmenu() {
     const navigate = useNavigate();
@@ -485,16 +486,18 @@ function Mainmenu() {
                     ) : (
                         <div className={styles.guideList}>
                             {guides.slice(0, 5).map((guide, index) => (
-                                <div 
-                                    key={guide.id} 
+                                <div
+                                    key={guide.id}
                                     className={styles.guideItem}
                                     style={{ '--item-index': index } as React.CSSProperties}
                                     onClick={() => navigate("/guide/" + guide.id)}
                                 >
                                     <img 
-                                        src={guide.thumbnail_url} 
+                                        src={getSafeImageSrc(guide.thumbnail_url)}
                                         alt={guide.title} 
                                         className={styles.guideThumbnail}
+                                        onError={onImgError}
+                                        onLoad={onImgLoad}
                                     />
                                     <div className={styles.guideContent}>
                                         <h4 className={styles.guideTitle}>{guide.title}</h4>
