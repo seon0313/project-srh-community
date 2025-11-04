@@ -428,14 +428,14 @@ app.post("/api/posts", async (c) => {
   // CREATE TABLE post (
   //   id text, type text, category text, author text, author_id text,
   //   thumbnail_url text, title text, content text DEFAULT 0,
-  //   upload_time real, edited integer, state text, tags text
+  //   upload_time real, edited integer, state text, tags text, ip text
   // )
 
   const TYPE_SET = new Set(["public", "student", "parent"]);
   const CATEGORY_SET = new Set(["nomal", "notice", "question", "private"]); // 'nomal' per schema
 
   type Body = {
-    token: string;
+    token?: string; // optional (익명 업로드 허용)
     title: string;
     content?: string; // markdown
     tags?: string[] | string;
@@ -448,31 +448,57 @@ app.post("/api/posts", async (c) => {
   if (!body) return c.json({ error: "잘못된 요청입니다." }, 400);
 
   const { token, title } = body;
-  if (!token) return c.json({ error: "JWT가 필요합니다." }, 400);
   if (!title || !title.trim()) return c.json({ error: "제목이 필요합니다." }, 400);
 
-  // Validate enums
+  // Validate enums with defaults
   const typeVal = (body.type || "public").toLowerCase();
   const categoryVal = (body.category || "nomal").toLowerCase();
   if (!TYPE_SET.has(typeVal)) return c.json({ error: "type 값이 올바르지 않습니다." }, 400);
   if (!CATEGORY_SET.has(categoryVal)) return c.json({ error: "category 값이 올바르지 않습니다." }, 400);
 
-  try {
-    const payload = await verify(token, c.env.SECRET_KEY);
-    const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
-    if (!payload.ip || payload.ip !== reqIp) {
-      return c.json({ error: "유효하지 않은 토큰입니다" }, 401);
+  const reqIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const maskIp = (ip: string) => {
+    if (!ip || ip === "unknown") return "unknown";
+    if (ip.includes(".")) {
+      const parts = ip.split(".");
+      return parts.slice(0, 2).join(".");
     }
+    if (ip.includes(":")) {
+      const parts = ip.split(":");
+      return parts.slice(0, 2).join(":");
+    }
+    return ip;
+  };
 
-    // 작성자명 결정 (닉네임 우선)
-    let authorName = (payload as any).username || (payload as any).id || "unknown";
+  let authorName = "";
+  let authorId = "";
+
+  // 토큰이 있으면 검증 시도, 실패해도 익명으로 계속 진행
+  if (token) {
     try {
-      const me = await c.env.DB.prepare("SELECT nickname FROM users WHERE id = ?").bind((payload as any).id).all();
-      if (me.results && me.results[0] && (me.results[0] as any).nickname) {
-        authorName = (me.results[0] as any).nickname as string;
+      const payload = await verify(token, c.env.SECRET_KEY);
+      if (payload && (payload as any).ip === reqIp) {
+        authorId = String((payload as any).id || "");
+        authorName = String((payload as any).username || authorId || "");
+        // 닉네임 우선 조회
+        try {
+          const me = await c.env.DB.prepare("SELECT nickname FROM users WHERE id = ?").bind(authorId).all();
+          if (me.results && me.results[0] && (me.results[0] as any).nickname) {
+            authorName = (me.results[0] as any).nickname as string;
+          }
+        } catch {}
       }
-    } catch {}
+    } catch {
+      // ignore - fallback to anonymous
+    }
+  }
 
+  if (!authorName) {
+    authorName = `익명(${maskIp(reqIp)})`;
+    authorId = "";
+  }
+
+  try {
     const postId = (crypto as any).randomUUID ? crypto.randomUUID() : `${Date.now()}`;
     const now = Date.now();
     const tagsStr = Array.isArray(body.tags)
@@ -481,15 +507,15 @@ app.post("/api/posts", async (c) => {
         ? body.tags
         : "";
 
-    // 명시적으로 스키마에 맞춰 INSERT
-    const sql = `INSERT INTO post (id, type, category, author, author_id, thumbnail_url, title, content, upload_time, edited, state, tags)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    // 명시적으로 스키마에 맞춰 INSERT (ip 포함)
+    const sql = `INSERT INTO post (id, type, category, author, author_id, thumbnail_url, title, content, upload_time, edited, state, tags, ip)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const params = [
       postId,
       typeVal,
       categoryVal,
       authorName,
-      (payload as any).id,
+      authorId,
       body.thumbnail_url || "",
       title.trim(),
       body.content || "",
@@ -497,6 +523,7 @@ app.post("/api/posts", async (c) => {
       0,
       "active",
       tagsStr,
+      reqIp,
     ];
     await c.env.DB.prepare(sql).bind(...params).run();
 

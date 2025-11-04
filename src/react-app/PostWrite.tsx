@@ -159,11 +159,6 @@ function PostWrite() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    if (!token) {
-      alert("로그인이 필요합니다.");
-      navigate("/login");
-      return;
-    }
     if (!title.trim()) {
       alert("제목을 입력해주세요.");
       return;
@@ -180,18 +175,19 @@ function PostWrite() {
         .split(",")
         .map((t) => t.trim())
         .filter((t) => t.length > 0);
+      const payload: any = {
+        title: title.trim(),
+        content,
+        type: postType,
+        category,
+        tags: parsedTags,
+        thumbnail_url: thumbnailUrl || "",
+      };
+      if (token) payload.token = token;
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token,
-          title: title.trim(),
-          content, // markdown 본문
-          type: postType,
-          category,
-          tags: parsedTags,
-          thumbnail_url: thumbnailUrl || "",
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok || data.error) {
